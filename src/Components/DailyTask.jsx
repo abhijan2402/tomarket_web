@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import "../Style/DailyTask.css";
 
 const tasks = [
@@ -8,7 +7,8 @@ const tasks = [
     title: "Morning Run",
     description: "Go for a 5km run in the park.",
     time: "6:00 AM",
-    image: "https://via.placeholder.com/150", // Replace with actual image
+    image: "https://via.placeholder.com/150",
+    youtubeLink: "https://www.youtube.com",
   },
   {
     id: 2,
@@ -16,6 +16,7 @@ const tasks = [
     description: "Daily standup meeting with the team.",
     time: "9:30 AM",
     image: "https://via.placeholder.com/150",
+    youtubeLink: "https://www.youtube.com",
   },
   {
     id: 3,
@@ -23,6 +24,7 @@ const tasks = [
     description: "Focus on the frontend development of the project.",
     time: "11:00 AM",
     image: "https://via.placeholder.com/150",
+    youtubeLink: "https://www.youtube.com",
   },
   {
     id: 4,
@@ -30,14 +32,16 @@ const tasks = [
     description: "Strength training session at the gym.",
     time: "5:30 PM",
     image: "https://via.placeholder.com/150",
+    youtubeLink: "https://www.youtube.com",
   },
 ];
 
 function DailyTask() {
   const [completedTasks, setCompletedTasks] = useState([]);
 
-  const handleCompleteTask = (taskId) => {
-    setCompletedTasks([...completedTasks, taskId]);
+  const handleCompleteTask = (taskId, youtubeLink) => {
+    window.open(youtubeLink, "_blank"); // Open YouTube link in a new tab
+    setCompletedTasks([...completedTasks, taskId]); // Mark task as completed
   };
 
   const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
@@ -57,7 +61,7 @@ function DailyTask() {
               </p>
             </div>
             <button
-              onClick={() => handleCompleteTask(task.id)}
+              onClick={() => handleCompleteTask(task.id, task.youtubeLink)}
               disabled={isTaskCompleted(task.id)}
               className={`redirect-icon ${
                 isTaskCompleted(task.id) ? "task-completed" : ""

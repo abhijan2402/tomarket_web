@@ -3,44 +3,6 @@ import "../Style/Dashboard.css";
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../firebase";
 
-const newTasks = [
-  { id: 1, title: "Complete Profile", icon: "bi-pencil-square" },
-  { id: 2, title: "Upload Documents", icon: "bi-file-earmark-arrow-up" },
-  { id: 3, title: "Verify Email", icon: "bi-envelope-check" },
-  { id: 4, title: "Add Payment Method", icon: "bi-wallet2" },
-];
-
-const completedTasks = [
-  {
-    id: 1,
-    title: "Morning Run",
-    description: "Go for a 5km run in the park.",
-    time: "6:00 AM",
-    image: "https://via.placeholder.com/150", // Replace with actual image
-  },
-  {
-    id: 2,
-    title: "Team Meeting",
-    description: "Daily standup meeting with the team.",
-    time: "9:30 AM",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 3,
-    title: "Project Work",
-    description: "Focus on the frontend development of the project.",
-    time: "11:00 AM",
-    image: "https://via.placeholder.com/150",
-  },
-  {
-    id: 4,
-    title: "Gym Session",
-    description: "Strength training session at the gym.",
-    time: "5:30 PM",
-    image: "https://via.placeholder.com/150",
-  },
-];
-
 const tasks = [
   {
     id: 1,
@@ -48,6 +10,7 @@ const tasks = [
     description: "Go for a 5km run in the park.",
     time: "6:00 AM",
     image: "https://via.placeholder.com/150", // Replace with actual image
+    youtubeLink: "https://www.youtube.com", // Replace with actual YouTube link
   },
   {
     id: 2,
@@ -55,6 +18,7 @@ const tasks = [
     description: "Daily standup meeting with the team.",
     time: "9:30 AM",
     image: "https://via.placeholder.com/150",
+    youtubeLink: "https://www.youtube.com",
   },
   {
     id: 3,
@@ -62,6 +26,7 @@ const tasks = [
     description: "Focus on the frontend development of the project.",
     time: "11:00 AM",
     image: "https://via.placeholder.com/150",
+    youtubeLink: "https://www.youtube.com",
   },
   {
     id: 4,
@@ -69,6 +34,7 @@ const tasks = [
     description: "Strength training session at the gym.",
     time: "5:30 PM",
     image: "https://via.placeholder.com/150",
+    youtubeLink: "https://www.youtube.com",
   },
 ];
 
@@ -76,8 +42,9 @@ function Dashboard() {
   const [completedTasks, setCompletedTasks] = useState([]);
   const [dataImg, setdataImg] = useState([]);
 
-  const handleCompleteTask = (taskId) => {
-    setCompletedTasks([...completedTasks, taskId]);
+  const handleCompleteTask = (taskId, youtubeLink) => {
+    window.open(youtubeLink, "_blank"); // Open YouTube link in a new tab
+    setCompletedTasks([...completedTasks, taskId]); // Mark task as completed
   };
   const getData = async () => {
     let resultArray = [];
@@ -96,6 +63,7 @@ function Dashboard() {
   }, []);
 
   const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
+
   return (
     <div className="dashboard-container">
       {/* Adverts Section */}
