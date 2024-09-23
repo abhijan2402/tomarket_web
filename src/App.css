@@ -1,17 +1,54 @@
-.sidebar{
-  height: 100vh;
+/* Ensure the sidebar stays fixed */
+.sidebar {
+  height: 100vh; /* Full viewport height */
   width: 15%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #12192c;
+  color: #fff;
+  overflow: hidden; /* Prevent content overflow */
 }
-.sidebar ul{
+
+.sidebar ul {
   margin-top: 20px;
 }
-.sidebar ul li{
+
+.sidebar ul li {
   margin-top: 10px;
 }
-.sidebar ul li i{
-   color: aliceblue;
+
+.sidebar ul li i {
+  color: aliceblue;
 }
+
 .sidebar ul li a {
   color: aliceblue !important;
   text-decoration: none;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Content area */
+.content {
+  margin-left: 15%;
+  padding: 20px;
+  height: 100vh;
+  overflow-y: auto;
+  background-color: #090f1e;
 }

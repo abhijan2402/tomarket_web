@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../Style/DailyTask.css";
 
@@ -34,8 +34,17 @@ const tasks = [
 ];
 
 function DailyTask() {
+  const [completedTasks, setCompletedTasks] = useState([]);
+
+  const handleCompleteTask = (taskId) => {
+    setCompletedTasks([...completedTasks, taskId]);
+  };
+
+  const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
+
   return (
     <div className="daily-task-container">
+      <h1>Daily Task</h1>
       <ul className="task-list">
         {tasks.map((task) => (
           <li key={task.id} className="task-list-item">
@@ -47,9 +56,23 @@ function DailyTask() {
                 <i className="bi bi-clock"></i> {task.time}
               </p>
             </div>
-            <Link to={`/task/${task.id}`} className="redirect-icon">
-              <i className="bi bi-arrow-right-circle-fill"></i>
-            </Link>
+            <button
+              onClick={() => handleCompleteTask(task.id)}
+              disabled={isTaskCompleted(task.id)}
+              className={`redirect-icon ${
+                isTaskCompleted(task.id) ? "task-completed" : ""
+              }`}
+            >
+              {isTaskCompleted(task.id) ? (
+                <>
+                  Task Completed <i className="bi bi-check-circle-fill"></i>
+                </>
+              ) : (
+                <>
+                  Start Task <i className="bi bi-arrow-right-circle-fill"></i>
+                </>
+              )}
+            </button>
           </li>
         ))}
       </ul>
