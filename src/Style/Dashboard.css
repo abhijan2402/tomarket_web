@@ -6,11 +6,47 @@
   padding: 10px 20px;
 }
 
-.card-container {
+.task_container_main{
   display: flex;
+  gap: 40px;
+}
+
+/* Advert Section */
+.advert-container {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.advert-space {
+  background-color: #f4f4f4;
+  height: 200px;
+  display: flex;
+  align-items: center;
   justify-content: center;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  color: #333;
+  font-size: 16px;
+}
+
+/* Task Section */
+.task-section {
   width: 100%;
   margin-top: 20px;
+}
+
+.task-section h3{
+  color: #ccc;
+  border-bottom: 1px solid #fff;
+  padding: 8px 0;
+  margin-bottom: 20px;
+}
+
+.task-slider {
+  display: flex;
+  flex-wrap: wrap;
 }
 
 .task-card {
@@ -44,8 +80,4 @@
   font-weight: 600;
   color: #ffffff;
   letter-spacing: 1px;
-}
-.task-slider{
-    display: flex;
-    flex-wrap: wrap;
 }
