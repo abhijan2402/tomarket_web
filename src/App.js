@@ -1,5 +1,10 @@
 import React, { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, NavLink } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  NavLink,
+} from "react-router-dom";
 import "./App.css";
 
 import Dashboard from "./Components/Dashboard";
@@ -10,102 +15,72 @@ import Reward from "./Components/Reward";
 import Wallet from "./Components/Wallet";
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
   };
 
   return (
-    <div className={darkMode ? "dark-mode" : "light-mode"}>
+    <div>
       <Router>
-        <div className="d-flex">
-          <nav
-            className="sidebar"
-            style={{ backgroundColor: "#12192C", color: "#fff" }}
-          >
-            <div>
-              <img src="" alt="Logo"></img>
-            </div>
-            <ul className="nav flex-column">
-              <li className="nav-item">
-                <NavLink
-                  to="/"
-                  className="nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { backgroundColor: "#1D263E" } : undefined
-                  }
-                >
-                  <i className="bi bi-house-door"></i> Dashboard
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/daily-task"
-                  className="nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { backgroundColor: "#1D263E", color:"#7460E5" } : undefined
-                  }
-                >
-                  <i className="bi bi-list-task"></i> Daily Task
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/completed-task"
-                  className="nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { backgroundColor: "#1D263E" } : undefined
-                  }
-                >
-                  <i className="bi bi-check-circle"></i> Completed Task
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/pending-task"
-                  className="nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { backgroundColor: "#1D263E" } : undefined
-                  }
-                >
-                  <i className="bi bi-hourglass-split"></i> Pending Task
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/reward"
-                  className="nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { backgroundColor: "#1D263E" } : undefined
-                  }
-                >
-                  <i className="bi bi-trophy"></i> Reward
-                </NavLink>
-              </li>
-              <li className="nav-item">
-                <NavLink
-                  to="/wallet"
-                  className="nav-link"
-                  style={({ isActive }) =>
-                    isActive ? { backgroundColor: "#1D263E" } : undefined
-                  }
-                >
-                  <i className="bi bi-wallet"></i> Wallet
-                </NavLink>
-              </li>
-            </ul>
-          </nav>
-          <div className="content flex-grow-1">
-            <Routes>
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/daily-task" element={<DailyTask />} />
-              <Route path="/completed-task" element={<CompletedTask />} />
-              <Route path="/pending-task" element={<PendingTask />} />
-              <Route path="/reward" element={<Reward />} />
-              <Route path="/wallet" element={<Wallet />} />
-            </Routes>
+        <header className="navbar">
+          <div className="logo">
+            <h2 style={{ color: "#fff" }}>LOGO</h2>
           </div>
+          <button className="hamburger" onClick={toggleMobileMenu}>
+            ☰
+          </button>
+          <ul className={`nav-items ${isMobileMenuOpen ? "open" : ""}`}>
+            <li>
+              <NavLink to="/" className="nav-link" onClick={toggleMobileMenu}>
+                Dashboard
+              </NavLink>
+            </li>
+            {/* <li>
+              <NavLink to="/daily-task" className="nav-link" onClick={toggleMobileMenu}>
+                Daily Task
+              </NavLink>
+            </li> */}
+            {/* <li>
+              <NavLink to="/completed-task" className="nav-link" onClick={toggleMobileMenu}>
+                Completed Task
+              </NavLink>
+            </li> */}
+            {/* <li>
+              <NavLink to="/pending-task" className="nav-link" onClick={toggleMobileMenu}>
+                Pending Task
+              </NavLink>
+            </li> */}
+            <li>
+              <NavLink
+                to="/reward"
+                className="nav-link"
+                onClick={toggleMobileMenu}
+              >
+                Reward
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="/wallet"
+                className="nav-link"
+                onClick={toggleMobileMenu}
+              >
+                Wallet
+              </NavLink>
+            </li>
+          </ul>
+        </header>
+        <div className="content">
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/daily-task" element={<DailyTask />} />
+            <Route path="/completed-task" element={<CompletedTask />} />
+            <Route path="/pending-task" element={<PendingTask />} />
+            <Route path="/reward" element={<Reward />} />
+            <Route path="/wallet" element={<Wallet />} />
+          </Routes>
         </div>
       </Router>
     </div>

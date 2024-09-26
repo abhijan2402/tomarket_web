@@ -1,12 +1,12 @@
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  /* justify-content: center; */
+  /* align-items: center; */
   padding: 10px 0px;
 }
 
-.task_container_main{
+.task_container_main {
   /* display: flex;
   gap: 40px; */
 
@@ -16,14 +16,15 @@
 /* Advert Section */
 .advert-container {
   display: flex;
-  justify-content: space-between;
+  gap: 10px;
   width: 100%;
   margin-bottom: 20px;
 }
 
 .advert-space {
   background-color: #f4f4f4;
-  height: 200px;
+  height: 300px;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -32,14 +33,22 @@
   color: #333;
   font-size: 16px;
 }
-
+@media (max-width: 450px) {
+  .advert-space {
+    margin-bottom: 10px;
+    height: 250px;
+  }
+  .advert-container {
+    gap: 5px;
+  }
+}
 /* Task Section */
 .task-section {
   width: 100%;
   margin-top: 20px;
 }
 
-.task-section h3{
+.task-section h3 {
   color: #ccc;
   border-bottom: 1px solid #fff;
   padding: 8px 0;
@@ -82,4 +91,117 @@
   font-weight: 600;
   color: #ffffff;
   letter-spacing: 1px;
+}
+
+/* Styles for Task List */
+.task-list {
+  list-style: none;
+  padding: 0;
+}
+
+.task-list-item {
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  box-shadow: rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.task-image {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-right: 20px;
+}
+
+.task-details {
+  display: flex;
+  flex-direction: column;
+}
+
+.task-title {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.task-description {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.task-time {
+  font-size: 12px;
+  color: #666;
+}
+
+.tabs-container {
+  /* border: 2px solid red; */
+  display: flex;
+  gap: 5px;
+  margin-bottom: 20px;
+}
+
+.tabs-container button {
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #203054;
+  color: white;
+  border: none;
+  outline: none;
+  transition: background-color 0.3s;
+}
+
+.tabs-container button.active {
+  background-color: #ffc107;
+  color: #203054;
+}
+
+.tabs-container button:hover {
+  background-color: #ffda3a;
+}
+
+.task-container {
+  width: 100%;
+}
+
+/* Responsive for mobile */
+@media (max-width: 768px) {
+  .advert-container {
+    flex-direction: column;
+  }
+
+  .advert-space {
+    margin-bottom: 10px;
+  }
+  .task-details {
+    width: 100%;
+  }
+  .tabs-container button {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .redirect-icon {
+    width: 100%;
+  }
+  .task-image {
+    width: 100%;
+    height: 200px;
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+  .task-list-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .task-details {
+    align-items: flex-start;
+  }
 }

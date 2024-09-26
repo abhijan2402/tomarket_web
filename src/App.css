@@ -1,54 +1,97 @@
-/* Ensure the sidebar stays fixed */
-.sidebar {
-  height: 100vh; /* Full viewport height */
-  width: 15%;
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: #12192c;
+/* App container */
+.app {
+  font-family: Arial, sans-serif;
+}
+
+.dark-mode {
+  background-color: #090f1e;
   color: #fff;
-  overflow: hidden; /* Prevent content overflow */
 }
 
-.sidebar ul {
-  margin-top: 20px;
+/* Navbar styles */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background-color: #1a233b;
+  position: relative;
 }
 
-.sidebar ul li {
-  margin-top: 10px;
+.navbar ul {
+  padding-left: 0rem;
+  margin-bottom: 0rem;
 }
 
-.sidebar ul li i {
-  color: aliceblue;
+.logo h2 {
+  margin: 0;
 }
 
-.sidebar ul li a {
-  color: aliceblue !important;
+/* Hamburger menu */
+.hamburger {
+  display: none;
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: #fff;
+  cursor: pointer;
+}
+
+.nav-items {
+  display: flex;
+  list-style: none;
+  transition: max-height 0.3s ease-in-out;
+}
+
+.nav-items li {
+  margin-right: 20px;
+}
+
+.nav-items .nav-link {
   text-decoration: none;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: background-color 0.3s;
+  letter-spacing: 1px;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 10px;
+.nav-items .nav-link:hover {
+  background-color: #1d263e;
 }
 
-::-webkit-scrollbar-track {
-  background: #f1f1f1;
+.nav-items .nav-link.active {
+  background-color: #ffc107;
 }
 
-::-webkit-scrollbar-thumb {
-  background: #888;
-}
+/* Mobile responsive styles */
+@media (max-width: 790px) {
+  .nav-items {
+    flex-direction: column;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    background-color: #12192c;
+    max-height: 0;
+    overflow: hidden;
+  }
 
-::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  .nav-items.open {
+    max-height: 500px; /* Adjust as needed */
+  }
+
+  .nav-items li {
+    margin: 10px 0;
+    text-align: center;
+  }
+
+  .hamburger {
+    display: block;
+  }
 }
 
 /* Content area */
 .content {
-  margin-left: 15%;
   padding: 20px;
-  height: 100vh;
-  overflow-y: auto;
-  background-color: #090f1e;
 }
