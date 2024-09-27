@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import "../Style/Dashboard.css";
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../firebase";
+import Card from "./Cards/Card";
 
 const tasks = [
   {
@@ -40,28 +41,26 @@ function Dashboard() {
 
   const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
 
-  // Tab Content Renderers
+  // Tab Content components
   const renderNewTasks = () => (
     <ul className="task-list">
       {dataImg.map((task) => (
         <li key={task.id} className="task-list-item">
-          <img
-            src="https://via.placeholder.com/150"
-            alt={task.title}
-            className="task-image"
-          />
+          <i class="bi bi-youtube"></i>
           <div className="task-details">
-            <h4 className="task-title">{task.title}</h4>
-            <p className="task-description">{task.description}</p>
-            <p className="task-time">
-              <i className="bi bi-clock"></i> {"5:30 PM"}
-            </p>
+            <h4 className="task-title">
+              {task.title.length > 20
+                ? `${task.title.substring(0, 20)}...`
+                : task.title}
+            </h4>
+            <p className="task-time">{"+250 BP"}</p>
           </div>
           <div
             style={{
               width: "100%",
               display: "flex",
               justifyContent: "flex-end",
+              alignItems: "center",
             }}
           >
             <button
@@ -74,15 +73,7 @@ function Dashboard() {
                 isTaskCompleted(task.id) ? "task-completed" : ""
               }`}
             >
-              {isTaskCompleted(task?.id) ? (
-                <>
-                  Task Completed <i className="bi bi-check-circle-fill"></i>
-                </>
-              ) : (
-                <>
-                  Start Task <i className="bi bi-arrow-right-circle-fill"></i>
-                </>
-              )}
+              {isTaskCompleted(task?.id) ? <>Task Completed</> : <>Start</>}
             </button>
           </div>
         </li>
@@ -94,13 +85,33 @@ function Dashboard() {
     <ul className="task-list">
       {tasks.map((task) => (
         <li key={task.id} className="task-list-item">
-          <img src={task.image} alt={task.title} className="task-image" />
+          <i class="bi bi-youtube"></i>
+
           <div className="task-details">
-            <h4 className="task-title">{task.title}</h4>
-            <p className="task-description">{task.description}</p>
-            <p className="task-time">
-              <i className="bi bi-clock"></i> {task.time}
-            </p>
+            <h4 className="task-title">
+              {task.title.length > 20
+                ? `${task.title.substring(0, 20)}...`
+                : task.title}
+            </h4>
+            <p className="task-time">+250 BP</p>
+          </div>
+          <div
+            style={{
+              width: "100%",
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "center",
+            }}
+          >
+            <button
+              onClick={() => {
+                window.open(task?.link, "_blank", "noopener,noreferrer");
+                handleCompleteTask(task?.id);
+              }}
+              className="redirect-icon"
+            >
+              start
+            </button>
           </div>
         </li>
       ))}
@@ -113,23 +124,22 @@ function Dashboard() {
         .filter((task) => !isTaskCompleted(task.id))
         .map((task) => (
           <li key={task.id} className="task-list-item">
-            <img
-              src="https://via.placeholder.com/150"
-              alt={task.title}
-              className="task-image"
-            />
+            <i class="bi bi-youtube"></i>
+
             <div className="task-details">
-              <h4 className="task-title">{task.title}</h4>
-              <p className="task-description">{task.description}</p>
-              <p className="task-time">
-                <i className="bi bi-clock"></i> {task.time || "5:30 PM"}
-              </p>
+              <h4 className="task-title">
+                {task.title.length > 20
+                  ? `${task.title.substring(0, 20)}...`
+                  : task.title}
+              </h4>
+              <p className="task-time">{"+250 BP"}</p>
             </div>
             <div
               style={{
                 width: "100%",
                 display: "flex",
                 justifyContent: "flex-end",
+                alignItems: "center",
               }}
             >
               <button
@@ -139,7 +149,7 @@ function Dashboard() {
                 }}
                 className="redirect-icon"
               >
-                Start Task <i className="bi bi-arrow-right-circle-fill"></i>
+                Start
               </button>
             </div>
           </li>
@@ -147,13 +157,58 @@ function Dashboard() {
     </ul>
   );
 
+  const card_data = {
+    id: 1,
+    title: "Weekly",
+    desc: "Earn for checking socials",
+    bonus: "+0/540",
+    card_bg: "#000",
+    background: "#fff",
+    color: "#000",
+  };
+
   return (
     <div className="dashboard-container">
       {/* Adverts Section */}
       <div className="advert-container">
-        <div className="advert-space">Advert Space 1</div>
+        <div className="advert-space">
+          <div className="advert_space_img">
+            <img
+              src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
+              alt="img"
+            />
+          </div>
+          <div className="advert_space_details">
+            <h5>ForU AI Quest</h5>
+            <p>+999 BP</p>
+          </div>
+          <div className="advert_space_btn">
+            <button className="advert_space_btn1">Open</button>
+            <p className="advert_space_card_count">0/2</p>
+          </div>
+        </div>
 
-        <div className="advert-space">Advert Space 2</div>
+        <div className="advert-space">
+          <div className="advert_space_img">
+            <img
+              src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
+              alt="img"
+            />
+          </div>
+          <div className="advert_space_details">
+            <h5>ForU AI Quest</h5>
+            <p>+999 BP</p>
+          </div>
+          <div className="advert_space_btn">
+            <button className="advert_space_btn1">Open</button>
+            <p className="advert_space_card_count">0/2</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Cards */}
+      <div>
+        <Card card_data={card_data} />
       </div>
 
       {/* Tab Navigation */}
@@ -162,19 +217,19 @@ function Dashboard() {
           className={activeTab === "new" ? "active" : ""}
           onClick={() => setActiveTab("new")}
         >
-          New Tasks
+          New
         </button>
         <button
           className={activeTab === "completed" ? "active" : ""}
           onClick={() => setActiveTab("completed")}
         >
-          Completed Tasks
+          OnChain
         </button>
         <button
           className={activeTab === "pending" ? "active" : ""}
           onClick={() => setActiveTab("pending")}
         >
-          Pending Tasks
+          Socials
         </button>
       </div>
 

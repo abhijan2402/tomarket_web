@@ -13,6 +13,7 @@ import CompletedTask from "./Components/CompletedTask";
 import PendingTask from "./Components/PendingTask";
 import Reward from "./Components/Reward";
 import Wallet from "./Components/Wallet";
+import BottomTabBar from "./Components/BottomTabBar/BottomTabBar";
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -28,7 +29,7 @@ function App() {
           <div className="logo">
             <h2 style={{ color: "#fff" }}>LOGO</h2>
           </div>
-          <button className="hamburger" onClick={toggleMobileMenu}>
+          {/* <button className="hamburger" onClick={toggleMobileMenu}>
             ☰
           </button>
           <ul className={`nav-items ${isMobileMenuOpen ? "open" : ""}`}>
@@ -37,21 +38,21 @@ function App() {
                 Dashboard
               </NavLink>
             </li>
-            {/* <li>
+            <li>
               <NavLink to="/daily-task" className="nav-link" onClick={toggleMobileMenu}>
                 Daily Task
               </NavLink>
-            </li> */}
-            {/* <li>
+            </li>
+            <li>
               <NavLink to="/completed-task" className="nav-link" onClick={toggleMobileMenu}>
                 Completed Task
               </NavLink>
-            </li> */}
-            {/* <li>
+            </li>
+            <li>
               <NavLink to="/pending-task" className="nav-link" onClick={toggleMobileMenu}>
                 Pending Task
               </NavLink>
-            </li> */}
+            </li>
             <li>
               <NavLink
                 to="/reward"
@@ -70,7 +71,7 @@ function App() {
                 Wallet
               </NavLink>
             </li>
-          </ul>
+          </ul> */}
         </header>
         <div className="content">
           <Routes>
@@ -82,6 +83,7 @@ function App() {
             <Route path="/wallet" element={<Wallet />} />
           </Routes>
         </div>
+          <BottomTabBar/>
       </Router>
     </div>
   );

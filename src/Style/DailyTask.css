@@ -1,4 +1,4 @@
-.daily-task-container {
+/* .daily-task-container {
   padding: 20px;
   background-color: transparent;
   border-radius: 10px;
@@ -33,12 +33,6 @@
   transform: scale(1.02);
 }
 
-/* .task-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 8px;
-  margin-right: 20px;
-} */
 
 .task-details {
   flex-grow: 1;
@@ -67,7 +61,6 @@
   margin-right: 5px;
 }
 
-/* Styling for the redirect icon */
 .redirect-icon {
   font-size: 24px;
   color: #fff;
@@ -83,7 +76,6 @@
 .redirect-icon:hover {
   color: #1d263e;
 }
-/* Styling for the redirect icon */
 .redirect-icon {
   font-size: 18px;
   color: #fff;
@@ -105,4 +97,4 @@
 .redirect-icon:disabled {
   color: #fff;
   background-color: #6c757d;
-}
+} */
