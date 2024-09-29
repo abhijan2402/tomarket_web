@@ -19,6 +19,8 @@ function Dashboard() {
   const [activeTab, setActiveTab] = useState("new");
   const [completedTasks, setCompletedTasks] = useState([]);
   const [dataImg, setdataImg] = useState([]);
+  const [loadingTaskId, setLoadingTaskId] = useState(null); // Track task being loaded
+  const [claimedTaskId, setClaimedTaskId] = useState(null); // Track task claimed
 
   const handleCompleteTask = (taskId, youtubeLink) => {
     window.open(youtubeLink, "_blank");
@@ -41,12 +43,22 @@ function Dashboard() {
 
   const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
 
+  const handleStartClick = (taskId) => {
+    setLoadingTaskId(taskId); // Set loading state
+
+    // Simulate loading with a timeout
+    setTimeout(() => {
+      setLoadingTaskId(null); // Remove loading state
+      setClaimedTaskId(taskId); // Mark task as claimable
+    }, 3000); // 3 seconds delay for the spinner
+  };
+
   // Tab Content components
   const renderNewTasks = () => (
     <ul className="task-list">
       {dataImg.map((task) => (
         <li key={task.id} className="task-list-item">
-          <i class="bi bi-youtube"></i>
+          <i className="bi bi-youtube"></i>
           <div className="task-details">
             <h4 className="task-title">
               {task.title.length > 20
@@ -64,16 +76,29 @@ function Dashboard() {
             }}
           >
             <button
-              onClick={() => {
-                window.open(task?.link, "_blank", "noopener,noreferrer");
-                handleCompleteTask(task?.id);
-              }}
+              onClick={() => handleStartClick(task.id)}
               disabled={isTaskCompleted(task?.id)}
               className={`redirect-icon ${
                 isTaskCompleted(task.id) ? "task-completed" : ""
-              }`}
+              } ${claimedTaskId === task.id ? "claim-button" : ""}`}
+              style={{
+                backgroundColor:
+                  loadingTaskId === task.id
+                    ? "grey"
+                    : claimedTaskId === task.id
+                    ? "greenyellow"
+                    : "#434343",
+              }}
             >
-              {isTaskCompleted(task?.id) ? <>Task Completed</> : <>Start</>}
+              {loadingTaskId === task.id ? (
+                <div className="spinner"></div>
+              ) : claimedTaskId === task.id ? (
+                "Claim"
+              ) : isTaskCompleted(task?.id) ? (
+                "Task Completed"
+              ) : (
+                "Start"
+              )}
             </button>
           </div>
         </li>
@@ -85,7 +110,7 @@ function Dashboard() {
     <ul className="task-list">
       {tasks.map((task) => (
         <li key={task.id} className="task-list-item">
-          <i class="bi bi-youtube"></i>
+          <i className="bi bi-youtube"></i>
 
           <div className="task-details">
             <h4 className="task-title">
@@ -110,7 +135,7 @@ function Dashboard() {
               }}
               className="redirect-icon"
             >
-              start
+              Start
             </button>
           </div>
         </li>
@@ -124,7 +149,7 @@ function Dashboard() {
         .filter((task) => !isTaskCompleted(task.id))
         .map((task) => (
           <li key={task.id} className="task-list-item">
-            <i class="bi bi-youtube"></i>
+            <i className="bi bi-youtube"></i>
 
             <div className="task-details">
               <h4 className="task-title">
@@ -143,10 +168,7 @@ function Dashboard() {
               }}
             >
               <button
-                onClick={() => {
-                  window.open(task?.link, "_blank", "noopener,noreferrer");
-                  handleCompleteTask(task?.id);
-                }}
+                onClick={() => handleStartClick(task.id)}
                 className="redirect-icon"
               >
                 Start
