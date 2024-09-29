@@ -14,6 +14,7 @@ import PendingTask from "./Components/PendingTask";
 import Reward from "./Components/Reward";
 import Wallet from "./Components/Wallet";
 import BottomTabBar from "./Components/BottomTabBar/BottomTabBar";
+import Fren from "./Components/Fren";
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -79,8 +80,9 @@ function App() {
             <Route path="/daily-task" element={<DailyTask />} />
             <Route path="/completed-task" element={<CompletedTask />} />
             <Route path="/pending-task" element={<PendingTask />} />
-            <Route path="/reward" element={<Reward />} />
+            <Route path="/earn" element={<Reward />} />
             <Route path="/wallet" element={<Wallet />} />
+            <Route path="/frens" element={<Fren/>}/>
           </Routes>
         </div>
           <BottomTabBar/>

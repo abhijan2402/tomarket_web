@@ -1,0 +1,164 @@
+/* Wallet header styles (already given) */
+.wallet_header {
+    margin-top: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 10px;
+}
+
+.wallet_header h3 {
+  color: #fff;
+  letter-spacing: 1px;
+}
+
+.wallet_header p {
+  margin-bottom: 0;
+  background-color: rgba(128, 128, 128, 0.242);
+  text-align: center;
+  border-radius: 30px;
+  padding: 8px 40px;
+  color: gray;
+  font-size: 18px;
+  letter-spacing: 1px;
+}
+
+/* Wallet tab styles */
+.wallet_tab {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  width: 30%;
+  background-color: #33333348;
+  border-radius: 5px;
+}
+
+.tab_item {
+  padding: 10px 20px;
+  cursor: pointer;
+  color: #fff;
+  width: 100%;
+  text-align: center;
+  background-color: #3333331c;
+  border-radius: 5px;
+  /* margin: 0 10px; */
+  letter-spacing: 1px;
+  transition: background-color 0.3s ease;
+}
+
+/* Style for active tab */
+.tab_item.active {
+  background-color: rgba(128, 128, 128, 0.278);
+}
+
+/* Tab content styles */
+.tab_content {
+  padding: 20px 10px;
+  border-radius: 10px;
+  margin: 10px;
+}
+
+.balance_content,
+.history_content {
+  color: #fff;
+  text-align: center;
+}
+
+.wallet_btn {
+  background-color: #33333370;
+  border: none;
+  outline: none;
+  padding: 10px 20px;
+  border-radius: 30px;
+  color: greenyellow;
+  letter-spacing: 1px;
+}
+
+.wallet-task-list {
+  list-style: none;
+  padding-left: 0;
+}
+
+.wallet-task-list-item {
+  display: flex;
+  margin-bottom: 25px;
+}
+.wallet-task-list-item .wallet_coin {
+  margin-bottom: 0;
+  font-size: 50px;
+  border-radius: 50%;
+  padding: 0 15px;
+  /* border-radius: 50%; */
+  /* padding: 20px 25px; */
+  background-color: #33333383;
+}
+.wallet-task-details {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.wallet-task-title {
+  text-align: start;
+  padding: 0 20px;
+}
+.wallet-task-time {
+  text-align: start;
+  padding: 0 20px;
+}
+
+@media (max-width: 1100px) {
+  .wallet_tab {
+    width: 50%;
+  }
+}
+
+@media (max-width: 600px) {
+  .wallet_tab {
+    width: 70%;
+  }
+}
+
+@media (max-width: 500px) {
+  .tab_content {
+    margin: 0;
+  }
+  .wallet_tab {
+    width: 100%;
+  }
+}
+@media (max-width: 480px) {
+  .wallet-task-list-item .wallet_coin {
+    margin-bottom: 0;
+    font-size: 25px;
+    border-radius: 50%;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+  }
+  .wallet-task-title {
+    font-size: 14px;
+    padding: 0 10px;
+  }
+  .wallet-task-time {
+    font-size: 12px;
+    padding: 0 10px;
+  }
+  p {
+    margin-bottom: 0;
+  }
+  .wallet_btn {
+    font-size: 14px;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 390px) {
+  .tab_content {
+    padding: 20px 8px;
+  }
+  .wallet_btn {
+    font-size: 12px;
+    padding: 10px 20px;
+  }
+}
