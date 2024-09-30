@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -15,20 +15,43 @@ import Reward from "./Components/Reward";
 import Wallet from "./Components/Wallet";
 import BottomTabBar from "./Components/BottomTabBar/BottomTabBar";
 import Fren from "./Components/Fren";
+import { collection, getDocs, query } from "firebase/firestore";
+import { db } from "./firebase";
+import SignIn from "./Components/Auth/SignIn";
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
+  const [Logo, setLogo] = useState([])
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+  const getData = async () => {
+    let resultArray = [];
+    const q = query(collection(db, "settings"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      resultArray.push({ id: doc.id, ...doc.data() });
+    });
+    setLogo(resultArray)
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
 
   return (
     <div>
       <Router>
         <header className="navbar">
           <div className="logo">
-            <h2 style={{ color: "#fff" }}>LOGO</h2>
+            {/* <h2 style={{ color: "#fff" }}>LOGO</h2> */}
+            <img
+              src={Logo[0]?.value}
+              alt="Description of the image"
+              width="60"
+              height="60"
+              style={{ objectFit: "cover", borderRadius: "5px" }} // Ensures the image covers the space without distortion
+            />
           </div>
           {/* <button className="hamburger" onClick={toggleMobileMenu}>
             ☰
@@ -82,10 +105,11 @@ function App() {
             <Route path="/pending-task" element={<PendingTask />} />
             <Route path="/earn" element={<Reward />} />
             <Route path="/wallet" element={<Wallet />} />
-            <Route path="/frens" element={<Fren/>}/>
+            <Route path="/frens" element={<Fren />} />
+            <Route path="/Login" element={<SignIn />} />
           </Routes>
         </div>
-          <BottomTabBar/>
+        <BottomTabBar />
       </Router>
     </div>
   );
