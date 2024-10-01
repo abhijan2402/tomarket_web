@@ -119,7 +119,8 @@
   background-color: green;
 }
 
-.task-completed, .claim-button {
+.task-completed,
+.claim-button {
   pointer-events: none;
 }
 

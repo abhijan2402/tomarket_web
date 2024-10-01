@@ -3,7 +3,9 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  NavLink,
+  Link,
+  useLocation,
+  useNavigate,
 } from "react-router-dom";
 import "./App.css";
 
@@ -18,13 +20,17 @@ import Fren from "./Components/Fren";
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "./firebase";
 import SignIn from "./Components/Auth/SignIn";
+import SignUp from "./Components/Auth/SignUp";
+import ForgotPassword from "./Components/Auth/ForgotPassword";
 
 function App() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [Logo, setLogo] = useState([])
+  const [Logo, setLogo] = useState([]);
+
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
   };
+
   const getData = async () => {
     let resultArray = [];
     const q = query(collection(db, "settings"));
@@ -32,7 +38,7 @@ function App() {
     querySnapshot.forEach((doc) => {
       resultArray.push({ id: doc.id, ...doc.data() });
     });
-    setLogo(resultArray)
+    setLogo(resultArray);
   };
 
   useEffect(() => {
@@ -40,78 +46,57 @@ function App() {
   }, []);
 
   return (
-    <div>
-      <Router>
+    <Router>
+      <div>
         <header className="navbar">
           <div className="logo">
-            {/* <h2 style={{ color: "#fff" }}>LOGO</h2> */}
-            <img
-              src={Logo[0]?.value}
-              alt="Description of the image"
-              width="60"
-              height="60"
-              style={{ objectFit: "cover", borderRadius: "5px" }} // Ensures the image covers the space without distortion
-            />
+            <Link to="/">
+              <img
+                src={Logo[0]?.value}
+                alt="Description of the image"
+                width="60"
+                height="60"
+                style={{ objectFit: "cover", borderRadius: "5px" }}
+              />
+            </Link>
           </div>
-          {/* <button className="hamburger" onClick={toggleMobileMenu}>
-            ☰
-          </button>
-          <ul className={`nav-items ${isMobileMenuOpen ? "open" : ""}`}>
-            <li>
-              <NavLink to="/" className="nav-link" onClick={toggleMobileMenu}>
-                Dashboard
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/daily-task" className="nav-link" onClick={toggleMobileMenu}>
-                Daily Task
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/completed-task" className="nav-link" onClick={toggleMobileMenu}>
-                Completed Task
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/pending-task" className="nav-link" onClick={toggleMobileMenu}>
-                Pending Task
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/reward"
-                className="nav-link"
-                onClick={toggleMobileMenu}
-              >
-                Reward
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/wallet"
-                className="nav-link"
-                onClick={toggleMobileMenu}
-              >
-                Wallet
-              </NavLink>
-            </li>
-          </ul> */}
+          <div className="header_log">
+            <Link to="/Login">
+              <button>Login</button>
+            </Link>
+          </div>
         </header>
-        <div className="content">
-          <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/daily-task" element={<DailyTask />} />
-            <Route path="/completed-task" element={<CompletedTask />} />
-            <Route path="/pending-task" element={<PendingTask />} />
-            <Route path="/earn" element={<Reward />} />
-            <Route path="/wallet" element={<Wallet />} />
-            <Route path="/frens" element={<Fren />} />
-            <Route path="/Login" element={<SignIn />} />
-          </Routes>
-        </div>
-        <BottomTabBar />
-      </Router>
-    </div>
+        <AppContent />
+      </div>
+    </Router>
+  );
+}
+
+function AppContent() {
+  const location = useLocation();
+
+  return (
+    <>
+      <div className="content">
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/daily-task" element={<DailyTask />} />
+          <Route path="/completed-task" element={<CompletedTask />} />
+          <Route path="/pending-task" element={<PendingTask />} />
+          <Route path="/earn" element={<Reward />} />
+          <Route path="/wallet" element={<Wallet />} />
+          <Route path="/frens" element={<Fren />} />
+          <Route path="/login" element={<SignIn />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot_password" element={<ForgotPassword />} />
+        </Routes>
+      </div>
+
+      {/* Conditionally render BottomTabBar only if not on certain routes */}
+      {!["/Login", "/signup", "/forgot_password"].includes(
+        location.pathname
+      ) && <BottomTabBar />}
+    </>
   );
 }
 

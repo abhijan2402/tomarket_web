@@ -27,7 +27,7 @@ const BottomTabBar = () => {
 
       <div
         className={`tab-item ${activeTab === "Earn" ? "active" : ""}`}
-        onClick={() => handleTabClick("Login")}
+        onClick={() => handleTabClick("task")}
       >
         <i className="bi bi-currency-dollar tab-icon"></i>
         <p>Task</p>

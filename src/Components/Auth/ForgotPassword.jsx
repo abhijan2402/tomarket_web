@@ -1,11 +1,14 @@
 import { sendPasswordResetEmail } from "firebase/auth";
 import React, { useState } from "react";
 import { auth } from "../../firebase";
+import { useNavigate } from "react-router-dom";
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const navigate = useNavigate()
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
@@ -23,7 +26,61 @@ function ForgotPassword() {
       // setMessage(''); // Clear success message on error
     }
   };
-  return <div>ForgotPassword</div>;
+  return (
+    <div className="container _login_container">
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div style={{display:"flex", justifyContent:"space-between"}}>
+            <p style={{fontSize:"35px", color:"#fff", cursor:"pointer"}} onClick={()=> navigate("/Login")}>
+              <i class="bi bi-arrow-left-circle-fill"></i>
+            </p>
+            <h2 className="">Reset Password</h2>
+          </div>
+          <form className="_login_form" onSubmit={handleResetPassword}>
+            <div className="mb-3">
+              <label htmlFor="email" className="form-label text-white">
+                Email address
+              </label>
+              <div className="input-group">
+                <input
+                  type="email"
+                  className="form-control"
+                  id="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+            </div>
+            <div className="mb-3">
+              <label htmlFor="password" className="form-label text-white">
+                New Password
+              </label>
+              <div className="input-group">
+                <input
+                  type="password"
+                  className="form-control"
+                  id="password"
+                  placeholder="Enter your new password"
+                  required
+                />
+              </div>
+            </div>
+            {/* <div className="text-end">
+              <p className="text-white">Forgot Password?</p>
+            </div> */}
+            {error && <p className="text-danger">{error}</p>}
+            <div className="d-grid">
+              <button type="submit" className="btn btn-primary">
+                Confirm Password
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default ForgotPassword;
