@@ -3,7 +3,7 @@ import "./BottomTabBar.css";
 import { useNavigate } from "react-router-dom";
 
 const BottomTabBar = () => {
-  const [activeTab, setActiveTab] = useState("/"); // Default active tab
+  const [activeTab, setActiveTab] = useState("/");
   const navigate = useNavigate();
 
   const handleTabClick = (tab) => {
@@ -26,7 +26,7 @@ const BottomTabBar = () => {
       </div>
 
       <div
-        className={`tab-item ${activeTab === "Earn" ? "active" : ""}`}
+        className={`tab-item ${activeTab === "task" ? "active" : ""}`}
         onClick={() => handleTabClick("task")}
       >
         <i className="bi bi-currency-dollar tab-icon"></i>

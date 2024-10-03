@@ -1,0 +1,46 @@
+.skeleton-list-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+  
+  .skeleton-avatar {
+    width: 50px;
+    height: 50px;
+    background-color: #dddddd7c;
+    border-radius: 50%;
+    margin-right: 10px;
+  }
+  
+  .skeleton-text {
+    width: 100%;
+  }
+  
+  .skeleton-line {
+    height: 14px;
+    background-color: #dddddd7c;
+    margin-bottom: 8px;
+    border-radius: 4px;
+  }
+  
+  .skeleton-line.short {
+    width: 50%;
+  }
+  
+  .skeleton-line.full {
+    width: 100%;
+  }
+  
+  .skeleton-container {
+    animation: shimmer 1.5s infinite linear;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+  

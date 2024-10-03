@@ -1,15 +1,10 @@
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  /* justify-content: center; */
-  /* align-items: center; */
   padding: 10px 0px;
 }
 
 .task_container_main {
-  /* display: flex;
-  gap: 40px; */
-
   width: 100%;
 }
 
@@ -26,8 +21,6 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  /* align-items: center; */
-  /* justify-content: center; */
   border: 1px solid #ccc;
   border-radius: 8px;
   color: #333;
@@ -299,11 +292,18 @@
 }
 
 .tabs-container {
-  /* border: 2px solid red; */
   display: flex;
   gap: 5px;
   margin-bottom: 20px;
+  overflow-x: scroll;
+  scrollbar-width: none; 
+  -ms-overflow-style: none;  
 }
+
+.tabs-container::-webkit-scrollbar {
+  display: none;
+}
+
 
 .tabs-container button {
   padding: 10px 10px;
@@ -324,9 +324,7 @@
   font-weight: 700;
 }
 
-.tabs-container button:hover {
-  /* background-color: #ffda3a; */
-}
+
 
 .task-container {
   width: 100%;

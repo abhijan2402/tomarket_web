@@ -31,17 +31,17 @@
   padding: 8px 25px;
   border-radius: 4px;
   letter-spacing: 1px;
-  font-weight: 700;
+  font-weight: 600;
   outline: none;
   border: none;
-  background-color: #3392f7d4;
+  background-color: #686c70ad;
   cursor: pointer;
   color: #fff;
   transition: 0.5s all;
 }
 
 .header_log button:hover {
-  background-color: #3392f7;
+  background-color: #686c70e9;
 }
 
 /* Hamburger menu */

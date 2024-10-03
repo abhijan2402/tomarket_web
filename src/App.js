@@ -83,7 +83,7 @@ function AppContent() {
           <Route path="/daily-task" element={<DailyTask />} />
           <Route path="/completed-task" element={<CompletedTask />} />
           <Route path="/pending-task" element={<PendingTask />} />
-          <Route path="/earn" element={<Reward />} />
+          <Route path="/task" element={<Reward />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/frens" element={<Fren />} />
           <Route path="/login" element={<SignIn />} />
