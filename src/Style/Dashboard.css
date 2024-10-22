@@ -296,14 +296,13 @@
   gap: 5px;
   margin-bottom: 20px;
   overflow-x: scroll;
-  scrollbar-width: none; 
-  -ms-overflow-style: none;  
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
 .tabs-container::-webkit-scrollbar {
   display: none;
 }
-
 
 .tabs-container button {
   padding: 10px 10px;
@@ -323,8 +322,6 @@
   color: #fff;
   font-weight: 700;
 }
-
-
 
 .task-container {
   width: 100%;

@@ -19,8 +19,8 @@ function SignIn() {
     try {
       const response = await signInWithEmailAndPassword(auth, email, password);
       console.log(response, "RESP");
-
-      alert("Sign-in successful!");
+      navigate("/");
+      alert("Sign-In successful!");
     } catch (err) {
       setError(err.message);
     }
@@ -68,9 +68,9 @@ function SignIn() {
               <p
                 className="text-white"
                 onClick={() => navigate("/forgot_password")}
-                style={{cursor:"pointer"}}
+                style={{ cursor: "pointer" }}
               >
-                Forgot Password?
+                Forgot Password
               </p>
             </div>
             {error && <p className="text-danger">{error}</p>}
@@ -80,12 +80,16 @@ function SignIn() {
               </button>
             </div>
 
-            <div className="">
+            <div className="create_account">
               <p className="text-white text-center pt-3">
                 Create an Account?{" "}
                 <span
                   onClick={() => navigate("/signup")}
-                  style={{ color: "#0D6EFD", cursor: "pointer", letterSpacing:"1px" }}
+                  style={{
+                    color: "#0D6EFD",
+                    cursor: "pointer",
+                    letterSpacing: "1px",
+                  }}
                 >
                   Sign Up
                 </span>

@@ -8,31 +8,30 @@ function ForgotPassword() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
     try {
-      const resp = await sendPasswordResetEmail(
-        auth,
-        "abhishek.jangid@gmail.com"
-      );
-      console.log(resp, "RESP");
-
-      // setMessage("Password reset email sent! Please check your inbox."); // Success message
-      // setError(''); // Clear any previous error messages
+      await sendPasswordResetEmail(auth, email);
+      setMessage("Password reset email sent! Please check your inbox.");
+      setError(""); // Clear any previous error messages
     } catch (err) {
-      // setError(err.message);
-      // setMessage(''); // Clear success message on error
+      setError(err.message); // Set error message on failure
+      setMessage(""); // Clear success message on error
     }
   };
+
   return (
     <div className="container _login_container">
       <div className="row justify-content-center">
         <div className="col-md-6">
-          <div style={{display:"flex", justifyContent:"space-between"}}>
-            <p style={{fontSize:"35px", color:"#fff", cursor:"pointer"}} onClick={()=> navigate("/Login")}>
-              <i class="bi bi-arrow-left-circle-fill"></i>
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <p
+              style={{ fontSize: "35px", color: "#fff", cursor: "pointer" }}
+              onClick={() => navigate("/Login")}
+            >
+              <i className="bi bi-arrow-left-circle-fill"></i>
             </p>
             <h2 className="">Reset Password</h2>
           </div>
@@ -53,24 +52,10 @@ function ForgotPassword() {
                 />
               </div>
             </div>
-            <div className="mb-3">
-              <label htmlFor="password" className="form-label text-white">
-                New Password
-              </label>
-              <div className="input-group">
-                <input
-                  type="password"
-                  className="form-control"
-                  id="password"
-                  placeholder="Enter your new password"
-                  required
-                />
-              </div>
-            </div>
-            {/* <div className="text-end">
-              <p className="text-white">Forgot Password?</p>
-            </div> */}
+
             {error && <p className="text-danger">{error}</p>}
+            {message && <p className="text-success">{message}</p>}
+
             <div className="d-grid">
               <button type="submit" className="btn btn-primary">
                 Confirm Password

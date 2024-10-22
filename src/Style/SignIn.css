@@ -38,7 +38,7 @@
   border-radius: 8px;
   font-weight: 600;
   font-size: 18px;
-  background-color: #0d6efd;
+  background-color: #0d6dfdd9;
   cursor: pointer;
   transition: 0.3s all;
 }
@@ -50,5 +50,13 @@
 @media (max-width: 500px) {
   ._login_form {
     padding: 10px 4px;
+  }
+  .text-end p {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+  .create_account {
+    font-size: 16px;
+    letter-spacing: 1px;
   }
 }

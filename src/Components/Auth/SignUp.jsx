@@ -16,12 +16,9 @@ function SignUp() {
   const handlecreateAccount = async (e) => {
     e.preventDefault();
     try {
-      await createUserWithEmailAndPassword(
-        auth,
-        "abhishek.jangid@gmail.com",
-        "123456"
-      );
-      alert("Sign-in successful!"); // You can redirect or perform any action
+      await createUserWithEmailAndPassword(auth, email, password);
+      navigate("/");
+      alert("Sign-Up successful!"); // You can redirect or perform any action
     } catch (err) {
       setError(err.message);
     }
@@ -72,12 +69,16 @@ function SignUp() {
               </button>
             </div>
 
-            <div className="">
+            <div className="create_account">
               <p className="text-white text-center pt-3">
                 Already have an Account?{" "}
                 <span
                   onClick={() => navigate("/Login")}
-                  style={{ color: "#0D6EFD", cursor: "pointer", letterSpacing:"1px" }}
+                  style={{
+                    color: "#0D6EFD",
+                    cursor: "pointer",
+                    letterSpacing: "1px",
+                  }}
                 >
                   Login
                 </span>
