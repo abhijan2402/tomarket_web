@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
@@ -24,6 +25,10 @@ function SignIn() {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -54,7 +59,7 @@ function SignIn() {
               </label>
               <div className="input-group">
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Toggle input type based on showPassword state
                   className="form-control"
                   id="password"
                   placeholder="Enter your password"
@@ -62,6 +67,17 @@ function SignIn() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                <span
+                  className="input-group-text"
+                  onClick={togglePasswordVisibility}
+                  style={{ cursor: "pointer", height: "46px" }}
+                >
+                  {showPassword ? (
+                    <i className="bi bi-eye-slash"></i>
+                  ) : (
+                    <i className="bi bi-eye"></i>
+                  )}
+                </span>
               </div>
             </div>
             <div className="text-end">

@@ -5,7 +5,6 @@ import {
   Route,
   Link,
   useLocation,
-  useNavigate,
 } from "react-router-dom";
 import "./App.css";
 
@@ -22,14 +21,10 @@ import { db } from "./firebase";
 import SignIn from "./Components/Auth/SignIn";
 import SignUp from "./Components/Auth/SignUp";
 import ForgotPassword from "./Components/Auth/ForgotPassword";
+import Topbar from "./Components/Topbar/Topbar";
 
 function App() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [Logo, setLogo] = useState([]);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
 
   const getData = async () => {
     let resultArray = [];
@@ -48,24 +43,7 @@ function App() {
   return (
     <Router>
       <div>
-        <header className="navbar">
-          <div className="logo">
-            <Link to="/">
-              <img
-                src={Logo[0]?.value}
-                alt="Description of the image"
-                width="60"
-                height="60"
-                style={{ objectFit: "cover", borderRadius: "5px" }}
-              />
-            </Link>
-          </div>
-          <div className="header_log">
-            <Link to="/Login">
-              <button>Login</button>
-            </Link>
-          </div>
-        </header>
+        <Topbar Logo={Logo}/>
         <AppContent />
       </div>
     </Router>
@@ -93,8 +71,8 @@ function AppContent() {
       </div>
 
       {/* Conditionally render BottomTabBar only if not on certain routes */}
-      {!["/Login", "/signup", "/forgot_password"].includes(
-        location.pathname
+      {!["/login", "/signup", "/forgot_password"].includes(
+        location.pathname.toLowerCase()
       ) && <BottomTabBar />}
     </>
   );

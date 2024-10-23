@@ -58,7 +58,7 @@ function ForgotPassword() {
 
             <div className="d-grid">
               <button type="submit" className="btn btn-primary">
-                Confirm Password
+                Send Email
               </button>
             </div>
           </form>
