@@ -43,7 +43,7 @@ function App() {
   return (
     <Router>
       <div>
-        <Topbar Logo={Logo}/>
+        <Topbar Logo={Logo} />
         <AppContent />
       </div>
     </Router>

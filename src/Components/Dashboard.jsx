@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../Style/Dashboard.css";
 import { collection, getDocs, query } from "firebase/firestore";
 import { db } from "../firebase";
 import Card from "./Cards/Card";
 import SkeletonList from "./SkeletonList/SkeletonList";
+import { AppContext } from "../context/AppContext";
 
 function Dashboard() {
-  const [activeTab, setActiveTab] = useState("new");
+  const [activeTab, setActiveTab] = useState("New");
   const [completedTasks, setCompletedTasks] = useState([]);
   const [dataImg, setDataImg] = useState([]);
   const [taskStates, setTaskStates] = useState({});
   const [loading, setLoading] = useState(true);
+  const { categories } = useContext(AppContext);
 
   const handleCompleteTask = (taskId, youtubeLink) => {
     window.open(youtubeLink, "_blank");
@@ -42,7 +44,6 @@ function Dashboard() {
       [taskId]: { loading: true, claimed: false },
     }));
 
-    // Simulate loading with a timeout
     setTimeout(() => {
       setTaskStates((prev) => ({
         ...prev,
@@ -51,18 +52,17 @@ function Dashboard() {
     }, 3000);
   };
 
-  // Tab Content components
   const renderTasks = () => {
     let filteredTasks = [];
-    if (activeTab === "new") {
+    if (activeTab === "New") {
       filteredTasks = dataImg.filter((task) => task.status === "approved");
     } else if (activeTab === "OnChain") {
       filteredTasks = dataImg.filter(
         (task) => task.status === "approved" && task.type === "OnChain"
       );
-    } else if (activeTab === "Social") {
+    } else if (activeTab === "Socials") {
       filteredTasks = dataImg.filter(
-        (task) => task.type === "Social" && task.status === "approved"
+        (task) => task.type === "Socials" && task.status === "approved"
       );
     }
 
@@ -161,24 +161,14 @@ function Dashboard() {
 
       {/* Tab Navigation */}
       <div className="tabs-container">
-        <button
-          className={activeTab === "new" ? "active" : ""}
-          onClick={() => setActiveTab("new")}
-        >
-          New
-        </button>
-        <button
-          className={activeTab === "OnChain" ? "active" : ""}
-          onClick={() => setActiveTab("OnChain")}
-        >
-          OnChain
-        </button>
-        <button
-          className={activeTab === "Social" ? "active" : ""}
-          onClick={() => setActiveTab("Social")}
-        >
-          Socials
-        </button>
+        {categories?.map((category) => (
+          <button
+            className={activeTab === category.name ? "active" : ""}
+            onClick={() => setActiveTab(category.name)}
+          >
+            {category.name}
+          </button>
+        ))}
       </div>
 
       {/* Tab Content */}
