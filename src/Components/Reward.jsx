@@ -17,11 +17,14 @@ function Reward() {
   const handleSubmit = async () => {
     
     try {
+      if(!tasks.length) {
+        return toast.error('Please add task first')
+      }
       const DataResp = await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: new Date(),
         createdBy: "User",
-        status: "Pending Approval",
+        status: "pending",
         type: "default",
       });
 
