@@ -1,37 +1,58 @@
-import { addDoc, collection } from "firebase/firestore";
 import React, { useState } from "react";
+import { addDoc, collection } from "firebase/firestore";
 import { db } from "../firebase";
 import { ToastContainer, toast } from "react-toastify";
+import TaskForm from "./TaskForm";
+import TaskList from "./TaskList";
 import "react-toastify/dist/ReactToastify.css";
 import "../Style/Reward.css";
 
 function Reward() {
   const [tasks, setTasks] = useState([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [link, setLink] = useState("");
-  const [reward, setReward] = useState("");
-
   const [showForm, setShowForm] = useState(false);
+  const [isGroupTask, setIsGroupTask] = useState(false);
 
-  const handleSubmit = async () => {
-    
+  const addTaskToList = (task) => {
+    setTasks((prev) => [...prev, task]);
+    toast.success("Task added to the list");
+  };
+
+  const removeTask = (index) => {
+    const newTasks = tasks.filter((_, i) => i !== index);
+    setTasks(newTasks);
+    toast.info("Task removed");
+  };
+
+  const handleSubmitGroup = async () => {
     try {
-      if(!tasks.length) {
-        return toast.error('Please add task first')
+      if (!tasks.length) {
+        return toast.error("Please add tasks first");
       }
-      const DataResp = await addDoc(collection(db, "tasks"), {
+
+      await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: new Date(),
         createdBy: "User",
         status: "pending",
-        type: "default",
+        type: "group",
       });
 
-      setTitle("");
-      setDescription("");
-      setLink("");
-      setReward("");
+      setTasks([]);
+      toast.success("Group tasks added successfully!");
+    } catch (error) {
+      toast.error("Error adding document: " + error.message);
+    }
+  };
+
+  const handleSubmitSingle = async (task) => {
+    try {
+      await addDoc(collection(db, "singletasks"), {
+        ...task,
+        createdAt: new Date(),
+        createdBy: "User",
+        status: "pending",
+        type: "single",
+      });
 
       toast.success("Task added successfully!");
     } catch (error) {
@@ -39,29 +60,13 @@ function Reward() {
     }
   };
 
-  const addTask = () => {
-    if(!title || !description || !link || reward) {
-      return toast.error("All filed is required")
+  const handleTabSwitch = (isGroup) => {
+    if (isGroup === isGroupTask) {
+      setShowForm(!showForm);
+    } else {
+      setShowForm(true);
+      setIsGroupTask(isGroup);
     }
-    setTasks((prev) => [
-      ...prev,
-      {
-        title,
-        description,
-        link,
-        reward,
-      },
-    ]);
-    setTitle("");
-    setDescription("");
-    setLink("");
-    setReward("");
-    setShowForm(false);
-  };
-
-  const removeTask = (index) => {
-    const newTasks = tasks.filter((task, i) => i !== index);
-    setTasks(newTasks);
   };
 
   return (
@@ -70,72 +75,38 @@ function Reward() {
       <div className="task_form">
         <h1>Create Task</h1>
 
-        <div>
-          {tasks?.map((task, i) => (
-            <div key={i} className="task_item">
-              <p>{task.title}</p>
-              <div onClick={() => removeTask(i)} className="delete-icon">
-                <i className="bi bi-trash"></i>
-              </div>
-            </div>
-          ))}
-        </div>
+        {/* Task list component with remove functionality */}
+        {tasks.length === 0 ? null : (
+          <TaskList
+            tasks={tasks}
+            removeTask={removeTask}
+            isGroupTask={isGroupTask}
+            handleSubmitGroup={handleSubmitGroup}
+          />
+        )}
+
+        {/* Toggle buttons for task type */}
         <div className="task_buttons">
-          <button onClick={() => setShowForm(true)} className="add-btn">
-            <i class="bi bi-plus-circle"></i> Add
+          <button
+            onClick={() => handleTabSwitch(false)}
+            className={`add-btn ${!isGroupTask && showForm ? "active" : ""}`}
+          >
+            <i className="bi bi-plus-circle"></i> Add Task
           </button>
-          <button onClick={handleSubmit} className="add-btn">
-            Submit
+          <button
+            onClick={() => handleTabSwitch(true)}
+            className={`add-btn ${isGroupTask && showForm ? "active" : ""}`}
+          >
+            <i className="bi bi-plus-circle"></i> Group Task
           </button>
         </div>
 
-        {showForm ? (
-          <div style={{paddingTop: 20}}>
-            <div className="task_form_field">
-              <label htmlFor="title">Title</label>
-              <input
-                type="text"
-                id="title"
-                placeholder="Title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-              />
-            </div>
-            <div className="task_form_field">
-              <label htmlFor="desc">Description</label>
-              <textarea
-                id="desc"
-                placeholder="Description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <div className="task_form_field">
-              <label htmlFor="link">Link</label>
-              <input
-                type="text"
-                id="link"
-                placeholder="Link"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-              />
-            </div>
-            <div className="task_form_field">
-              <label htmlFor="reward">Reward</label>
-              <input
-                type="text"
-                id="reward"
-                placeholder="$5"
-                value={reward}
-                onChange={(e) => setReward(e.target.value)}
-              />
-            </div>
-          
-            <button onClick={addTask} style={{ marginTop: "10px" }}>
-              Add
-            </button>
-          </div>
-        ) : null}
+        {/* Task form (only show when needed) */}
+        {showForm && (
+          <TaskForm
+            addTaskToList={isGroupTask ? addTaskToList : handleSubmitSingle}
+          />
+        )}
       </div>
     </div>
   );

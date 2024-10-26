@@ -6,13 +6,11 @@ import { auth } from "../../firebase"; // Import Firebase authentication
 const Topbar = ({ Logo }) => {
   const [user, setUser] = useState(null);
 
-  // Listen to the Firebase authentication state
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
 
-    // Cleanup the subscription when the component unmounts
     return () => unsubscribe();
   }, []);
 
@@ -42,13 +40,14 @@ const Topbar = ({ Logo }) => {
           </Link>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <div className="header_log">
+          {/* <div className="header_log">
             <Link to="/task">
               <button>
                 Task <i className="bi bi-plus-circle"></i>
               </button>
             </Link>
-          </div>
+          </div> */}
+
           {/* Dropdown on hover */}
           <div className="dropdown">
             <div

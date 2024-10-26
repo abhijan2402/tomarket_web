@@ -57,10 +57,10 @@
   font-weight: 600;
 }
 
-.task_form button:hover {
+/* .task_form button:hover {
   background-color: rgba(187, 185, 185, 0.973);
   color: #000;
-}
+} */
 
 @media (max-width: 500px) {
   .task_form {
@@ -77,27 +77,50 @@
   justify-content: center;
   align-items: center;
   gap: 10px;
-  padding: 10px 40px !important;
+  padding: 10px 30px !important;
 }
 
+.add-btn.active {
+  background-color: #4caf50;
+  color: white;
+}
+
+/* Task List */
+.tasklist_container {
+  border: 1px solid #fff;
+  border-radius: 8px;
+  padding: 0 10px;
+  margin: 20px 0;
+}
+.tasklist_container h6 {
+  color: #bdbaba;
+  font-weight: 700;
+  padding: 10px 4px;
+}
+.submit-group-btn {
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
 
 .task_item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
   color: white;
   margin-top: 20px;
-  border-bottom: 1px solid white;
-  padding-bottom: 15px;
+  background-color: #bdbaba42;
+  border-radius: 8px;
 }
 
-.task_item div {
-  background: red;
+.task_item div i{
+  background: rgb(255, 255, 255);
+  color: red;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 40px;
-  height: 40px;
   border-radius: 5px;
+  font-size: 21px;
 }
 .task_buttons {
   display: grid;
