@@ -73,9 +73,10 @@ function Dashboard() {
             <i className="bi bi-youtube"></i>
             <div className="task-details">
               <h4 className="task-title">
-                {task.title.length > 20
+                {/* {task.title.length > 20
                   ? `${task.title.substring(0, 20)}...`
-                  : task.title}
+                  : task.title} */}
+                {task.title}
               </h4>
               <p className="task-time">+{task.reward} BP</p>
             </div>
@@ -173,7 +174,8 @@ function Dashboard() {
 
       {/* Tab Content */}
       <div className="task-container">
-        {loading ? <SkeletonList /> : renderTasks()}
+        {/* {loading ? <SkeletonList /> : renderTasks()} */}
+        {renderTasks()}
       </div>
     </div>
   );

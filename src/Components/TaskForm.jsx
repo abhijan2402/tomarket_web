@@ -65,7 +65,7 @@ function TaskForm({ addTaskToList }) {
       <div className="task_form_field">
         <label htmlFor="reward">Reward</label>
         <input
-          type="text"
+          type="number"
           id="reward"
           placeholder="$5"
           value={reward}

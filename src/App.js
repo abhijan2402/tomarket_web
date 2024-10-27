@@ -3,7 +3,6 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
   useLocation,
 } from "react-router-dom";
 import "./App.css";
@@ -22,6 +21,7 @@ import SignIn from "./Components/Auth/SignIn";
 import SignUp from "./Components/Auth/SignUp";
 import ForgotPassword from "./Components/Auth/ForgotPassword";
 import Topbar from "./Components/Topbar/Topbar";
+import Profile from "./Components/Profile";
 
 function App() {
   const [Logo, setLogo] = useState([]);
@@ -42,19 +42,22 @@ function App() {
 
   return (
     <Router>
-      <div>
-        <Topbar Logo={Logo} />
-        <AppContent />
-      </div>
+      {/* Wrapping Router here ensures useLocation is in the correct context */}
+      <AppContent Logo={Logo} />
     </Router>
   );
 }
 
-function AppContent() {
+function AppContent({ Logo }) {
   const location = useLocation();
 
   return (
     <>
+      {/* Conditionally render Topbar */}
+      {!["/login", "/signup", "/forgot_password"].includes(
+        location.pathname.toLowerCase()
+      ) && <Topbar Logo={Logo} />}
+
       <div className="content">
         <Routes>
           <Route path="/" element={<Dashboard />} />
@@ -64,6 +67,7 @@ function AppContent() {
           <Route path="/task" element={<Reward />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/frens" element={<Fren />} />
+          <Route path="/profile" element={<Profile/>}/>
           <Route path="/login" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot_password" element={<ForgotPassword />} />

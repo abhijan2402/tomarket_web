@@ -14,7 +14,6 @@ function Reward() {
 
   const addTaskToList = (task) => {
     setTasks((prev) => [...prev, task]);
-    toast.success("Task added to the list");
   };
 
   const removeTask = (index) => {
@@ -38,7 +37,7 @@ function Reward() {
       });
 
       setTasks([]);
-      toast.success("Group tasks added successfully!");
+      toast.success("Taks has submitted for review!");
     } catch (error) {
       toast.error("Error adding document: " + error.message);
     }

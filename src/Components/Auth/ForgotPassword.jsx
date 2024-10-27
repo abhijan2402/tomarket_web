@@ -25,8 +25,8 @@ function ForgotPassword() {
   return (
     <div className="container _login_container">
       <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+        <div className="col-md-6 login_form_container">
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems:"center" }}>
             <p
               style={{ fontSize: "35px", color: "#fff", cursor: "pointer" }}
               onClick={() => navigate("/Login")}
