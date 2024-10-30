@@ -37,7 +37,7 @@
 }
 
 .advert_space_details {
-  margin-top: 45px;
+  margin-top: 40px;
   padding: 0 5px;
 }
 
@@ -59,8 +59,8 @@
 .advert_space_btn1 {
   border: none;
   outline: none;
-  background-color: #000;
-  color: #fff;
+  background-color: #fcc419;
+  color: #000000;
   padding: 8px 18px;
   border-radius: 30px;
   font-weight: 600;
@@ -120,7 +120,7 @@
 @media (max-width: 600px) {
   .advert_space_details {
     margin-top: 00px;
-    padding-top: 40px;
+    padding-top: 25px;
   }
   .advert-container {
     display: flex;
@@ -143,6 +143,7 @@
   .advert-space {
     min-width: 200px;
     flex-shrink: 0;
+    padding: 20px 12px;
   }
 }
 
@@ -269,7 +270,7 @@
 .redirect-icon {
   font-size: 18px;
   color: #fff;
-  background-color: #4e4d4dd2;
+  background-color: #fcc419;
   text-decoration: none;
   font-weight: 600;
   padding: 12px 40px;
@@ -307,7 +308,7 @@
 .tabs-container button {
   padding: 10px 10px;
   border-radius: 4px;
-  font-size: 20px;
+  font-size: 18px;
   letter-spacing: 1px;
   cursor: pointer;
   background-color: #000;

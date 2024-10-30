@@ -11,7 +11,7 @@ const Card = ({ title,card_data }) => {
         <p>{card_data.bonus} BP</p>
       </div>
       <div className="card_space_btn">
-        <button className="card_space_btn1" style={{backgroundColor:card_data.background, color:card_data.color}}>Open</button>
+        <button className="card_space_btn1">Open</button>
         <p className="card_space_card_count">0/2</p>
       </div>
     </div>

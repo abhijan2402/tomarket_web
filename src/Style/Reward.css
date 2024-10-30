@@ -12,6 +12,11 @@
 .task_form h1 {
   color: #fff;
   text-align: center;
+  font-size: 30px;
+  background-color: rgba(153, 154, 156, 0.399);
+  border-radius: 6px;
+  padding: 10px 0;
+  letter-spacing: 1px;
 }
 .task_form_field {
   display: flex;
@@ -46,14 +51,14 @@
 }
 
 .task_form button {
-  background-color: rgba(187, 185, 185, 0.684);
+  background-color: #fcc419;
   padding: 10px 20px;
   width: 100%;
   border-radius: 8px;
   outline: none;
   border: none;
   transition: 0.5s all;
-  color: #fff;
+  color: #000;
   font-weight: 600;
 }
 
@@ -67,6 +72,14 @@
     margin-top: 20px;
     margin-bottom: 20px;
     border: none;
+    padding: 10px 6px;
+  }
+  .task_form button {
+    padding: 10px 10px;
+    font-size: 14px;
+  }
+  .task_buttons {
+    gap: 10px;
   }
 }
 

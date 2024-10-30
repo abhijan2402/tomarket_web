@@ -1,6 +1,7 @@
 .card_title{
     color: #fff;
     padding: 5px 10px;
+    font-size: 20px;
 }
 .card-space {
   background-color: #ffffff1d;
@@ -10,9 +11,8 @@
   /* justify-content: center; */
   border-radius: 8px;
   color: #333;
-  font-size: 16px;
   padding: 15px 8px;
-  margin: 0 10px;
+  margin: 5px 10px;
   margin-bottom: 20px;
 }
 
@@ -25,11 +25,13 @@
 
 .card_space_details h5 {
   font-weight: 700;
+  font-size: 16px;
 }
 
 .card_space_details p {
   color: rgb(160, 158, 158);
-  font-size: 14px;
+  font-size: 12px;
+  color: green;
 }
 
 .card_space_btn {
@@ -41,12 +43,13 @@
 .card_space_btn1 {
   border: none;
   outline: none;
-  background-color: #000;
-  color: #fff;
+  background-color: #fcc419;
+  color: aliceblue;
   padding: 8px 18px;
   border-radius: 30px;
   font-weight: 600;
   letter-spacing: 1px;
+  margin-top: 8px;
 }
 
 .card_space_card_count {
@@ -56,4 +59,5 @@
   font-weight: 600;
   color: rgb(160, 158, 158);
   margin-top: 12px;
+  font-size: 12px;
 }

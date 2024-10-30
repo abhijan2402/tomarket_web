@@ -78,7 +78,20 @@ function Dashboard() {
                   : task.title} */}
                 {task.title}
               </h4>
-              <p className="task-time">+{task.reward} BP</p>
+              <div style={{ display: "flex", gap: "5px" }}>
+                {/* <p
+                  className="task-time"
+                  style={{ color: "red", fontSize: "12px" }}
+                >
+                  +{task.reward} BP
+                </p> */}
+                <p
+                  className="task-time"
+                  style={{ color: "green", fontSize: "12px" }}
+                >
+                  +{task.reward} BP
+                </p>
+              </div>
             </div>
             <div
               style={{
@@ -99,7 +112,7 @@ function Dashboard() {
                     ? "grey"
                     : taskStates[task.id]?.claimed
                     ? "greenyellow"
-                    : "#434343",
+                    : "#fcc419",
                 }}
               >
                 {taskStates[task.id]?.loading ? (
@@ -144,7 +157,7 @@ function Dashboard() {
               </div>
               <div className="advert_space_details">
                 <h5>ForU AI Quest</h5>
-                <p>+999 BP</p>
+                <p style={{ color: "green" }}>+999 BP</p>
               </div>
               <div className="advert_space_btn">
                 <button className="advert_space_btn1">Open</button>
