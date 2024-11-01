@@ -40,13 +40,13 @@ const Topbar = ({ Logo }) => {
           </Link>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          {/* <div className="header_log">
+          <div className="header_log">
             <Link to="/task">
               <button>
-                Task <i className="bi bi-plus-circle"></i>
+                <i className="bi bi-plus-circle"></i> Task
               </button>
             </Link>
-          </div> */}
+          </div>
 
           {/* Dropdown on hover */}
           <div className="dropdown">

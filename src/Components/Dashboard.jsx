@@ -31,6 +31,8 @@ function Dashboard() {
     setLoading(false);
   };
 
+  console.log(dataImg);
+
   useEffect(() => {
     getData();
   }, []);
@@ -143,54 +145,57 @@ function Dashboard() {
   };
 
   return (
-    <div className="dashboard-container">
-      {/* Adverts Section */}
-      <div className="advert-container">
-        {[1, 2, 3].map((item, index) => {
-          return (
-            <div className="advert-space" key={index}>
-              <div className="advert_space_img">
-                <img
-                  src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
-                  alt="img"
-                />
-              </div>
-              <div className="advert_space_details">
-                <h5>ForU AI Quest</h5>
-                <p style={{ color: "green" }}>+999 BP</p>
-              </div>
-              <div className="advert_space_btn">
-                <button className="advert_space_btn1">Open</button>
-                <p className="advert_space_card_count">0/2</p>
-              </div>
-            </div>
-          );
-        })}
-      </div>
+    <>
+      {loading ? (
+        <SkeletonList />
+      ) : (
+        <div className="dashboard-container">
+          {/* Adverts Section */}
+          <div className="advert-container">
+            {[1, 2, 3].map((item, index) => {
+              return (
+                <div className="advert-space" key={index}>
+                  <div className="advert_space_img">
+                    <img
+                      src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
+                      alt="img"
+                    />
+                  </div>
+                  <div className="advert_space_details">
+                    <h5>ForU AI Quest</h5>
+                    <p style={{ color: "green" }}>+999 BP</p>
+                  </div>
+                  <div className="advert_space_btn">
+                    <button className="advert_space_btn1">Open</button>
+                    <p className="advert_space_card_count">0/2</p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-      {/* Cards */}
-      <div>
-        <Card card_data={card_data} />
-      </div>
+          {/* Cards */}
+          <div>
+            <Card card_data={card_data} />
+          </div>
 
-      {/* Tab Navigation */}
-      <div className="tabs-container">
-        {categories?.map((category) => (
-          <button
-            className={activeTab === category.name ? "active" : ""}
-            onClick={() => setActiveTab(category.name)}
-          >
-            {category.name}
-          </button>
-        ))}
-      </div>
+          {/* Tab Navigation */}
+          <div className="tabs-container">
+            {categories?.map((category) => (
+              <button
+                className={activeTab === category.name ? "active" : ""}
+                onClick={() => setActiveTab(category.name)}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
 
-      {/* Tab Content */}
-      <div className="task-container">
-        {/* {loading ? <SkeletonList /> : renderTasks()} */}
-        {renderTasks()}
-      </div>
-    </div>
+          {/* Tab Content */}
+          <div className="task-container">{renderTasks()}</div>
+        </div>
+      )}
+    </>
   );
 }
 

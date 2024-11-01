@@ -28,15 +28,15 @@
 }
 
 .header_log button {
-  padding: 8px 25px;
+  padding: 6px 18px;
   border-radius: 4px;
   letter-spacing: 1px;
   font-weight: 600;
   outline: none;
   border: none;
-  background-color: #686c70ad;
+  background-color: goldenrod;
   cursor: pointer;
-  color: #fff;
+  color: #000;
   transition: 0.5s all;
 }
 

@@ -22,6 +22,7 @@ import SignUp from "./Components/Auth/SignUp";
 import ForgotPassword from "./Components/Auth/ForgotPassword";
 import Topbar from "./Components/Topbar/Topbar";
 import Profile from "./Components/Profile";
+import Home from "./Components/Home";
 
 function App() {
   const [Logo, setLogo] = useState([]);
@@ -60,14 +61,15 @@ function AppContent({ Logo }) {
 
       <div className="content">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/taskdasboard" element={<Dashboard />} />
           <Route path="/daily-task" element={<DailyTask />} />
           <Route path="/completed-task" element={<CompletedTask />} />
           <Route path="/pending-task" element={<PendingTask />} />
           <Route path="/task" element={<Reward />} />
           <Route path="/wallet" element={<Wallet />} />
           <Route path="/frens" element={<Fren />} />
-          <Route path="/profile" element={<Profile/>}/>
+          <Route path="/profile" element={<Profile />} />
           <Route path="/login" element={<SignIn />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot_password" element={<ForgotPassword />} />

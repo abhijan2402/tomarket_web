@@ -4,7 +4,7 @@ import '../../Style/Skeleton.css';
 const SkeletonList = () => {
   return (
     <div className="skeleton-container">
-      {Array(5).fill().map((_, index) => (
+      {Array(8).fill().map((_, index) => (
         <div key={index} className="skeleton-list-item">
           <div className="skeleton-avatar"></div>
           <div className="skeleton-text">

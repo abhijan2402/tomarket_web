@@ -26,8 +26,8 @@ const BottomTabBar = () => {
       </div>
 
       <div
-        className={`tab-item ${activeTab === "task" ? "active" : ""}`}
-        onClick={() => handleTabClick("task")}
+        className={`tab-item ${activeTab === "taskdasboard" ? "active" : ""}`}
+        onClick={() => handleTabClick("taskdasboard")}
       >
         <i className="bi bi-list-task tab-icon"></i>
         <p>Task</p>
