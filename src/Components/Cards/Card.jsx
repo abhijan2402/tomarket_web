@@ -4,15 +4,15 @@ import "./Card.css"
 const Card = ({ title,card_data }) => {
   return (
     <>
-    <h3 className="card_title">{card_data.title}</h3>
+    
     <div className="card-space">
       <div className="card_space_details">
-        <h5>{card_data.desc}</h5>
-        <p>{card_data.bonus} BP</p>
+        <h5>{card_data?.tasks[0].title}</h5>
+        <p>+ {card_data?.tasks[0]?.reward} BP</p>
       </div>
       <div className="card_space_btn">
         <button className="card_space_btn1">Open</button>
-        <p className="card_space_card_count">0/2</p>
+        <p className="card_space_card_count">0/{card_data?.tasks?.length || 0}</p>
       </div>
     </div>
     </>

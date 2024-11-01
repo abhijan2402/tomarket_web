@@ -9,7 +9,8 @@ import { AppContext } from "../context/AppContext";
 function Dashboard() {
   const [activeTab, setActiveTab] = useState("New");
   const [completedTasks, setCompletedTasks] = useState([]);
-  const [dataImg, setDataImg] = useState([]);
+  const [singleTasks, setSingleTasks] = useState([]);
+  const [multiTasks, setMultiTasks] = useState([]);
   const [taskStates, setTaskStates] = useState({});
   const [loading, setLoading] = useState(true);
   const { categories } = useContext(AppContext);
@@ -19,22 +20,43 @@ function Dashboard() {
     setCompletedTasks([...completedTasks, taskId]);
   };
 
-  const getData = async () => {
+  const getSingleTasks = async () => {
+    setLoading(true);
+    let resultArray = [];
+    const q = query(collection(db, "singletasks"));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+      resultArray.push({ id: doc.id, ...doc.data() });
+    });
+
+    console.log(resultArray);
+
+    setSingleTasks(resultArray);
+    setLoading(false);
+  };
+
+  const getMultiTasks = async () => {
     setLoading(true);
     let resultArray = [];
     const q = query(collection(db, "tasks"));
     const querySnapshot = await getDocs(q);
+
     querySnapshot.forEach((doc) => {
       resultArray.push({ id: doc.id, ...doc.data() });
     });
-    setDataImg(resultArray);
+
+    console.log(resultArray);
+
+    setMultiTasks(resultArray);
     setLoading(false);
   };
 
-  console.log(dataImg);
+  console.log(multiTasks);
 
   useEffect(() => {
-    getData();
+    getSingleTasks();
+    getMultiTasks();
   }, []);
 
   const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
@@ -57,14 +79,14 @@ function Dashboard() {
   const renderTasks = () => {
     let filteredTasks = [];
     if (activeTab === "New") {
-      filteredTasks = dataImg.filter((task) => task.status === "approved");
+      filteredTasks = singleTasks.filter((task) => task.status === "approved");
     } else if (activeTab === "OnChain") {
-      filteredTasks = dataImg.filter(
-        (task) => task.status === "approved" && task.type === "OnChain"
+      filteredTasks = singleTasks.filter(
+        (task) => task.status === "approved" && task.category === "OnChain"
       );
     } else if (activeTab === "Socials") {
-      filteredTasks = dataImg.filter(
-        (task) => task.type === "Socials" && task.status === "approved"
+      filteredTasks = singleTasks.filter(
+        (task) => task.category === "Socials" && task.status === "approved"
       );
     }
 

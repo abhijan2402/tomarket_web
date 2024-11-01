@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AppContext } from "../context/AppContext";
 
 function TaskForm({ addTaskToList }) {
   const [title, setTitle] = useState("");
@@ -8,6 +9,7 @@ function TaskForm({ addTaskToList }) {
   const [link, setLink] = useState("");
   const [reward, setReward] = useState("");
   const [category, setCategory] = useState("");
+  const { categories } = useContext(AppContext);
 
   const handleAddTask = () => {
     if (!title || !description || !link || !reward || !category) {
@@ -80,8 +82,9 @@ function TaskForm({ addTaskToList }) {
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="">Select a category</option>
-          <option value="Onchain">Onchain</option>
-          <option value="Socials">Socials</option>
+          {categories?.map((category) => (
+            <option value={category.name}>{category.name}</option>
+          ))}
         </select>
       </div>
       <button onClick={handleAddTask} style={{ marginTop: "10px" }}>

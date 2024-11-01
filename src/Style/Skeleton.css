@@ -39,6 +39,10 @@
 @keyframes shimmer {
   0% {
     background-position: -1000px 0;
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    padding:0 15px ;
   }
   100% {
     background-position: 1000px 0;
