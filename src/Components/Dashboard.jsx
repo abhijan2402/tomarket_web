@@ -9,7 +9,8 @@ import { AppContext } from "../context/AppContext";
 function Dashboard() {
   const [activeTab, setActiveTab] = useState("New");
   const [completedTasks, setCompletedTasks] = useState([]);
-  const [dataImg, setDataImg] = useState([]);
+  const [singleTasks, setSingleTasks] = useState([]);
+  const [multiTasks, setMultiTasks] = useState([]);
   const [taskStates, setTaskStates] = useState({});
   const [loading, setLoading] = useState(true);
   const { categories } = useContext(AppContext);
@@ -19,20 +20,43 @@ function Dashboard() {
     setCompletedTasks([...completedTasks, taskId]);
   };
 
-  const getData = async () => {
+  const getSingleTasks = async () => {
+    setLoading(true);
+    let resultArray = [];
+    const q = query(collection(db, "singletasks"));
+    const querySnapshot = await getDocs(q);
+
+    querySnapshot.forEach((doc) => {
+      resultArray.push({ id: doc.id, ...doc.data() });
+    });
+
+    console.log(resultArray);
+
+    setSingleTasks(resultArray);
+    setLoading(false);
+  };
+
+  const getMultiTasks = async () => {
     setLoading(true);
     let resultArray = [];
     const q = query(collection(db, "tasks"));
     const querySnapshot = await getDocs(q);
+
     querySnapshot.forEach((doc) => {
       resultArray.push({ id: doc.id, ...doc.data() });
     });
-    setDataImg(resultArray);
+
+    console.log(resultArray);
+
+    setMultiTasks(resultArray);
     setLoading(false);
   };
 
+  console.log(multiTasks);
+
   useEffect(() => {
-    getData();
+    getSingleTasks();
+    getMultiTasks();
   }, []);
 
   const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
@@ -55,14 +79,14 @@ function Dashboard() {
   const renderTasks = () => {
     let filteredTasks = [];
     if (activeTab === "New") {
-      filteredTasks = dataImg.filter((task) => task.status === "approved");
+      filteredTasks = singleTasks.filter((task) => task.status === "approved");
     } else if (activeTab === "OnChain") {
-      filteredTasks = dataImg.filter(
-        (task) => task.status === "approved" && task.type === "OnChain"
+      filteredTasks = singleTasks.filter(
+        (task) => task.status === "approved" && task.category === "OnChain"
       );
     } else if (activeTab === "Socials") {
-      filteredTasks = dataImg.filter(
-        (task) => task.type === "Socials" && task.status === "approved"
+      filteredTasks = singleTasks.filter(
+        (task) => task.category === "Socials" && task.status === "approved"
       );
     }
 
@@ -132,23 +156,13 @@ function Dashboard() {
     );
   };
 
-  const card_data = {
-    id: 1,
-    title: "Weekly",
-    desc: "Earn for checking socials",
-    bonus: "+0/540",
-    card_bg: "#000",
-    background: "#fff",
-    color: "#000",
-  };
-
-  return (
-    <div className="dashboard-container">
-      {/* Adverts Section */}
+  const renderMultiTasks = () => {
+    return (
       <div className="advert-container">
-        {[1, 2, 3].map((item, index) => {
-          return (
-            <div className="advert-space" key={index}>
+        {multiTasks
+          ?.filter((task) => task.status === "approved")
+          .map((item) => (
+            <div className="advert-space" key={item.id}>
               <div className="advert_space_img">
                 <img
                   src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
@@ -156,24 +170,48 @@ function Dashboard() {
                 />
               </div>
               <div className="advert_space_details">
-                <h5>ForU AI Quest</h5>
-                <p style={{ color: "green" }}>+999 BP</p>
+                <h5>{item?.tasks[0].title}</h5>
+                <p style={{ color: "green" }}>+{item?.tasks[0].reward} BP</p>
               </div>
               <div className="advert_space_btn">
                 <button className="advert_space_btn1">Open</button>
-                <p className="advert_space_card_count">0/2</p>
+                <p className="advert_space_card_count">
+                  0/{item?.tasks?.length || 0}
+                </p>
               </div>
             </div>
-          );
-        })}
+          ))}
       </div>
+    );
+  };
 
-      {/* Cards */}
+  const renderWeeklyTasks = () => {
+    return multiTasks?.filter(
+      (task) => task.status === "approved" && task.category === "Weekly"
+    )?.length ? (
       <div>
-        <Card card_data={card_data} />
+        <h3 className="card_title ">Weekly</h3>
+        <div className="weekly-task">
+          {multiTasks
+            ?.filter(
+              (task) => task.status === "approved" && task.category === "Weekly"
+            )
+            .map((item) => (
+              <Card key={item?.id} card_data={item} />
+            ))}
+        </div>
       </div>
+    ) : null;
+  };
 
-      {/* Tab Navigation */}
+
+
+  return (
+    <div className="dashboard-container">
+      {renderMultiTasks()}
+
+      {renderWeeklyTasks()}
+
       <div className="tabs-container">
         {categories?.map((category) => (
           <button
@@ -184,11 +222,8 @@ function Dashboard() {
           </button>
         ))}
       </div>
-
-      {/* Tab Content */}
       <div className="task-container">
-        {/* {loading ? <SkeletonList /> : renderTasks()} */}
-        {renderTasks()}
+        {loading ? <SkeletonList /> : renderTasks()}
       </div>
     </div>
   );

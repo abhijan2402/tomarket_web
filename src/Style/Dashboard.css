@@ -16,6 +16,19 @@
   margin-bottom: 20px;
 }
 
+.weekly-task {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 10px;
+  overflow-x: auto;
+}
+
+.weekly-task::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, and Opera */
+}
+
 .advert-space {
   background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
   width: 100%;
@@ -144,6 +157,10 @@
     min-width: 200px;
     flex-shrink: 0;
     padding: 20px 12px;
+  }
+
+  .card-space {
+    min-width: 300px;
   }
 }
 
