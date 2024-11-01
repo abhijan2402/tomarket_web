@@ -29,9 +29,6 @@ function Dashboard() {
     querySnapshot.forEach((doc) => {
       resultArray.push({ id: doc.id, ...doc.data() });
     });
-
-    console.log(resultArray);
-
     setSingleTasks(resultArray);
     setLoading(false);
   };
@@ -45,14 +42,11 @@ function Dashboard() {
     querySnapshot.forEach((doc) => {
       resultArray.push({ id: doc.id, ...doc.data() });
     });
-
-    console.log(resultArray);
-
     setMultiTasks(resultArray);
     setLoading(false);
   };
 
-  console.log(multiTasks);
+  console.log("multitask", multiTasks);
 
   useEffect(() => {
     getSingleTasks();
@@ -166,6 +160,11 @@ function Dashboard() {
     color: "#000",
   };
 
+  // Combine all approved tasks into a single array
+  const approvedTasks = multiTasks
+    .filter((taskGroup) => taskGroup.status === "approved")
+    .flatMap((taskGroup) => taskGroup.tasks);
+
   return (
     <>
       {loading ? (
@@ -174,9 +173,9 @@ function Dashboard() {
         <div className="dashboard-container">
           {/* Adverts Section */}
           <div className="advert-container">
-            {[1, 2, 3].map((item, index) => {
-              return (
-                <div className="advert-space" key={index}>
+            {approvedTasks.length > 0 ? (
+              approvedTasks.map((task, index) => (
+                <div className="advert-space" key={task?.id || index}>
                   <div className="advert_space_img">
                     <img
                       src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
@@ -184,16 +183,35 @@ function Dashboard() {
                     />
                   </div>
                   <div className="advert_space_details">
-                    <h5>ForU AI Quest</h5>
-                    <p style={{ color: "green" }}>+999 BP</p>
+                    <h5>{task?.title || "Untitled Task"}</h5>
+                    <p style={{ color: "green" }}>{`+${
+                      task?.reward || 0
+                    } BP`}</p>
+                    <p>{task?.description || "No description available"}</p>
                   </div>
                   <div className="advert_space_btn">
-                    <button className="advert_space_btn1">Open</button>
-                    <p className="advert_space_card_count">0/2</p>
+                    {task?.link ? (
+                      <a
+                        href={task.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <button className="advert_space_btn1">Open</button>
+                      </a>
+                    ) : (
+                      <button className="advert_space_btn1" disabled>
+                        No Link
+                      </button>
+                    )}
+                    <p className="advert_space_card_count">{`${index + 1}/${
+                      approvedTasks.length
+                    }`}</p>
                   </div>
                 </div>
-              );
-            })}
+              ))
+            ) : (
+              <p className="no_grp_task">No Group tasks available.</p>
+            )}
           </div>
 
           {/* Cards */}

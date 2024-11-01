@@ -32,9 +32,9 @@
   width: 100%;
 }
 
-.skeleton-container {
+/* .skeleton-container {
   animation: shimmer 1.5s infinite linear;
-}
+} */
 
 @keyframes shimmer {
   0% {
