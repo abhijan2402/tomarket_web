@@ -209,9 +209,7 @@ function Dashboard() {
                   </div>
                 </div>
               ))
-            ) : (
-              <p className="no_grp_task">No Group tasks available.</p>
-            )}
+            ) : null}
           </div>
 
           {/* Cards */}

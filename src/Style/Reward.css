@@ -50,16 +50,30 @@
   border: none;
 }
 
+.task_buttons div{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap:8px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+}
+
 .task_form button {
   background-color: #fcc419;
   padding: 10px 20px;
-  width: 100%;
-  border-radius: 8px;
+  width: 80%;
+  border-radius: 16px;
   outline: none;
   border: none;
   transition: 0.5s all;
   color: #000;
   font-weight: 600;
+}
+
+.task_form button i{
+  font-size: 30px;
 }
 
 /* .task_form button:hover {
@@ -75,7 +89,7 @@
     padding: 10px 6px;
   }
   .task_form button {
-    padding: 10px 10px;
+    padding: 0px 10px;
     font-size: 14px;
   }
   .task_buttons {
@@ -84,8 +98,7 @@
 }
 
 .add-btn {
-  margin: auto;
-  margin-top: 20px;
+  /* margin-top: 20px; */
   display: flex;
   justify-content: center;
   align-items: center;

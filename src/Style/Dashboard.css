@@ -142,6 +142,9 @@
 }
 
 @media (max-width: 600px) {
+  .dashboard-container{
+    margin: 0 8px;
+  }
   .advert_space_details {
     margin-top: 00px;
     padding-top: 25px;
@@ -167,7 +170,7 @@
   .advert-space {
     min-width: 200px;
     flex-shrink: 0;
-    padding: 20px 12px;
+    padding: 20px 10px;
   }
 
   .card-space {

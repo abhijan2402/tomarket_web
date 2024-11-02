@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "../../firebase"; // Import Firebase authentication
 
 const Topbar = ({ Logo }) => {
   const [user, setUser] = useState(null);
+  const location = useLocation(); // Get location object
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -32,7 +33,7 @@ const Topbar = ({ Logo }) => {
           <Link to="/">
             <img
               src={Logo[0]?.value}
-              alt="Description of the image"
+              alt="Description of the logo"
               width="60"
               height="60"
               style={{ objectFit: "cover", borderRadius: "5px" }}
@@ -40,13 +41,15 @@ const Topbar = ({ Logo }) => {
           </Link>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          <div className="header_log">
-            <Link to="/task">
-              <button>
-                <i className="bi bi-plus-circle"></i> Task
-              </button>
-            </Link>
-          </div>
+          {location.pathname !== "/" && (
+            <div className="header_log">
+              <Link to="/task">
+                <button>
+                  <i className="bi bi-plus-circle"></i> Task
+                </button>
+              </Link>
+            </div>
+          )}
 
           {/* Dropdown on hover */}
           <div className="dropdown">
@@ -69,7 +72,7 @@ const Topbar = ({ Logo }) => {
                     Login{" "}
                     <i
                       style={{ marginLeft: "6px" }}
-                      class="bi bi-box-arrow-in-left"
+                      className="bi bi-box-arrow-in-left"
                     ></i>
                   </Link>
                 </li>
@@ -79,7 +82,7 @@ const Topbar = ({ Logo }) => {
                     Log Out{" "}
                     <i
                       style={{ marginLeft: "6px" }}
-                      class="bi bi-box-arrow-right"
+                      className="bi bi-box-arrow-right"
                     ></i>
                   </button>
                 </li>
