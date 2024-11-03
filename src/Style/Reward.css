@@ -56,14 +56,14 @@
   align-items: center;
   gap:8px;
   color: #fff;
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 .task_form button {
   background-color: #fcc419;
   padding: 10px 20px;
-  width: 80%;
+  width: 100%;
   border-radius: 16px;
   outline: none;
   border: none;
@@ -73,7 +73,7 @@
 }
 
 .task_form button i{
-  font-size: 30px;
+  font-size: 25px;
 }
 
 /* .task_form button:hover {

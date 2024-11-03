@@ -143,7 +143,7 @@ function Reward() {
       <CustomPopup show={showPopup} onClose={() => setShowPopup(false)}>
         {popupType === "single" ? (
           <>
-            <h6>Single Task Information</h6>
+            <h6>Add Task Information</h6>
             <p>Quickly add a personal task for individual tracking.</p>
           </>
         ) : popupType === "group" ? (

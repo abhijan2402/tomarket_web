@@ -1,6 +1,5 @@
 .main_img_container {
   padding: 8px 8px;
-
 }
 .main_img_container img {
   width: 100%;
@@ -8,18 +7,20 @@
   padding: 0 4px;
 }
 
-.home_title {
-  margin-top: 8px;
-  padding: 8px 6px;
+.home_content_contatiner {
+  padding: 8px;
+  /* margin: 10px; */
 }
-.home_title h3 {
+
+.home_content_contatiner h3 {
   color: #fff;
   text-align: center;
 }
 
-.home_desc {
+.home_content_contatiner p {
   color: #fff;
-  padding: 8px 8px;
+  padding: 0 4px;
+  text-align: center;
 }
 
 .img_collage {
@@ -32,16 +33,23 @@
 .img_collage img {
   width: 48%;
   border-radius: 6px;
-
 }
 
 .home_redirection_btn {
+  background-color: #ffffff19;
+  border-radius: 8px;
   color: #fff;
   text-align: center;
   font-size: 18px;
   margin-top: 20px;
   margin-bottom: 10px;
-  padding: 10px 0;
+  margin-left: 10px;
+  margin-right: 10px;
+  padding: 10px 10px;
   border-radius: 8px;
   cursor: pointer;
+  transition: 0.4s all;
+}
+.home_redirection_btn:hover {
+  background-color: #ffffff2a;
 }
