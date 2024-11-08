@@ -34,14 +34,14 @@ const Topbar = ({ Logo }) => {
             <img
               src={Logo[0]?.value}
               alt="Description of the logo"
-              width="60"
-              height="60"
+              width="50"
+              height="50"
               style={{ objectFit: "cover", borderRadius: "5px" }}
             />
           </Link>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          {location.pathname !== "/" && (
+          {!["/", "/Frens", "/Wallet", "/task"].includes(location.pathname) && (
             <div className="header_log">
               <Link to="/task">
                 <button>

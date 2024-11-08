@@ -105,7 +105,7 @@ function Dashboard() {
                 </p> */}
                 <p
                   className="task-time"
-                  style={{ color: "green", fontSize: "12px" }}
+                  style={{ color: "greenyellow", fontSize: "12px" }}
                 >
                   +{task.reward} BP
                 </p>
@@ -130,7 +130,7 @@ function Dashboard() {
                     ? "grey"
                     : taskStates[task.id]?.claimed
                     ? "greenyellow"
-                    : "#fcc419",
+                    : "#FCC419",
                 }}
               >
                 {taskStates[task.id]?.loading ? (
@@ -173,43 +173,43 @@ function Dashboard() {
         <div className="dashboard-container">
           {/* Adverts Section */}
           <div className="advert-container">
-            {approvedTasks.length > 0 ? (
-              approvedTasks.map((task, index) => (
-                <div className="advert-space" key={task?.id || index}>
-                  <div className="advert_space_img">
-                    <img
-                      src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
-                      alt="img"
-                    />
+            {approvedTasks.length > 0
+              ? approvedTasks.map((task, index) => (
+                  <div className="advert-space" key={task?.id || index}>
+                    <div className="advert_space_img">
+                      <img
+                        src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
+                        alt="img"
+                      />
+                    </div>
+                    <div className="advert_space_details">
+                      <h5>{task?.title || "Untitled Task"}</h5>
+                      <p style={{ color: "green" }}>{`+${
+                        task?.reward || 0
+                      } BP`}</p>
+                      <p>{task?.description || "No description available"}</p>
+                    </div>
+                    <div className="advert_space_btn">
+                      {task?.link ? (
+                        <a
+                          href={task.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <button className="advert_space_btn1">Open</button>
+                        </a>
+                      ) : (
+                        <button className="advert_space_btn1" disabled>
+                          No Link
+                        </button>
+                      )}
+                      <p className="advert_space_card_count">{`${index + 1}/${
+                        approvedTasks.length
+                      }`}</p>
+                    </div>
                   </div>
-                  <div className="advert_space_details">
-                    <h5>{task?.title || "Untitled Task"}</h5>
-                    <p style={{ color: "green" }}>{`+${
-                      task?.reward || 0
-                    } BP`}</p>
-                    <p>{task?.description || "No description available"}</p>
-                  </div>
-                  <div className="advert_space_btn">
-                    {task?.link ? (
-                      <a
-                        href={task.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        <button className="advert_space_btn1">Open</button>
-                      </a>
-                    ) : (
-                      <button className="advert_space_btn1" disabled>
-                        No Link
-                      </button>
-                    )}
-                    <p className="advert_space_card_count">{`${index + 1}/${
-                      approvedTasks.length
-                    }`}</p>
-                  </div>
-                </div>
-              ))
-            ) : null}
+                ))
+              : null}
           </div>
 
           {/* Cards */}

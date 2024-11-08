@@ -13,7 +13,8 @@ function Reward() {
   const [showForm, setShowForm] = useState(false);
   const [isGroupTask, setIsGroupTask] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [popupType, setPopupType] = useState(""); // New state to determine popup type
+  const [popupType, setPopupType] = useState("");
+  const [popupMsgType, setPopupMsgType] = useState("");
 
   const addTaskToList = (task) => {
     setTasks((prev) => [...prev, task]);
@@ -73,6 +74,9 @@ function Reward() {
 
   const handleShowPopup = (type) => {
     setPopupType(type);
+  };
+  const handleShowMsgPopup = (type) => {
+    setPopupMsgType(type);
     setShowPopup(true);
   };
 
@@ -106,7 +110,7 @@ function Reward() {
               <span>
                 <i
                   className="bi bi-exclamation-circle-fill"
-                  onClick={() => handleShowPopup("single")} // Show single task popup
+                  onClick={() => handleShowMsgPopup("single")} // Show single task popup
                   style={{ cursor: "pointer" }}
                 ></i>
               </span>
@@ -117,14 +121,17 @@ function Reward() {
               onClick={() => handleTabSwitch(true)}
               className={`add-btn ${isGroupTask && showForm ? "active" : ""}`}
             >
-              <i className="bi bi-collection-fill"></i>
+              <i
+                className="bi bi-collection-fill"
+                onClick={() => handleShowPopup("group")}
+              ></i>
             </button>
             <p style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               Group Task{" "}
               <span>
                 <i
                   className="bi bi-exclamation-circle-fill"
-                  onClick={() => handleShowPopup("group")} // Show group task popup
+                  onClick={() => handleShowMsgPopup("group")}
                   style={{ cursor: "pointer" }}
                 ></i>
               </span>
@@ -141,12 +148,12 @@ function Reward() {
 
       {/* Custom Popup */}
       <CustomPopup show={showPopup} onClose={() => setShowPopup(false)}>
-        {popupType === "single" ? (
+        {popupMsgType === "single" ? (
           <>
             <h6>Add Task Information</h6>
             <p>Quickly add a personal task for individual tracking.</p>
           </>
-        ) : popupType === "group" ? (
+        ) : popupMsgType === "group" ? (
           <>
             <h6>Group Task Information</h6>
             <p>
