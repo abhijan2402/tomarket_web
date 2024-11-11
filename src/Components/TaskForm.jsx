@@ -9,10 +9,19 @@ function TaskForm({ addTaskToList }) {
   const [link, setLink] = useState("");
   const [reward, setReward] = useState("");
   const [category, setCategory] = useState("");
+  const [selectedPlatform, setSelectedPlatform] = useState("");
+  const [customLogo, setCustomLogo] = useState(null); // For custom image upload
   const { categories } = useContext(AppContext);
 
   const handleAddTask = () => {
-    if (!title || !description || !link || !reward || !category) {
+    if (
+      !title ||
+      !description ||
+      !link ||
+      !reward ||
+      !category ||
+      !selectedPlatform
+    ) {
       return toast.error("All fields are required");
     }
 
@@ -23,6 +32,8 @@ function TaskForm({ addTaskToList }) {
       link,
       reward,
       category,
+      platformLogo:
+        selectedPlatform === "Other" ? customLogo : selectedPlatform,
     });
 
     // Reset form fields
@@ -31,6 +42,22 @@ function TaskForm({ addTaskToList }) {
     setLink("");
     setReward("");
     setCategory("");
+    setSelectedPlatform("");
+    setCustomLogo(null);
+  };
+
+  const handlePlatformChange = (e) => {
+    const platform = e.target.value;
+    setSelectedPlatform(platform);
+    if (platform !== "Other") {
+      setCustomLogo(null); // Reset custom logo if not "Other"
+    }
+  };
+
+  const handleImageChange = (e) => {
+    if (e.target.files.length > 0) {
+      setCustomLogo(URL.createObjectURL(e.target.files[0]));
+    }
   };
 
   return (
@@ -82,11 +109,52 @@ function TaskForm({ addTaskToList }) {
           onChange={(e) => setCategory(e.target.value)}
         >
           <option value="">Select a category</option>
-          {categories?.map((category) => (
-            <option value={category.name}>{category.name}</option>
+          {categories?.map((category, index) => (
+            <option key={index} value={category.name}>
+              {category.name}
+            </option>
           ))}
         </select>
       </div>
+
+      <div className="task_form_field">
+        <label htmlFor="platform">Task Logo</label>
+        <select
+          id="platform"
+          value={selectedPlatform}
+          onChange={handlePlatformChange}
+        >
+          <option value="">Select a logo</option>
+          <option value="Facebook">Facebook</option>
+          <option value="YouTube">YouTube</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Twitter">Twitter</option>
+          <option value="Reddit">Reddit</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      {selectedPlatform === "Other" && (
+        <div className="task_form_field">
+          <label htmlFor="customLogo">Upload Custom Logo</label>
+          <div className="file-upload">
+            <input
+              type="file"
+              id="customLogo"
+              accept="image/*"
+              onChange={handleImageChange}
+              style={{ display: "none" }}
+            />
+            <label htmlFor="customLogo" className="file-upload-label">
+              Choose File
+            </label>
+            <span className="upload-icon">
+              <i class="bi bi-upload"></i>
+            </span>
+          </div>
+        </div>
+      )}
+
       <button onClick={handleAddTask} style={{ marginTop: "10px" }}>
         Add Task
       </button>

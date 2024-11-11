@@ -1,10 +1,6 @@
+// src/App.js
 import React, { useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import "./App.css";
 
 import Dashboard from "./Components/Dashboard";
@@ -23,6 +19,9 @@ import ForgotPassword from "./Components/Auth/ForgotPassword";
 import Topbar from "./Components/Topbar/Topbar";
 import Profile from "./Components/Profile";
 import Home from "./Components/Home";
+import { AuthProvider, useAuth } from "./context/AuthContext"; // import AuthProvider and useAuth
+import PrivateRoute from "./Components/PrivateRoute";
+import LandingPage from "./Components/LandingPage";
 
 function App() {
   const [Logo, setLogo] = useState([]);
@@ -42,44 +41,60 @@ function App() {
   }, []);
 
   return (
-    <Router>
-      {/* Wrapping Router here ensures useLocation is in the correct context */}
-      <AppContent Logo={Logo} />
-    </Router>
+    <AuthProvider>
+      <Router>
+        <AppContent Logo={Logo} />
+      </Router>
+    </AuthProvider>
   );
 }
 
 function AppContent({ Logo }) {
   const location = useLocation();
+  const { user, loading } = useAuth(); // Access user and loading states
 
+  // Debugging
+  console.log("Current user:", user);
+  console.log("Loading state:", loading);
+  
   return (
     <>
-      {/* Conditionally render Topbar */}
-      {!["/login", "/signup", "/forgot_password"].includes(
-        location.pathname.toLowerCase()
-      ) && <Topbar Logo={Logo} />}
+      {!loading && (
+        <>
+          {!["/login", "/signup", "/forgot_password"].includes(
+            location.pathname.toLowerCase()
+          ) && <Topbar Logo={Logo} />}
 
-      <div className="content">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/taskdasboard" element={<Dashboard />} />
-          <Route path="/daily-task" element={<DailyTask />} />
-          <Route path="/completed-task" element={<CompletedTask />} />
-          <Route path="/pending-task" element={<PendingTask />} />
-          <Route path="/task" element={<Reward />} />
-          <Route path="/wallet" element={<Wallet />} />
-          <Route path="/frens" element={<Fren />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/login" element={<SignIn />} />
-          <Route path="/signup" element={<SignUp />} />
-          <Route path="/forgot_password" element={<ForgotPassword />} />
-        </Routes>
-      </div>
+          <div className="content">
+            <Routes>
+              <Route path="/home" element={<Home />} />
+              <Route path="/login" element={<SignIn />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot_password" element={<ForgotPassword />} />
 
-      {/* Conditionally render BottomTabBar only if not on certain routes */}
-      {!["/login", "/signup", "/forgot_password"].includes(
-        location.pathname.toLowerCase()
-      ) && <BottomTabBar />}
+              <Route element={<PrivateRoute />}>
+                {/* Protected Routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/taskdashboard" element={<Dashboard />} />
+                <Route path="/daily-task" element={<DailyTask />} />
+                <Route path="/completed-task" element={<CompletedTask />} />
+                <Route path="/pending-task" element={<PendingTask />} />
+                <Route path="/task" element={<Reward />} />
+                <Route path="/wallet" element={<Wallet />} />
+                <Route path="/frens" element={<Fren />} />
+                <Route path="/profile" element={<Profile />} />
+              </Route>
+
+              {/* Catch-all route for unauthenticated users */}
+              <Route path="*" element={user ? <Navigate to="/" /> : <Navigate to="/home" />} />
+            </Routes>
+          </div>
+
+          {!["/login", "/signup", "/forgot_password", "/home"].includes(
+            location.pathname.toLowerCase()
+          ) && <BottomTabBar />}
+        </>
+      )}
     </>
   );
 }

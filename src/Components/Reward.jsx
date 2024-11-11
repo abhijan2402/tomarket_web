@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
 import { db } from "../firebase";
+import { getAuth } from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import TaskForm from "./TaskForm";
 import TaskList from "./TaskList";
 import CustomPopup from "./Popups/CustomPopup";
 import "react-toastify/dist/ReactToastify.css";
 import "../Style/Reward.css";
+import { useAuth } from "../context/AuthContext";
 
 function Reward() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [isGroupTask, setIsGroupTask] = useState(false);
@@ -47,14 +50,33 @@ function Reward() {
     }
   };
 
+  // Handle submitting a single task
   const handleSubmitSingle = async (task) => {
     try {
-      await addDoc(collection(db, "singletasks"), {
+      if (!user) {
+        return toast.error("User is not logged in");
+      }
+
+      // Add task to "singletasks" collection
+      const taskRef = await addDoc(collection(db, "singletasks"), {
         ...task,
         createdAt: new Date(),
-        createdBy: "User",
+        createdBy: user.uid,
         status: "pending",
         type: "single",
+      });
+
+      // Track User's progress in UserTasks collection
+      await addDoc(collection(db, "UserTasks"), {
+        UserTaskId: `UT${Date.now()}`, // Generate a unique UserTaskId
+        UserId: user.uid, // Use logged-in user's ID
+        TaskId: taskRef.id, // Reference to the TaskId from singletasks
+        UserObject: {
+          name: user.displayName || "John Doe", // Get user name from auth or use default
+          role: "Designer", // Replace with user role if available
+        },
+        CurrentStatus: "pending", // Initial status when task is assigned
+        isProof: false,
       });
 
       toast.success("Task added successfully!");

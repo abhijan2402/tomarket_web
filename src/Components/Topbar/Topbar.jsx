@@ -1,25 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "../../firebase"; // Import Firebase authentication
+import { auth } from "../../firebase";
 
 const Topbar = ({ Logo }) => {
   const [user, setUser] = useState(null);
-  const location = useLocation(); // Get location object
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
     });
-
     return () => unsubscribe();
   }, []);
 
-  // Handle logout
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        console.log("User logged out successfully");
+        alert("You have been logged out successfully.");
+        navigate("/home");
       })
       .catch((error) => {
         console.error("Error logging out:", error);
@@ -33,7 +33,7 @@ const Topbar = ({ Logo }) => {
           <Link to="/">
             <img
               src={Logo[0]?.value}
-              alt="Description of the logo"
+              alt="Logo"
               width="50"
               height="50"
               style={{ objectFit: "cover", borderRadius: "5px" }}
@@ -41,7 +41,9 @@ const Topbar = ({ Logo }) => {
           </Link>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          {!["/", "/Frens", "/Wallet", "/task"].includes(location.pathname) && (
+          {!["/", "/Frens", "/Wallet", "/task", "/profile", "/home"].includes(
+            location.pathname
+          ) && (
             <div className="header_log">
               <Link to="/task">
                 <button>
@@ -51,21 +53,23 @@ const Topbar = ({ Logo }) => {
             </div>
           )}
 
-          {/* Dropdown on hover */}
+          {/* Dropdown on click */}
           <div className="dropdown">
-            <div
-              className="three-dots dropdown-toggle"
+            <button
+              className="btn btn-secondary dropdown-toggle"
+              type="button"
+              id="dropdownMenuButton"
               data-bs-toggle="dropdown"
+              aria-expanded="false"
             >
               <i className="bi bi-three-dots-vertical"></i>
-            </div>
-            <ul className="dropdown-menu">
+            </button>
+            <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
               <li>
                 <Link className="dropdown-item" to="/profile">
                   Profile
                 </Link>
               </li>
-              {/* Conditionally render Login or Logout based on the user's state */}
               {!user ? (
                 <li>
                   <Link className="dropdown-item" to="/login">

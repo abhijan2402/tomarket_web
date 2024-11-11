@@ -1,38 +1,43 @@
 import { signInWithEmailAndPassword } from "firebase/auth";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { auth } from "../../firebase";
 import "../../Style/SignIn.css";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap"; // Import Spinner for loader
+import { useAuth } from "../../context/AuthContext"; // Import Auth Context
 
 function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // State for managing loader
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [user, navigate]);
 
   const handleSignIn = async (e) => {
     e.preventDefault();
-    setError(""); // Clear previous errors
-    setLoading(true); // Show loader
+    setError("");
+    setLoading(true);
 
     try {
-      const response = await signInWithEmailAndPassword(auth, email, password);
-      console.log(response, "RESP");
-      setLoading(false); // Hide loader
+      await signInWithEmailAndPassword(auth, email, password);
+      setLoading(false);
       navigate("/");
-      alert("Sign-In successful! Welcome back!");
     } catch (err) {
-      setLoading(false); // Hide loader
+      setLoading(false);
       const errorMessage = getFriendlyErrorMessage(err.code);
       setError(errorMessage);
     }
   };
 
-  // Helper function to map Firebase errors to user-friendly messages
   const getFriendlyErrorMessage = (errorCode) => {
     switch (errorCode) {
       case "auth/user-not-found":
@@ -58,7 +63,7 @@ function SignIn() {
 
   return (
     <div className="container _login_container">
-      {loading === true ? (
+      {loading ? (
         <div className="full-screen-loader">
           <Spinner animation="border" role="status" className="spinner-lg">
             <span className="visually-hidden" style={{ color: "#fff" }}>
@@ -70,6 +75,9 @@ function SignIn() {
       ) : (
         <div className="row justify-content-center">
           <div className="col-md-6 login_form_container">
+            <p className="form_cancle">
+              <i class="bi bi-x-square" onClick={() => navigate("/home")}></i>
+            </p>
             <h2 className="text-center">Sign In</h2>
             <form className="_login_form" onSubmit={handleSignIn}>
               <div className="mb-3">
@@ -94,7 +102,7 @@ function SignIn() {
                 </label>
                 <div className="input-group">
                   <input
-                    type={showPassword ? "text" : "password"} // Toggle input type based on showPassword state
+                    type={showPassword ? "text" : "password"}
                     className="form-control"
                     id="password"
                     placeholder="Enter your password"
@@ -125,7 +133,6 @@ function SignIn() {
                 </p>
               </div>
 
-              {/* Display error message if exists */}
               {error && <p className="text-danger">{error}</p>}
 
               <div className="d-grid">

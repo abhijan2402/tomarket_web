@@ -15,6 +15,18 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const { categories } = useContext(AppContext);
 
+  // Icon Mapping based on platform
+  const platformIcons = {
+    youtube: "bi-youtube",
+    twitter: "bi-twitter",
+    instagram: "bi-instagram",
+    facebook: "bi-facebook",
+    reddit: "bi bi-reddit",
+  };
+
+  // Default icon if `platformLogo` is not specified
+  const defaultIcon = "bi bi-card-checklist";
+
   const handleCompleteTask = (taskId, youtubeLink) => {
     window.open(youtubeLink, "_blank");
     setCompletedTasks([...completedTasks, taskId]);
@@ -46,7 +58,7 @@ function Dashboard() {
     setLoading(false);
   };
 
-  console.log("multitask", multiTasks);
+  console.log("singletask", singleTasks);
 
   useEffect(() => {
     getSingleTasks();
@@ -70,6 +82,7 @@ function Dashboard() {
     }, 3000);
   };
 
+  // Rendering the Task List
   const renderTasks = () => {
     let filteredTasks = [];
     if (activeTab === "New") {
@@ -88,7 +101,11 @@ function Dashboard() {
       <ul className="task-list">
         {filteredTasks.map((task) => (
           <li key={task.id} className="task-list-item">
-            <i className="bi bi-youtube"></i>
+            <i
+              className={`bi ${
+                platformIcons[task.platformLogo?.toLowerCase()] || defaultIcon
+              }`}
+            ></i>
             <div className="task-details">
               <h4 className="task-title">
                 {/* {task.title.length > 20
@@ -131,6 +148,8 @@ function Dashboard() {
                     : taskStates[task.id]?.claimed
                     ? "greenyellow"
                     : "#FCC419",
+
+                  color: "#000",
                 }}
               >
                 {taskStates[task.id]?.loading ? (

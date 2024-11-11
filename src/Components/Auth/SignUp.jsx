@@ -79,6 +79,9 @@ function SignUp() {
       ) : (
         <div className="row justify-content-center">
           <div className="col-md-6 login_form_container">
+            <p className="form_cancle">
+              <i class="bi bi-x-square" onClick={() => navigate("/home")}></i>
+            </p>
             <h2 className="text-center">Sign Up</h2>
             <form className="_login_form" onSubmit={handleCreateAccount}>
               <div className="mb-3">

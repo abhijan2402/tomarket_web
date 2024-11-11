@@ -48,7 +48,7 @@ const Home = () => {
 
               <div
                 className="home_redirection_btn"
-                onClick={() => navigate("task")}
+                onClick={() => navigate("/login")}
               >
                 <span style={{ color: "goldenrod" }}>Let’s Get Started</span> –
                 Create Your First Task!{" "}
