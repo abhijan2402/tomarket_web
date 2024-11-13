@@ -18,6 +18,8 @@ function Reward() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
   const [popupMsgType, setPopupMsgType] = useState("");
+  const taskCount = tasks.length;
+  console.log(taskCount);
 
   const addTaskToList = (task) => {
     setTasks((prev) => [...prev, task]);
@@ -29,13 +31,14 @@ function Reward() {
     toast.info("Task removed");
   };
 
+  // Handling Group task
   const handleSubmitGroup = async () => {
     try {
       if (!tasks.length) {
         return toast.error("Please add tasks first");
       }
 
-      await addDoc(collection(db, "tasks"), {
+      const grpTask = await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: new Date(),
         createdBy: "User",
@@ -44,6 +47,21 @@ function Reward() {
       });
 
       setTasks([]);
+
+      await addDoc(collection(db, "userGroupTask"), {
+        UserGroupTaskId: `UGT${Date.now()}`,
+        UserId: user.uid,
+        TaskId: grpTask.id,
+        UserObject: {
+          name: user.displayName || "John Doe",
+          role: "Designer",
+        },
+        TotalTask: taskCount,
+        NumberOfTaskCompleted: 0,
+        CurrentStatus: "pending",
+        isAllCompleted: false,
+      });
+
       toast.success("Tasks have been submitted for review!");
     } catch (error) {
       toast.error("Error adding document: " + error.message);
@@ -57,7 +75,6 @@ function Reward() {
         return toast.error("User is not logged in");
       }
 
-      // Add task to "singletasks" collection
       const taskRef = await addDoc(collection(db, "singletasks"), {
         ...task,
         createdAt: new Date(),
@@ -68,15 +85,15 @@ function Reward() {
 
       // Track User's progress in UserTasks collection
       await addDoc(collection(db, "UserTasks"), {
-        UserTaskId: `UT${Date.now()}`, // Generate a unique UserTaskId
-        UserId: user.uid, // Use logged-in user's ID
-        TaskId: taskRef.id, // Reference to the TaskId from singletasks
+        UserTaskId: `UT${Date.now()}`,
+        UserId: user.uid,
+        TaskId: taskRef.id,
         UserObject: {
-          name: user.displayName || "John Doe", // Get user name from auth or use default
-          role: "Designer", // Replace with user role if available
+          name: user.displayName || "John Doe",
+          role: "Designer",
         },
-        CurrentStatus: "pending", // Initial status when task is assigned
-        isProof: false,
+        CurrentStatus: "pending",
+        isProof: true,
       });
 
       toast.success("Task added successfully!");

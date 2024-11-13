@@ -14,7 +14,28 @@ function Dashboard() {
   const [taskStates, setTaskStates] = useState({});
   const [loading, setLoading] = useState(true);
   const { categories } = useContext(AppContext);
+  const [proofModalOpen, setProofModalOpen] = useState(false);
+  const [proofFile, setProofFile] = useState(null);
+  const [selectedTaskId, setSelectedTaskId] = useState(null);
 
+  const openProofModal = (taskId) => {
+    setSelectedTaskId(taskId);
+    setProofModalOpen(true);
+  };
+
+  const handleProofFileChange = (event) => {
+    setProofFile(event.target.files[0]);
+  };
+
+  const submitProof = async () => {
+    if (!proofFile || !selectedTaskId) return;
+
+    // Handle file upload logic here
+    // e.g., uploading to Firebase storage and saving the proof URL
+
+    setProofModalOpen(false);
+    setProofFile(null);
+  };
   // Icon Mapping based on platform
   const platformIcons = {
     youtube: "bi-youtube",
@@ -95,6 +116,10 @@ function Dashboard() {
       filteredTasks = singleTasks.filter(
         (task) => task.category === "Socials" && task.status === "approved"
       );
+    } else if (activeTab === "Weekly") {
+      filteredTasks = singleTasks.filter(
+        (task) => task.category === "Weekly" && task.status === "approved"
+      );
     }
 
     return (
@@ -107,19 +132,8 @@ function Dashboard() {
               }`}
             ></i>
             <div className="task-details">
-              <h4 className="task-title">
-                {/* {task.title.length > 20
-                  ? `${task.title.substring(0, 20)}...`
-                  : task.title} */}
-                {task.title}
-              </h4>
+              <h4 className="task-title">{task.title}</h4>
               <div style={{ display: "flex", gap: "5px" }}>
-                {/* <p
-                  className="task-time"
-                  style={{ color: "red", fontSize: "12px" }}
-                >
-                  +{task.reward} BP
-                </p> */}
                 <p
                   className="task-time"
                   style={{ color: "greenyellow", fontSize: "12px" }}
@@ -136,6 +150,21 @@ function Dashboard() {
                 alignItems: "center",
               }}
             >
+              {/* Conditionally Render "Add Proof" Button */}
+              {task.isProof && !taskStates[task.id]?.proofAdded && (
+                <button
+                  onClick={() => openProofModal(task.id)}
+                  className="proof-button"
+                  style={{
+                    backgroundColor: "#FCC419",
+                    color: "#000",
+                    marginRight: "5px",
+                  }}
+                >
+                  Add Proof
+                </button>
+              )}
+              {/* Claim or Start Button */}
               <button
                 onClick={() => handleStartClick(task.id, task.link)}
                 disabled={isTaskCompleted(task.id)}
@@ -148,7 +177,6 @@ function Dashboard() {
                     : taskStates[task.id]?.claimed
                     ? "greenyellow"
                     : "#FCC419",
-
                   color: "#000",
                 }}
               >
@@ -250,6 +278,17 @@ function Dashboard() {
 
           {/* Tab Content */}
           <div className="task-container">{renderTasks()}</div>
+
+          {proofModalOpen && (
+            <div className="modal">
+              <div className="modal-content">
+                <h3>Upload Proof</h3>
+                <input type="file" onChange={handleProofFileChange} />
+                <button onClick={submitProof}>Submit Proof</button>
+                <button onClick={() => setProofModalOpen(false)}>Cancel</button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>
