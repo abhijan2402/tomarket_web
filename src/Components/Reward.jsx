@@ -114,6 +114,7 @@ function Reward() {
   const handleShowPopup = (type) => {
     setPopupType(type);
   };
+
   const handleShowMsgPopup = (type) => {
     setPopupMsgType(type);
     setShowPopup(true);

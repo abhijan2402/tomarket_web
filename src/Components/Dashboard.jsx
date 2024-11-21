@@ -1,12 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
 import "../Style/Dashboard.css";
-import { collection, getDocs, query } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  updateDoc,
+  doc,
+  addDoc,
+  where,
+} from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { db } from "../firebase";
 import Card from "./Cards/Card";
 import SkeletonList from "./SkeletonList/SkeletonList";
 import { AppContext } from "../context/AppContext";
+import { useAuth } from "../context/AuthContext";
 
 function Dashboard() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("New");
   const [completedTasks, setCompletedTasks] = useState([]);
   const [singleTasks, setSingleTasks] = useState([]);
@@ -17,6 +30,16 @@ function Dashboard() {
   const [proofModalOpen, setProofModalOpen] = useState(false);
   const [proofFile, setProofFile] = useState(null);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
+  const [userTasks, setUserTasks] = useState([]);
+  const storage = getStorage();
+
+  const filter_weekly_task = singleTasks.filter(
+    (task) =>
+      task.status === "approved" ||
+      (task.status === "completed" && task.category === "Weekly")
+  );
+
+  console.log("weekly", filter_weekly_task);
 
   const openProofModal = (taskId) => {
     setSelectedTaskId(taskId);
@@ -28,14 +51,31 @@ function Dashboard() {
   };
 
   const submitProof = async () => {
-    if (!proofFile || !selectedTaskId) return;
+    if (!proofFile || !selectedTaskId) {
+      toast.error("Please upload a proof file.");
+      return;
+    }
 
-    // Handle file upload logic here
-    // e.g., uploading to Firebase storage and saving the proof URL
+    const proofRef = ref(storage, `proofs/${selectedTaskId}/${proofFile.name}`);
 
-    setProofModalOpen(false);
-    setProofFile(null);
+    try {
+      // Upload file to Firebase Storage
+      const uploadResult = await uploadBytes(proofRef, proofFile);
+      const proofURL = await getDownloadURL(uploadResult.ref);
+
+      // Update Firestore with proof URL
+      const taskDocRef = doc(db, "singletasks", selectedTaskId);
+      await updateDoc(taskDocRef, { proofURL, status: "proofSubmitted" });
+
+      setProofModalOpen(false);
+      setProofFile(null);
+      toast.success("Proof submitted successfully!");
+    } catch (error) {
+      toast.error("Failed to submit proof. Please try again.");
+      console.error(error);
+    }
   };
+
   // Icon Mapping based on platform
   const platformIcons = {
     youtube: "bi-youtube",
@@ -48,35 +88,64 @@ function Dashboard() {
   // Default icon if `platformLogo` is not specified
   const defaultIcon = "bi bi-card-checklist";
 
-  const handleCompleteTask = (taskId, youtubeLink) => {
-    window.open(youtubeLink, "_blank");
-    setCompletedTasks([...completedTasks, taskId]);
-  };
-
+  // Fetching Single
   const getSingleTasks = async () => {
     setLoading(true);
-    let resultArray = [];
-    const q = query(collection(db, "singletasks"));
-    const querySnapshot = await getDocs(q);
+    try {
+      const q = query(collection(db, "singletasks"));
+      const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
-      resultArray.push({ id: doc.id, ...doc.data() });
-    });
-    setSingleTasks(resultArray);
-    setLoading(false);
+      const tasks = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setSingleTasks(tasks);
+    } catch (error) {
+      toast.error("Failed to load tasks.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
+  // Fetching MultiTask
   const getMultiTasks = async () => {
     setLoading(true);
-    let resultArray = [];
-    const q = query(collection(db, "tasks"));
-    const querySnapshot = await getDocs(q);
+    try {
+      const q = query(collection(db, "tasks"));
+      const querySnapshot = await getDocs(q);
 
-    querySnapshot.forEach((doc) => {
-      resultArray.push({ id: doc.id, ...doc.data() });
-    });
-    setMultiTasks(resultArray);
-    setLoading(false);
+      const tasks = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMultiTasks(tasks);
+    } catch (error) {
+      toast.error("Failed to load multi-tasks.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch UserTasks for the logged-in user
+  const fetchUserTasks = async () => {
+    if (!user) return;
+
+    try {
+      const userTasksQuery = query(
+        collection(db, "UserTasks"),
+        where("UserId", "==", user.uid)
+      );
+      const querySnapshot = await getDocs(userTasksQuery);
+      const tasks = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setUserTasks(tasks);
+    } catch (error) {
+      console.error("Error fetching UserTasks:", error);
+    }
   };
 
   console.log("singletask", singleTasks);
@@ -84,115 +153,132 @@ function Dashboard() {
   useEffect(() => {
     getSingleTasks();
     getMultiTasks();
+    fetchUserTasks();
   }, []);
 
-  const isTaskCompleted = (taskId) => completedTasks.includes(taskId);
+  // Handling the Individual task in a new tab and saving the details in UserTasks collection
+  const handleCompleteTask = async (taskId, youtubeLink) => {
+    // Open the task link in a new tab
+    window.open(youtubeLink, "_blank");
 
-  const handleStartClick = (taskId, link) => {
-    handleCompleteTask(taskId, link);
-    setTaskStates((prev) => ({
-      ...prev,
-      [taskId]: { loading: true, claimed: false },
-    }));
+    try {
+      // Update the status of the task in the Firestore collection
+      const taskDocRef = doc(db, "singletasks", taskId);
+      await updateDoc(taskDocRef, { status: "completed" });
 
-    setTimeout(() => {
-      setTaskStates((prev) => ({
-        ...prev,
-        [taskId]: { loading: false, claimed: true },
-      }));
-    }, 3000);
+      // Save the user's progress in UserTasks collection
+      if (!user) throw new Error("User not logged in.");
+      const userTaskData = {
+        UserTaskId: `UT${Date.now()}`,
+        UserId: user.uid,
+        TaskId: taskId,
+        UserObject: {
+          name: user.displayName || "John Doe",
+          role: "Designer",
+        },
+        CurrentStatus: "pending",
+        isProof: true,
+      };
+
+      await addDoc(collection(db, "UserTasks"), userTaskData);
+
+      // Update local state to reflect changes
+      setSingleTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === taskId ? { ...task, status: "completed" } : task
+        )
+      );
+
+      toast.info("Task is completed and tracked.");
+    } catch (error) {
+      toast.error("Failed to process the task.");
+      console.error(error);
+    }
   };
 
-  // Rendering the Task List
+  // Render Tasks on the Basis of Category and Filters
   const renderTasks = () => {
     let filteredTasks = [];
+
     if (activeTab === "New") {
-      filteredTasks = singleTasks.filter((task) => task.status === "approved");
+      filteredTasks = singleTasks.filter(
+        (task) => task.status === "approved" || task.status === "completed"
+      );
     } else if (activeTab === "OnChain") {
       filteredTasks = singleTasks.filter(
-        (task) => task.status === "approved" && task.category === "OnChain"
+        (task) =>
+          task.status === "completed" ||
+          (task.status === "approved" && task.category === "OnChain")
       );
     } else if (activeTab === "Socials") {
       filteredTasks = singleTasks.filter(
-        (task) => task.category === "Socials" && task.status === "approved"
-      );
-    } else if (activeTab === "Weekly") {
-      filteredTasks = singleTasks.filter(
-        (task) => task.category === "Weekly" && task.status === "approved"
+        (task) =>
+          task.status === "approved" ||
+          (task.status === "completed" && task.category === "Socials")
       );
     }
 
     return (
       <ul className="task-list">
-        {filteredTasks.map((task) => (
-          <li key={task.id} className="task-list-item">
-            <i
-              className={`bi ${
-                platformIcons[task.platformLogo?.toLowerCase()] || defaultIcon
-              }`}
-            ></i>
-            <div className="task-details">
-              <h4 className="task-title">{task.title}</h4>
-              <div style={{ display: "flex", gap: "5px" }}>
-                <p
-                  className="task-time"
-                  style={{ color: "greenyellow", fontSize: "12px" }}
-                >
+        {filteredTasks.map((task) => {
+          // Check if the current task has a corresponding UserTask with isProof = true
+          const userTask = userTasks.find((ut) => ut.TaskId === task.id);
+          const showAddProof = userTask?.isProof;
+
+          return (
+            <li key={task.id} className="task-list-item">
+              <i
+                className={`bi ${
+                  platformIcons[task.platformLogo?.toLowerCase()] || defaultIcon
+                }`}
+              ></i>
+              {/* Task details */}
+              <div className="task-details">
+                <h4 className="task-title">{task.title}</h4>
+                <p style={{ color: "greenyellow", fontSize: "12px" }}>
                   +{task.reward} BP
                 </p>
               </div>
-            </div>
-            <div
-              style={{
-                width: "100%",
-                display: "flex",
-                justifyContent: "flex-end",
-                alignItems: "center",
-              }}
-            >
-              {/* Conditionally Render "Add Proof" Button */}
-              {task.isProof && !taskStates[task.id]?.proofAdded && (
-                <button
-                  onClick={() => openProofModal(task.id)}
-                  className="proof-button"
-                  style={{
-                    backgroundColor: "#FCC419",
-                    color: "#000",
-                    marginRight: "5px",
-                  }}
-                >
-                  Add Proof
-                </button>
-              )}
-              {/* Claim or Start Button */}
-              <button
-                onClick={() => handleStartClick(task.id, task.link)}
-                disabled={isTaskCompleted(task.id)}
-                className={`redirect-icon ${
-                  isTaskCompleted(task.id) ? "task-completed" : ""
-                } ${taskStates[task.id]?.claimed ? "claim-button" : ""}`}
-                style={{
-                  backgroundColor: taskStates[task.id]?.loading
-                    ? "grey"
-                    : taskStates[task.id]?.claimed
-                    ? "greenyellow"
-                    : "#FCC419",
-                  color: "#000",
-                }}
-              >
-                {taskStates[task.id]?.loading ? (
-                  <div className="spinner"></div>
-                ) : taskStates[task.id]?.claimed ? (
-                  "Claim"
-                ) : isTaskCompleted(task.id) ? (
-                  "Task Completed"
+              {/* Add proof or start/claim task */}
+              <div>
+                {showAddProof === true ? (
+                  <button
+                    className="redirect-icon"
+                    onClick={() => openProofModal(task.id)}
+                    style={{ display: "flex", alignItems: "center" }}
+                  >
+                    Proof
+                    <i
+                      class="bi bi-upload"
+                      style={{
+                        fontSize: "14px",
+                        color: "#000",
+                        marginLeft: "8px",
+                      }}
+                    ></i>
+                  </button>
                 ) : (
-                  "Start"
+                  <button
+                    className={`redirect-icon ${
+                      task.status === "completed" ? "disabled" : ""
+                    }`}
+                    onClick={() =>
+                      task.status === "approved" &&
+                      handleCompleteTask(task.id, task.link)
+                    }
+                    disabled={task.status === "completed"}
+                    style={{
+                      cursor:
+                        task.status === "completed" ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {task.status === "completed" ? "Completed" : "Start"}
+                  </button>
                 )}
-              </button>
-            </div>
-          </li>
-        ))}
+              </div>
+            </li>
+          );
+        })}
       </ul>
     );
   };
@@ -261,31 +347,61 @@ function Dashboard() {
 
           {/* Cards */}
           <div>
-            <Card card_data={card_data} />
+            <div>
+              <h6 style={{ color: "#FFF", padding: "8px 0px" }}>Weekly</h6>
+            </div>
+            <div className="weekly_Card">
+              <Card card_data={filter_weekly_task} />
+            </div>
           </div>
 
           {/* Tab Navigation */}
           <div className="tabs-container">
-            {categories?.map((category) => (
-              <button
-                className={activeTab === category.name ? "active" : ""}
-                onClick={() => setActiveTab(category.name)}
-              >
-                {category.name}
-              </button>
-            ))}
+            {categories
+              ?.filter((category) => category.name !== "Weekly") // Filter out "Weekly"
+              .map((category) => (
+                <button
+                  key={category.name} // Add a key for React's reconciliation
+                  className={activeTab === category.name ? "active" : ""}
+                  onClick={() => setActiveTab(category.name)}
+                >
+                  {category.name}
+                </button>
+              ))}
           </div>
 
           {/* Tab Content */}
           <div className="task-container">{renderTasks()}</div>
 
+          {/* Proof Uploading Modal */}
           {proofModalOpen && (
-            <div className="modal">
-              <div className="modal-content">
-                <h3>Upload Proof</h3>
+            <div
+              className="modal-overlay"
+              onClick={() => setProofModalOpen(false)}
+            >
+              <div
+                className="modal-content"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h4
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    marginBottom: "18px",
+                  }}
+                >
+                  Upload Proof{" "}
+                  <span
+                    onClick={() => setProofModalOpen(false)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <i class="bi bi-x-square"></i>
+                  </span>
+                </h4>
                 <input type="file" onChange={handleProofFileChange} />
-                <button onClick={submitProof}>Submit Proof</button>
-                <button onClick={() => setProofModalOpen(false)}>Cancel</button>
+                <button className="modal_submit_btn" onClick={submitProof}>
+                  Submit Proof
+                </button>
               </div>
             </div>
           )}

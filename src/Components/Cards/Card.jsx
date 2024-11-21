@@ -1,21 +1,23 @@
 import React from "react";
 import "./Card.css";
 
-const Card = ({ title, card_data }) => {
+const Card = ({ card_data }) => {
   return (
     <>
-      <div className="card-space">
-        <div className="card_space_details">
-          <h5>{card_data?.title}</h5>
-          <p>+ {card_data?.reward} BP</p>
+      {card_data.map((item, index) => (
+        <div className="card-space" key={index}>
+          <div className="card_space_details">
+            <h5>{item?.title}</h5>
+            <p>+ {item?.reward} BP</p>
+          </div>
+          <div className="card_space_btn">
+            <button className="card_space_btn1">Open</button>
+            <p className="card_space_card_count">
+              {item?.tasks?.length || 0}/{item?.tasks?.length || 0}
+            </p>
+          </div>
         </div>
-        <div className="card_space_btn">
-          <button className="card_space_btn1">Open</button>
-          <p className="card_space_card_count">
-            0/{card_data?.tasks?.length || 0}
-          </p>
-        </div>
-      </div>
+      ))}
     </>
   );
 };

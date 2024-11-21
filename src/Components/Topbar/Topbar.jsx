@@ -46,8 +46,12 @@ const Topbar = ({ Logo }) => {
           ) && (
             <div className="header_log">
               <Link to="/task">
-                <button>
-                  <i className="bi bi-plus-circle"></i> Task
+                <button style={{ fontSize: "14px" }}>
+                  <i
+                    className="bi bi-plus-circle"
+                    style={{ fontSize: "12px", marginRight: "5px" }}
+                  ></i>
+                  Task
                 </button>
               </Link>
             </div>
@@ -61,8 +65,12 @@ const Topbar = ({ Logo }) => {
               id="dropdownMenuButton"
               data-bs-toggle="dropdown"
               aria-expanded="false"
+              style={{ display: "flex" }}
             >
-              <i className="bi bi-three-dots-vertical"></i>
+              <i
+                className="bi bi-three-dots-vertical"
+                style={{ fontSize: "12px" }}
+              ></i>
             </button>
             <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
               <li>

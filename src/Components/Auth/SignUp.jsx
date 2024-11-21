@@ -1,25 +1,27 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase"; // Import Firestore instance
 import { useNavigate } from "react-router-dom";
-import { Spinner } from "react-bootstrap"; // Import Spinner for loader
+import { Spinner } from "react-bootstrap";
 
 function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // State for confirm password
-  const [showPassword, setShowPassword] = useState(false); // State for showing/hiding password
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // State for showing/hiding confirm password
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false); // State for managing loader
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleCreateAccount = async (e) => {
     e.preventDefault();
-    setLoading(true); // Show loader
+    setLoading(true);
 
     if (password !== confirmPassword) {
+      setLoading(false);
       setError(
         "Passwords do not match. Please make sure both passwords are identical."
       );
@@ -27,19 +29,30 @@ function SignUp() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      setLoading(false); // Show loader
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      // Add user wallet to Firestore
+      const user = userCredential.user;
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        wallet: 500,
+        createdAt: new Date().toISOString(),
+      });
+
+      setLoading(false);
       navigate("/");
       alert("Sign-up successful! Welcome!");
     } catch (err) {
-      setLoading(false); // Show loader
-      // Map Firebase errors to user-friendly messages
+      setLoading(false);
       const errorMessage = getFriendlyErrorMessage(err.code);
       setError(errorMessage);
     }
   };
 
-  // Helper function to map Firebase errors to user-friendly messages
   const getFriendlyErrorMessage = (errorCode) => {
     switch (errorCode) {
       case "auth/email-already-in-use":
@@ -80,7 +93,7 @@ function SignUp() {
         <div className="row justify-content-center">
           <div className="col-md-6 login_form_container">
             <p className="form_cancle">
-              <i class="bi bi-x-square" onClick={() => navigate("/home")}></i>
+              <i className="bi bi-x-square" onClick={() => navigate("/home")}></i>
             </p>
             <h2 className="text-center">Sign Up</h2>
             <form className="_login_form" onSubmit={handleCreateAccount}>
@@ -107,7 +120,7 @@ function SignUp() {
                 </label>
                 <div className="input-group">
                   <input
-                    type={showPassword ? "text" : "password"} // Toggle input type based on showPassword state
+                    type={showPassword ? "text" : "password"}
                     className="form-control"
                     id="password"
                     placeholder="Enter your password"
@@ -138,7 +151,7 @@ function SignUp() {
                 </label>
                 <div className="input-group">
                   <input
-                    type={showConfirmPassword ? "text" : "password"} // Toggle input type based on showConfirmPassword state
+                    type={showConfirmPassword ? "text" : "password"}
                     className="form-control"
                     id="confirmPassword"
                     placeholder="Confirm your password"

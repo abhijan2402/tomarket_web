@@ -1,5 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "../Style/Wallet.css";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const tasks = [
   {
@@ -8,33 +11,49 @@ const tasks = [
     description: "Go for a 5km run in the park.",
   },
   {
-    id: 1,
+    id: 2,
     title: "Bulm points",
-    description: "Go for a 5km run in the park.",
-  },
-  {
-    id: 1,
-    title: "Bulm points",
-    description: "Go for a 5km run in the park.",
+    description: "Do 10 push-ups.",
   },
 ];
 
 function Wallet() {
-  // State to keep track of the active tab
+  const { user } = useAuth();
+  const [walletAmount, setWalletAmount] = useState(null);
   const [activeTab, setActiveTab] = useState("Balance");
 
-  // Function to handle tab click
+  useEffect(() => {
+    const fetchWalletAmount = async () => {
+      if (user?.uid) {
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            setWalletAmount(userData.wallet || 0);
+          } else {
+            console.log("No such document!");
+          }
+        } catch (error) {
+          console.error("Error fetching wallet amount:", error);
+        }
+      }
+    };
+
+    fetchWalletAmount();
+  }, [user]);
+
   const handleTabClick = (tab) => {
     setActiveTab(tab);
   };
 
-  // Tab Content components
   const renderNewTasks = () => (
     <ul className="wallet-task-list">
       {tasks.map((task) => (
         <li key={task.id} className="wallet-task-list-item">
           <p className="wallet_coin">
-            <i class="bi bi-currency-bitcoin"></i>
+            <i className="bi bi-currency-bitcoin"></i>
           </p>
           <div className="wallet-task-details">
             <h4 className="wallet-task-title">
@@ -52,7 +71,7 @@ function Wallet() {
               alignItems: "center",
             }}
           >
-            <button className="wallet_btn"> Ready to claim</button>
+            <button className="wallet_btn">Ready to claim</button>
           </div>
         </li>
       ))}
@@ -63,11 +82,10 @@ function Wallet() {
     <>
       <div className="wallet_header">
         <h3>Points</h3>
-        <p>$0</p>
+        <p>{walletAmount !== null ? `$${walletAmount}` : "0"}</p>
       </div>
 
       <div className="wallet_tab">
-        {/* Tabs for Balance and History */}
         <div
           className={`tab_item ${activeTab === "Balance" ? "active" : ""}`}
           onClick={() => handleTabClick("Balance")}
@@ -82,17 +100,11 @@ function Wallet() {
         </div>
       </div>
 
-      {/* Conditional rendering of tab content */}
       <div className="tab_content">
         {activeTab === "Balance" ? (
-          <div className="balance_content">
-            {/* Replace this with actual Balance content */}
-            {/* <p>Your current balance is $0.</p> */}
-            {renderNewTasks()}
-          </div>
+          <div className="balance_content">{renderNewTasks()}</div>
         ) : (
           <div className="history_content">
-            {/* Replace this with actual History content */}
             <p>No transaction history available.</p>
           </div>
         )}
