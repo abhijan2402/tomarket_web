@@ -177,7 +177,7 @@ function Dashboard() {
           role: "Designer",
         },
         CurrentStatus: "pending",
-        isProof: true,
+        isProof: false,
       };
 
       await addDoc(collection(db, "UserTasks"), userTaskData);
