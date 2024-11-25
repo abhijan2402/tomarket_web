@@ -21,25 +21,38 @@ import { useAuth } from "../context/AuthContext";
 function Dashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("New");
-  const [completedTasks, setCompletedTasks] = useState([]);
   const [singleTasks, setSingleTasks] = useState([]);
   const [multiTasks, setMultiTasks] = useState([]);
-  const [taskStates, setTaskStates] = useState({});
   const [loading, setLoading] = useState(true);
   const { categories } = useContext(AppContext);
   const [proofModalOpen, setProofModalOpen] = useState(false);
   const [proofFile, setProofFile] = useState(null);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [userTasks, setUserTasks] = useState([]);
+  const [selectedGroupTasks, setSelectedGroupTasks] = useState([]);
+  const [groupTaskId, setGroupTaskId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+
   const storage = getStorage();
+
+  const handleOpenModal = (tasks, taskId) => {
+    setGroupTaskId(taskId);
+    setSelectedGroupTasks(tasks);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setShowModal(false);
+    setSelectedGroupTasks([]);
+  };
+
+  // Filter Weekly task
 
   const filter_weekly_task = singleTasks.filter(
     (task) =>
       task.status === "approved" ||
       (task.status === "completed" && task.category === "Weekly")
   );
-
-  console.log("weekly", filter_weekly_task);
 
   const openProofModal = (taskId) => {
     setSelectedTaskId(taskId);
@@ -148,7 +161,7 @@ function Dashboard() {
     }
   };
 
-  console.log("singletask", singleTasks);
+  // console.log("multitask", multiTasks);
 
   useEffect(() => {
     getSingleTasks();
@@ -272,7 +285,14 @@ function Dashboard() {
                         task.status === "completed" ? "not-allowed" : "pointer",
                     }}
                   >
-                    {task.status === "completed" ? "Completed" : "Start"}
+                    {task.status === "completed" ? (
+                      <i
+                        class="bi bi-check2-all"
+                        style={{ fontSize: "20px", color: "#000" }}
+                      ></i>
+                    ) : (
+                      "Start"
+                    )}
                   </button>
                 )}
               </div>
@@ -283,21 +303,10 @@ function Dashboard() {
     );
   };
 
-  const card_data = {
-    id: 1,
-    title: "Weekly",
-    desc: "Earn for checking socials",
-    bonus: "+0/540",
-    card_bg: "#000",
-    background: "#fff",
-    color: "#000",
-  };
-
-  // Combine all approved tasks into a single array
-  const approvedTasks = multiTasks
-    .filter((taskGroup) => taskGroup.status === "approved")
-    .flatMap((taskGroup) => taskGroup.tasks);
-
+  // Multi Group task approved tasks into a single array
+  const approvedTasks = multiTasks.filter(
+    (taskGroup) => taskGroup.status === "approved"
+  );
   return (
     <>
       {loading ? (
@@ -305,44 +314,53 @@ function Dashboard() {
       ) : (
         <div className="dashboard-container">
           {/* Adverts Section */}
-          <div className="advert-container">
-            {approvedTasks.length > 0
-              ? approvedTasks.map((task, index) => (
-                  <div className="advert-space" key={task?.id || index}>
+          <div className="advert-container ">
+            {approvedTasks.length > 0 &&
+              approvedTasks.map((group, index) => {
+                console.log("g id", group);
+                // Ensure tasks exist and it's an array with at least one element
+                if (
+                  !group.tasks ||
+                  !Array.isArray(group.tasks) ||
+                  group.tasks.length === 0
+                ) {
+                  return null;
+                }
+                const firstTask = group.tasks[0];
+                return (
+                  <div
+                    className="advert-space card m-2 p-3"
+                    key={group.id || index}
+                  >
                     <div className="advert_space_img">
-                      <img
-                        src="https://www.iconeasy.com/icon/png/Application/Adobe%20CS5/ai.png"
-                        alt="img"
-                      />
+                      <i
+                        className={`bi ${
+                          platformIcons[
+                            firstTask.platformLogo?.toLowerCase()
+                          ] || defaultIcon
+                        }`}
+                      ></i>
                     </div>
-                    <div className="advert_space_details">
-                      <h5>{task?.title || "Untitled Task"}</h5>
-                      <p style={{ color: "green" }}>{`+${
-                        task?.reward || 0
+                    <div className="advert_space_details card-body">
+                      <h5 className="card-title fs-4">
+                        {firstTask?.description || "Untitled Task"}
+                      </h5>
+                      <p className="text-success fs-5">{`+${
+                        firstTask?.reward || 0
                       } BP`}</p>
-                      <p>{task?.description || "No description available"}</p>
                     </div>
-                    <div className="advert_space_btn">
-                      {task?.link ? (
-                        <a
-                          href={task.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <button className="advert_space_btn1">Open</button>
-                        </a>
-                      ) : (
-                        <button className="advert_space_btn1" disabled>
-                          No Link
-                        </button>
-                      )}
-                      <p className="advert_space_card_count">{`${index + 1}/${
-                        approvedTasks.length
-                      }`}</p>
+                    <div className="advert_space_btn  d-flex justify-content-between align-items-center">
+                      <button
+                        className="advert_space_btn1"
+                        onClick={() => handleOpenModal(group.tasks, group?.id)}
+                      >
+                        Open
+                      </button>
+                      <p className="advert_space_card_count mb-0">{`${group?.tasks.length}`}</p>
                     </div>
                   </div>
-                ))
-              : null}
+                );
+              })}
           </div>
 
           {/* Cards */}
@@ -351,7 +369,12 @@ function Dashboard() {
               <h6 style={{ color: "#FFF", padding: "8px 0px" }}>Weekly</h6>
             </div>
             <div className="weekly_Card">
-              <Card card_data={filter_weekly_task} />
+              <Card
+                card_data={filter_weekly_task}
+                handleCompleteTask={handleCompleteTask}
+                openProofModal={openProofModal}
+                userTasks={userTasks}
+              />
             </div>
           </div>
 
@@ -402,6 +425,126 @@ function Dashboard() {
                 <button className="modal_submit_btn" onClick={submitProof}>
                   Submit Proof
                 </button>
+              </div>
+            </div>
+          )}
+
+          {/* MultiTask ---> Group Task Modal */}
+          {showModal && (
+            <div
+              className="modal fade show custom-modal"
+              style={{
+                display: "block",
+              }}
+            >
+              <div className="modal-dialog modal-lg">
+                <div className="modal-content modal-tsk-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Group Tasks</h5>
+                    <i
+                      className="bi bi-x-square"
+                      style={{ fontSize: "1.5rem", cursor: "pointer" }}
+                      onClick={handleCloseModal}
+                    ></i>
+                  </div>
+                  <div className="modal-body">
+                    {selectedGroupTasks.map((task, index) => {
+                      // Find the corresponding UserTask with isProof = true
+                      const userTask = userTasks?.find(
+                        (ut) => ut.TaskId === groupTaskId
+                      );
+                      const showAddProof = userTask?.isProof;
+                      console.log("userproof", showAddProof);
+
+                      return (
+                        <div className="mb-2" key={index}>
+                          <div className="custome-card">
+                            <div className="grp-tsk-desc">
+                              <h6
+                                className="card-title fs-5"
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    marginRight: "14px",
+                                    display: "flex",
+                                  }}
+                                >
+                                  <i
+                                    className={`bi ${
+                                      platformIcons[
+                                        task.platformLogo?.toLowerCase()
+                                      ] || defaultIcon
+                                    }`}
+                                  ></i>
+                                </span>
+                                {task?.description || "Untitled Task"}
+                              </h6>
+                              <p className="text-success fs-6 pt-1">
+                                +{task?.reward || 0} BP
+                              </p>
+                            </div>
+                            <div>
+                              {showAddProof ? (
+                                <button
+                                  className="redirect-icon"
+                                  onClick={() => openProofModal(task.id)}
+                                  style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                  }}
+                                >
+                                  Proof
+                                  <i
+                                    className="bi bi-upload"
+                                    style={{
+                                      fontSize: "14px",
+                                      color: "#000",
+                                      marginLeft: "8px",
+                                    }}
+                                  ></i>
+                                </button>
+                              ) : (
+                                <button
+                                  className={`redirect-icon ${
+                                    task.status === "completed"
+                                      ? "disabled"
+                                      : ""
+                                  }`}
+                                  onClick={() =>
+                                    handleCompleteTask(groupTaskId, task.link)
+                                  }
+                                  disabled={task.status === "completed"}
+                                  style={{
+                                    cursor:
+                                      task.status === "completed"
+                                        ? "not-allowed"
+                                        : "pointer",
+                                  }}
+                                >
+                                  {task.status === "completed" ? (
+                                    <i
+                                      className="bi bi-check2-all"
+                                      style={{
+                                        fontSize: "20px",
+                                        color: "#000",
+                                      }}
+                                    ></i>
+                                  ) : (
+                                    "Start"
+                                  )}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           )}

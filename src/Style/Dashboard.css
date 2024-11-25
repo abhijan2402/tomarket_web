@@ -44,9 +44,8 @@
 .advert_space_img {
   width: 70px;
 }
-.advert_space_img img {
-  width: 100%;
-  height: 100%;
+.advert_space_img i {
+  font-size: 3rem;
 }
 
 .advert_space_details {
@@ -148,7 +147,7 @@
   }
   .advert_space_details {
     margin-top: 00px;
-    padding-top: 25px;
+    padding-top: 2px;
   }
   .advert-container {
     display: flex;
@@ -384,23 +383,21 @@
 button {
   margin: 5px;
 }
-.modal_submit_btn{
+.modal_submit_btn {
   background-color: #fcc419;
   color: #000;
   font-size: 14px;
   margin-top: 20px;
 }
 
-.weekly_Card{
+.weekly_Card {
   display: flex;
   gap: 8px;
   overflow-x: auto;
-  
 }
 .weekly_Card::-webkit-scrollbar {
   display: none;
 }
-
 
 @media (max-width: 500px) {
   .content {
@@ -416,4 +413,45 @@ button {
     padding: 10px 30px;
     font-size: 14px;
   }
+}
+
+.custome-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tsk-modal-conten .modal-header {
+  background-color: #000;
+  color: #fff;
+}
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.custom-modal .modal-dialog {
+  animation: slideUp 0.4s ease-out;
+  position: fixed;
+  bottom: 0;
+  margin: 0px;
+  width: 100%;
+  max-width: none;
+}
+
+.modal-tsk-content {
+  background-color: #000000;
+  color: #fff;
+  width: 100%;
+  max-width: 100%;
+}
+
+.grp-tsk-cls-tbn {
+  background-color: #000;
+  color: #fff;
 }

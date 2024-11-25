@@ -1,11 +1,13 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useState } from "react";
-import { auth, db } from "../../firebase"; // Import Firestore instance
+import { auth, db } from "../../firebase";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
 
 function SignUp() {
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -18,26 +20,42 @@ function SignUp() {
 
   const handleCreateAccount = async (e) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
+
+    // Validate input
+    if (name.trim() === "") {
+      setLoading(false);
+      setError("Name is required.");
+      return;
+    }
+
+    if (!/^[a-zA-Z ]{2,50}$/.test(name)) {
+      setLoading(false);
+      setError("Name must contain only alphabets and be 2-50 characters long.");
+      return;
+    }
+
+    if (age.trim() === "" || isNaN(age) || age < 18 || age > 120) {
+      setLoading(false);
+      setError("Please enter a valid age (must be between 18 and 120).");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setLoading(false);
-      setError(
-        "Passwords do not match. Please make sure both passwords are identical."
-      );
+      setError("Passwords do not match. Please ensure both passwords are identical.");
       return;
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-      // Add user wallet to Firestore
+      // Add user to Firestore
       const user = userCredential.user;
       await setDoc(doc(db, "users", user.uid), {
+        name: name.trim(),
+        age: parseInt(age, 10),
         email: user.email,
         wallet: 500,
         createdAt: new Date().toISOString(),
@@ -61,26 +79,14 @@ function SignUp() {
         return "The email address is not valid. Please enter a valid email.";
       case "auth/weak-password":
         return "The password is too weak. Please choose a stronger password with at least 6 characters.";
-      case "auth/operation-not-allowed":
-        return "Account creation is currently disabled. Please contact support.";
-      case "auth/network-request-failed":
-        return "Network error. Please check your internet connection and try again.";
       default:
         return "An unexpected error occurred. Please try again later.";
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleConfirmPasswordVisibility = () => {
-    setShowConfirmPassword(!showConfirmPassword);
-  };
-
   return (
     <div className="container _login_container">
-      {loading === true ? (
+      {loading ? (
         <div className="full-screen-loader">
           <Spinner animation="border" role="status" className="spinner-lg">
             <span className="visually-hidden" style={{ color: "#fff" }}>
@@ -92,26 +98,53 @@ function SignUp() {
       ) : (
         <div className="row justify-content-center">
           <div className="col-md-6 login_form_container">
-            <p className="form_cancle">
-              <i className="bi bi-x-square" onClick={() => navigate("/home")}></i>
-            </p>
             <h2 className="text-center">Sign Up</h2>
             <form className="_login_form" onSubmit={handleCreateAccount}>
+              <div className="mb-3">
+                <label htmlFor="name" className="form-label text-white">
+                  Name
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
+                  id="name"
+                  placeholder="Enter your name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="mb-3">
+                <label htmlFor="age" className="form-label text-white">
+                  Age
+                </label>
+                <input
+                  type="number"
+                  className="form-control"
+                  id="age"
+                  placeholder="Enter your age"
+                  value={age}
+                  onChange={(e) => setAge(e.target.value)}
+                  required
+                  min="18"
+                  max="120"
+                />
+              </div>
+
               <div className="mb-3">
                 <label htmlFor="email" className="form-label text-white">
                   Email address
                 </label>
-                <div className="input-group">
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
+                <input
+                  type="email"
+                  className="form-control"
+                  id="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
               </div>
 
               <div className="mb-3">
@@ -130,23 +163,16 @@ function SignUp() {
                   />
                   <span
                     className="input-group-text"
-                    onClick={togglePasswordVisibility}
-                    style={{ cursor: "pointer", height: "46px" }}
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{ cursor: "pointer" }}
                   >
-                    {showPassword ? (
-                      <i className="bi bi-eye-slash"></i>
-                    ) : (
-                      <i className="bi bi-eye"></i>
-                    )}
+                    {showPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
                   </span>
                 </div>
               </div>
 
               <div className="mb-3">
-                <label
-                  htmlFor="confirmPassword"
-                  className="form-label text-white"
-                >
+                <label htmlFor="confirmPassword" className="form-label text-white">
                   Confirm Password
                 </label>
                 <div className="input-group">
@@ -161,14 +187,10 @@ function SignUp() {
                   />
                   <span
                     className="input-group-text"
-                    onClick={toggleConfirmPasswordVisibility}
-                    style={{ cursor: "pointer", height: "46px" }}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    style={{ cursor: "pointer" }}
                   >
-                    {showConfirmPassword ? (
-                      <i className="bi bi-eye-slash"></i>
-                    ) : (
-                      <i className="bi bi-eye"></i>
-                    )}
+                    {showConfirmPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
                   </span>
                 </div>
               </div>
@@ -180,21 +202,15 @@ function SignUp() {
                 </button>
               </div>
 
-              <div className="create_account">
-                <p className="text-white text-center pt-3">
-                  Already have an Account?{" "}
-                  <span
-                    onClick={() => navigate("/Login")}
-                    style={{
-                      color: "#0D6EFD",
-                      cursor: "pointer",
-                      letterSpacing: "1px",
-                    }}
-                  >
-                    Login
-                  </span>
-                </p>
-              </div>
+              <p className="text-white text-center pt-3">
+                Already have an account?{" "}
+                <span
+                  onClick={() => navigate("/login")}
+                  style={{ color: "#0D6EFD", cursor: "pointer" }}
+                >
+                  Login
+                </span>
+              </p>
             </form>
           </div>
         </div>
