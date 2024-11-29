@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { getAuth } from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
@@ -83,17 +83,24 @@ function Reward() {
         type: "single",
       });
 
+      // Fetch user details from the `users` collection
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        throw new Error("User details not found in the database.");
+      }
+
+      const userData = userDoc.data();
+
       // Track User's progress in UserTasks collection
       await addDoc(collection(db, "UserTasks"), {
         UserTaskId: `UT${Date.now()}`,
-        UserId: user.uid,
         TaskId: taskRef.id,
+        UserId: user.uid,
         UserObject: {
-          name: user.displayName || "John Doe",
-          role: "Designer",
-        },
-        CurrentStatus: "pending",
-        isProof: true,
+          ...userData,
+        }
       });
 
       toast.success("Task added successfully!");

@@ -324,6 +324,7 @@
 
 .tabs-container {
   display: flex;
+  align-items: center;
   gap: 5px;
   margin-bottom: 20px;
   overflow-x: scroll;
@@ -333,6 +334,17 @@
 
 .tabs-container::-webkit-scrollbar {
   display: none;
+}
+
+.tabs-container p {
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: gray;
+  font-weight: 600;
+}
+.tabs-container p.active {
+  color: #fff;
+  font-weight: 700;
 }
 
 .tabs-container button {

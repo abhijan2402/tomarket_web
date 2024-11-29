@@ -8,6 +8,7 @@ import {
   doc,
   addDoc,
   where,
+  getDoc,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "react-toastify";
@@ -17,6 +18,7 @@ import Card from "./Cards/Card";
 import SkeletonList from "./SkeletonList/SkeletonList";
 import { AppContext } from "../context/AppContext";
 import { useAuth } from "../context/AuthContext";
+import MyTask from "./MyTask";
 
 function Dashboard() {
   const { user } = useAuth();
@@ -32,6 +34,8 @@ function Dashboard() {
   const [selectedGroupTasks, setSelectedGroupTasks] = useState([]);
   const [groupTaskId, setGroupTaskId] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [DetailedUserTasks, setDetailedUserTasks] = useState();
+  console.log("details user", DetailedUserTasks);
 
   const storage = getStorage();
 
@@ -161,39 +165,112 @@ function Dashboard() {
     }
   };
 
-  // console.log("multitask", multiTasks);
+  const fetchUserTaskDetails = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      // Fetch tasks associated with the logged-in user from `UserTasks`
+      const userTasksQuery = query(
+        collection(db, "UserTasks"),
+        where("UserId", "==", user.uid) // Filter by logged-in user's ID
+      );
+      const userTasksSnapshot = await getDocs(userTasksQuery);
+      const userTasks = userTasksSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // Create promises to fetch task and user details
+      const taskDetailsPromises = userTasks.map(async (userTask) => {
+        const taskRef = doc(db, "singletasks", userTask.TaskId); // Task reference
+        const taskDoc = await getDoc(taskRef);
+
+        return {
+          ...userTask,
+          taskDetails: taskDoc.exists() ? taskDoc.data() : null, // Fetch task details
+        };
+      });
+
+      // Resolve all promises and set state
+      const tasksWithDetails = await Promise.all(taskDetailsPromises);
+      setDetailedUserTasks(tasksWithDetails);
+    } catch (error) {
+      console.error("Error fetching user tasks:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  console.log("singletask", singleTasks);
+  console.log("userTask", userTasks);
 
   useEffect(() => {
     getSingleTasks();
     getMultiTasks();
     fetchUserTasks();
   }, []);
+  useEffect(() => {
+    fetchUserTaskDetails();
+  }, [userTasks]);
 
   // Handling the Individual task in a new tab and saving the details in UserTasks collection
   const handleCompleteTask = async (taskId, youtubeLink) => {
     // Open the task link in a new tab
     window.open(youtubeLink, "_blank");
+    console.log(taskId);
 
     try {
-      // Update the status of the task in the Firestore collection
+      if (!user) throw new Error("User not logged in.");
+
+      // Fetch user details from the `users` collection (for the user who is completing the task)
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (!userDoc.exists()) {
+        throw new Error("User details not found in the database.");
+      }
+
+      const userData = userDoc.data();
+
+      // Fetch the UserTask document using TaskId
+      const userTaskQuery = query(
+        collection(db, "UserTasks"),
+        where("TaskId", "==", taskId),
+        where("UserId", "==", user.uid)
+      );
+      const userTaskSnapshot = await getDocs(userTaskQuery);
+
+      if (userTaskSnapshot.empty) {
+        throw new Error("UserTask not found for the given TaskId.");
+      }
+
+      const userTaskDoc = userTaskSnapshot.docs[0]; // Get the first matching document
+
+      // Fetch the creator details (from the original task)
+      const creatorUserRef = doc(db, "users", userTaskDoc.data().UserId);
+      const creatorUserDoc = await getDoc(creatorUserRef);
+
+      if (!creatorUserDoc.exists()) {
+        throw new Error("Creator details not found.");
+      }
+
+      const creatorUserData = creatorUserDoc.data();
+
+      // Update the task status in the `singletasks` collection
       const taskDocRef = doc(db, "singletasks", taskId);
       await updateDoc(taskDocRef, { status: "completed" });
 
-      // Save the user's progress in UserTasks collection
-      if (!user) throw new Error("User not logged in.");
-      const userTaskData = {
-        UserTaskId: `UT${Date.now()}`,
-        UserId: user.uid,
-        TaskId: taskId,
-        UserObject: {
-          name: user.displayName || "John Doe",
-          role: "Designer",
-        },
-        CurrentStatus: "pending",
-        isProof: false,
+      // Prepare the updated userTaskData with both creator and completer details
+      const updatedUserTaskData = {
+        ...userTaskDoc.data(), // Retain the existing task data
+        createdByUserObject: { ...creatorUserData }, // Add the creator's details
+        taskCompletedByUserObject: { ...userData }, // Add the completer's details
+        CurrentStatus: "completed", // Update the task status to completed
       };
 
-      await addDoc(collection(db, "UserTasks"), userTaskData);
+      // Update the UserTask document with the new details
+      await updateDoc(userTaskDoc.ref, updatedUserTaskData);
 
       // Update local state to reflect changes
       setSingleTasks((prevTasks) =>
@@ -307,6 +384,7 @@ function Dashboard() {
   const approvedTasks = multiTasks.filter(
     (taskGroup) => taskGroup.status === "approved"
   );
+
   return (
     <>
       {loading ? (
@@ -391,10 +469,22 @@ function Dashboard() {
                   {category.name}
                 </button>
               ))}
+            <p
+              className={activeTab === "mytask" ? "active" : ""}
+              onClick={() => setActiveTab("mytask")}
+            >
+              My task
+            </p>
           </div>
 
           {/* Tab Content */}
-          <div className="task-container">{renderTasks()}</div>
+          <div className="task-container">
+            {activeTab === "mytask" ? (
+              <MyTask DetailedUserTasks={DetailedUserTasks} />
+            ) : (
+              renderTasks()
+            )}
+          </div>
 
           {/* Proof Uploading Modal */}
           {proofModalOpen && (

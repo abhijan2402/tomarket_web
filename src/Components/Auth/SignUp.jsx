@@ -58,6 +58,7 @@ function SignUp() {
         age: parseInt(age, 10),
         email: user.email,
         wallet: 500,
+        userID:user.uid,
         createdAt: new Date().toISOString(),
       });
 
