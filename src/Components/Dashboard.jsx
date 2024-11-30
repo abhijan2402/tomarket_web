@@ -9,6 +9,7 @@ import {
   addDoc,
   where,
   getDoc,
+  setDoc,
 } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { toast } from "react-toastify";
@@ -55,8 +56,10 @@ function Dashboard() {
   const filter_weekly_task = singleTasks.filter(
     (task) =>
       task.status === "approved" ||
-      (task.status === "completed" && task.category === "Weekly")
+      (task.category === "Weekly" && task.status === "completed")
   );
+
+  console.log(filter_weekly_task);
 
   const openProofModal = (taskId) => {
     setSelectedTaskId(taskId);
@@ -81,8 +84,8 @@ function Dashboard() {
       const proofURL = await getDownloadURL(uploadResult.ref);
 
       // Update Firestore with proof URL
-      const taskDocRef = doc(db, "singletasks", selectedTaskId);
-      await updateDoc(taskDocRef, { proofURL, status: "proofSubmitted" });
+      const taskDocRef = doc(db, "UserSingleTasks", selectedTaskId);
+      await updateDoc(taskDocRef, { proofURL, isProof: "proofAdded" });
 
       setProofModalOpen(false);
       setProofFile(null);
@@ -150,10 +153,7 @@ function Dashboard() {
     if (!user) return;
 
     try {
-      const userTasksQuery = query(
-        collection(db, "UserTasks"),
-        where("UserId", "==", user.uid)
-      );
+      const userTasksQuery = query(collection(db, "UserSingleTasks"));
       const querySnapshot = await getDocs(userTasksQuery);
       const tasks = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -170,30 +170,21 @@ function Dashboard() {
 
     setLoading(true);
     try {
-      // Fetch tasks associated with the logged-in user from `UserTasks`
-      const userTasksQuery = query(
-        collection(db, "UserTasks"),
-        where("UserId", "==", user.uid) // Filter by logged-in user's ID
+      // Query `singletasks` collection directly, filtering by the logged-in user's ID
+      const tasksQuery = query(
+        collection(db, "singletasks"),
+        where("createdBy", "==", user.uid) // Filter by logged-in user's ID
       );
-      const userTasksSnapshot = await getDocs(userTasksQuery);
-      const userTasks = userTasksSnapshot.docs.map((doc) => ({
+
+      const tasksSnapshot = await getDocs(tasksQuery);
+
+      // Map the task documents to an array
+      const tasksWithDetails = tasksSnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
 
-      // Create promises to fetch task and user details
-      const taskDetailsPromises = userTasks.map(async (userTask) => {
-        const taskRef = doc(db, "singletasks", userTask.TaskId); // Task reference
-        const taskDoc = await getDoc(taskRef);
-
-        return {
-          ...userTask,
-          taskDetails: taskDoc.exists() ? taskDoc.data() : null, // Fetch task details
-        };
-      });
-
-      // Resolve all promises and set state
-      const tasksWithDetails = await Promise.all(taskDetailsPromises);
+      // Set the fetched tasks in state
       setDetailedUserTasks(tasksWithDetails);
     } catch (error) {
       console.error("Error fetching user tasks:", error);
@@ -216,73 +207,60 @@ function Dashboard() {
 
   // Handling the Individual task in a new tab and saving the details in UserTasks collection
   const handleCompleteTask = async (taskId, youtubeLink) => {
-    // Open the task link in a new tab
+    // Open the YouTube link in a new tab
+    alert("hake");
     window.open(youtubeLink, "_blank");
     console.log(taskId);
 
     try {
-      if (!user) throw new Error("User not logged in.");
-
-      // Fetch user details from the `users` collection (for the user who is completing the task)
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        throw new Error("User details not found in the database.");
-      }
-
-      const userData = userDoc.data();
-
-      // Fetch the UserTask document using TaskId
-      const userTaskQuery = query(
-        collection(db, "UserTasks"),
-        where("TaskId", "==", taskId),
-        where("UserId", "==", user.uid)
-      );
-      const userTaskSnapshot = await getDocs(userTaskQuery);
-
-      if (userTaskSnapshot.empty) {
-        throw new Error("UserTask not found for the given TaskId.");
-      }
-
-      const userTaskDoc = userTaskSnapshot.docs[0]; // Get the first matching document
-
-      // Fetch the creator details (from the original task)
-      const creatorUserRef = doc(db, "users", userTaskDoc.data().UserId);
-      const creatorUserDoc = await getDoc(creatorUserRef);
-
-      if (!creatorUserDoc.exists()) {
-        throw new Error("Creator details not found.");
-      }
-
-      const creatorUserData = creatorUserDoc.data();
-
-      // Update the task status in the `singletasks` collection
+      // Reference to the task document in `singletasks` collection
       const taskDocRef = doc(db, "singletasks", taskId);
+
+      // Update the task status to 'completed'
       await updateDoc(taskDocRef, { status: "completed" });
 
-      // Prepare the updated userTaskData with both creator and completer details
-      const updatedUserTaskData = {
-        ...userTaskDoc.data(), // Retain the existing task data
-        createdByUserObject: { ...creatorUserData }, // Add the creator's details
-        taskCompletedByUserObject: { ...userData }, // Add the completer's details
-        CurrentStatus: "completed", // Update the task status to completed
-      };
+      // Add/Update the document in the `UserSingleTasks` collection
+      const userSingleTaskDocRef = doc(
+        db,
+        "UserSingleTasks",
+        `${user.uid}_${taskId}`
+      );
+      await setDoc(userSingleTaskDocRef, {
+        UserId: user.uid,
+        TaskId: taskId,
+        UserObject: {
+          name: user.name,
+          email: user.email,
+          wallet: user.wallet,
+        },
+        CurrentStatus: "completed",
+        isProof: "notRequired",
+        CompletedAt: new Date(),
+      });
 
-      // Update the UserTask document with the new details
-      await updateDoc(userTaskDoc.ref, updatedUserTaskData);
-
-      // Update local state to reflect changes
+      // Update local state to reflect the changes
       setSingleTasks((prevTasks) =>
         prevTasks.map((task) =>
           task.id === taskId ? { ...task, status: "completed" } : task
         )
       );
-
       toast.info("Task is completed and tracked.");
     } catch (error) {
       toast.error("Failed to process the task.");
       console.error(error);
+    }
+  };
+
+  // Handle Calim Reward
+  const handleClaimTask = async (taskId) => {
+    try {
+      // Update the task status in Firebase to "claimed" or perform any other logic
+      const taskRef = doc(db, "UserSingleTasks", taskId);
+      await updateDoc(taskRef, { status: "claimed" });
+      toast.success("Reward claimed successfully!");
+    } catch (error) {
+      console.error("Failed to claim the task:", error);
+      toast.error("Failed to claim the reward.");
     }
   };
 
@@ -292,19 +270,27 @@ function Dashboard() {
 
     if (activeTab === "New") {
       filteredTasks = singleTasks.filter(
-        (task) => task.status === "approved" || task.status === "completed"
+        (task) =>
+          (task.status === "approved" ||
+            task.status === "completed" ||
+            task.status === "claimAward") &&
+          task.createdBy !== user.uid
       );
     } else if (activeTab === "OnChain") {
       filteredTasks = singleTasks.filter(
         (task) =>
-          task.status === "completed" ||
-          (task.status === "approved" && task.category === "OnChain")
+          (task.status === "completed" ||
+            task.status === "claimAward" ||
+            (task.status === "approved" && task.category === "OnChain")) &&
+          task.createdBy !== user.uid
       );
     } else if (activeTab === "Socials") {
       filteredTasks = singleTasks.filter(
         (task) =>
-          task.status === "approved" ||
-          (task.status === "completed" && task.category === "Socials")
+          (task.status === "approved" ||
+            task.status === "claimAward" ||
+            (task.status === "completed" && task.category === "Socials")) &&
+          task.createdBy !== user.uid
       );
     }
 
@@ -313,7 +299,7 @@ function Dashboard() {
         {filteredTasks.map((task) => {
           // Check if the current task has a corresponding UserTask with isProof = true
           const userTask = userTasks.find((ut) => ut.TaskId === task.id);
-          const showAddProof = userTask?.isProof;
+          const showAddProof = userTask?.isProof === "askProof";
 
           return (
             <li key={task.id} className="task-list-item">
@@ -331,7 +317,7 @@ function Dashboard() {
               </div>
               {/* Add proof or start/claim task */}
               <div>
-                {showAddProof === true ? (
+                {showAddProof ? (
                   <button
                     className="redirect-icon"
                     onClick={() => openProofModal(task.id)}
@@ -339,7 +325,7 @@ function Dashboard() {
                   >
                     Proof
                     <i
-                      class="bi bi-upload"
+                      className="bi bi-upload"
                       style={{
                         fontSize: "14px",
                         color: "#000",
@@ -348,29 +334,61 @@ function Dashboard() {
                     ></i>
                   </button>
                 ) : (
-                  <button
-                    className={`redirect-icon ${
-                      task.status === "completed" ? "disabled" : ""
-                    }`}
-                    onClick={() =>
-                      task.status === "approved" &&
-                      handleCompleteTask(task.id, task.link)
-                    }
-                    disabled={task.status === "completed"}
-                    style={{
-                      cursor:
-                        task.status === "completed" ? "not-allowed" : "pointer",
-                    }}
-                  >
-                    {task.status === "completed" ? (
-                      <i
-                        class="bi bi-check2-all"
-                        style={{ fontSize: "20px", color: "#000" }}
-                      ></i>
+                  <>
+                    {/* Claim Button */}
+                    {task.status === "claimAward" ? (
+                      <button
+                        className="redirect-icon"
+                        onClick={() => handleClaimTask(task.id)}
+                        style={{
+                          cursor: "pointer",
+                          backgroundColor: "#4caf50",
+                          color: "#fff",
+                          padding: "5px 10px",
+                          borderRadius: "5px",
+                          border: "none",
+                        }}
+                      >
+                        Claim
+                        <i
+                          className="bi bi-currency-bitcoin"
+                          style={{
+                            fontSize: "18px",
+                            marginLeft: "8px",
+                          }}
+                        ></i>
+                      </button>
                     ) : (
-                      "Start"
+                      <>
+                        {/* Start or Completed Task Button */}
+                        <button
+                          className={`redirect-icon ${
+                            task.status === "completed" ? "disabled" : ""
+                          }`}
+                          onClick={() =>
+                            task.status === "approved" &&
+                            handleCompleteTask(task.id, task.link)
+                          }
+                          disabled={task.status === "completed"}
+                          style={{
+                            cursor:
+                              task.status === "completed"
+                                ? "not-allowed"
+                                : "pointer",
+                          }}
+                        >
+                          {task.status === "completed" ? (
+                            <i
+                              className="bi bi-check2-all"
+                              style={{ fontSize: "20px", color: "#000" }}
+                            ></i>
+                          ) : (
+                            "Start"
+                          )}
+                        </button>
+                      </>
                     )}
-                  </button>
+                  </>
                 )}
               </div>
             </li>

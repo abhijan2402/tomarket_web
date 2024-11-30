@@ -83,26 +83,6 @@ function Reward() {
         type: "single",
       });
 
-      // Fetch user details from the `users` collection
-      const userDocRef = doc(db, "users", user.uid);
-      const userDoc = await getDoc(userDocRef);
-
-      if (!userDoc.exists()) {
-        throw new Error("User details not found in the database.");
-      }
-
-      const userData = userDoc.data();
-
-      // Track User's progress in UserTasks collection
-      await addDoc(collection(db, "UserTasks"), {
-        UserTaskId: `UT${Date.now()}`,
-        TaskId: taskRef.id,
-        UserId: user.uid,
-        UserObject: {
-          ...userData,
-        }
-      });
-
       toast.success("Task added successfully!");
     } catch (error) {
       toast.error("Error adding document: " + error.message);

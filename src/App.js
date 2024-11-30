@@ -51,11 +51,7 @@ function App() {
 
 function AppContent({ Logo }) {
   const location = useLocation();
-  const { user, loading } = useAuth(); // Access user and loading states
-
-  // Debugging
-  console.log("Current user:", user);
-  console.log("Loading state:", loading);
+  const { user, loading } = useAuth();
 
   return (
     <>
