@@ -56,7 +56,7 @@ function AppContent({ Logo }) {
   // Debugging
   console.log("Current user:", user);
   console.log("Loading state:", loading);
-  
+
   return (
     <>
       {!loading && (
