@@ -12,9 +12,12 @@ import { toast } from "react-toastify";
 
 const MyTask = ({ DetailedUserTasks }) => {
   const [showModal, setShowModal] = useState(false);
+  const [proofType, setProofType] = useState("");
+  const [showProofModal, setShowProofModal] = useState(false);
   const [UserSingleTasks, setUserSingleTasks] = useState([]);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [loading, setLoading] = useState(true);
+
 
   const platformIcons = {
     youtube: "bi-youtube",
@@ -58,25 +61,36 @@ const MyTask = ({ DetailedUserTasks }) => {
     getUserSingleTasks();
   }, []);
 
+  const openProofModal = (taskId) => {
+    setSelectedTaskId(taskId);
+    setShowProofModal(true);
+  };
+
+  const closeProofModal = () => {
+    setShowProofModal(false);
+    setProofType("");
+  };
+
   // Ask Proof Form User
-  const updateProofStatus = async (taskId) => {
-    alert("hello");
+  const updateProofStatus = async () => {
+    if (!selectedTaskId || !proofType) {
+      toast.error("Invalid task or proof type.");
+      return;
+    }
     try {
-      const taskDoc = doc(db, "UserSingleTasks", taskId);
-      await updateDoc(taskDoc, {
-        isProof: "askProof",
-      });
+      const taskDoc = doc(db, "UserSingleTasks", selectedTaskId);
+      await updateDoc(taskDoc, { isProof: proofType });
       toast.success("Proof status updated successfully!");
-      // Update state to reflect the change
       setUserSingleTasks((prevTasks) =>
         prevTasks.map((task) =>
-          task.id === taskId ? { ...task, isProof: "askProof" } : task
+          task.id === selectedTaskId ? { ...task, isProof: proofType } : task
         )
       );
     } catch (error) {
+      console.error("Failed to update proof status:", error);
       toast.error("Failed to update proof status.");
-      console.error(error);
     }
+    closeProofModal();
   };
 
   // Give Reward to User
@@ -133,10 +147,17 @@ const MyTask = ({ DetailedUserTasks }) => {
                   className="redirect-icon"
                   style={{
                     cursor: "pointer",
+                    display: "flex",
+                    gap: "5px",
+                    alignItems: "center",
                   }}
                   onClick={() => handleOpenModal(userTask.id)}
                 >
-                  Task Details
+                  <i
+                    class="bi bi-list-check"
+                    style={{ fontSize: "14px", color: "#000" }}
+                  ></i>
+                  Detail
                 </button>
               </div>
             </li>
@@ -194,7 +215,7 @@ const MyTask = ({ DetailedUserTasks }) => {
                             cursor: "pointer",
                             borderRadius: "5px",
                           }}
-                          onClick={() => updateProofStatus(item.id)}
+                          onClick={() => openProofModal(item.id)}
                           // disabled={item.isProof}
                         >
                           {item.isProof === "proofAdded" ? (
@@ -215,7 +236,7 @@ const MyTask = ({ DetailedUserTasks }) => {
                             cursor: "pointer",
                             borderRadius: "5px",
                           }}
-                          onClick={() => updateRewardStatus(item.TaskId)}
+                          onClick={() => updateRewardStatus(item.id)}
                         >
                           <i
                             className="bi bi-currency-bitcoin"
@@ -228,6 +249,46 @@ const MyTask = ({ DetailedUserTasks }) => {
                 ) : (
                   <p>No users have completed this task yet.</p>
                 )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showProofModal && (
+        <div
+          className="modal fade show custom-modal"
+          style={{ display: "block" }}
+        >
+          <div className="modal-dialog modal-md">
+            <div className="modal-content modal-tsk-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Provide Proof Details</h5>
+                <i
+                  className="bi bi-x-square"
+                  style={{ fontSize: "1.5rem", cursor: "pointer" }}
+                  onClick={closeProofModal}
+                ></i>
+              </div>
+              <div className="modal-body">
+                <div className="form-group">
+                  <label>Proof Type:</label>
+                  <select
+                    className="form-control"
+                    value={proofType}
+                    onChange={(e) => setProofType(e.target.value)}
+                  >
+                    <option value="">Select Proof Type</option>
+                    <option value="link">Link</option>
+                    <option value="screenshot">Screenshot</option>
+                  </select>
+                </div>
+                <button
+                  className="btn btn-primary mt-3"
+                  onClick={() => updateProofStatus(selectedTaskId)}
+                >
+                  Submit Proof
+                </button>
               </div>
             </div>
           </div>

@@ -96,6 +96,10 @@ function Dashboard() {
     }
   };
 
+  const currentTaskUserTask = userTasks.find(
+    (ut) => ut.TaskId === selectedTaskId
+  );
+
   // Icon Mapping based on platform
   const platformIcons = {
     youtube: "bi-youtube",
@@ -297,9 +301,7 @@ function Dashboard() {
     return (
       <ul className="task-list">
         {filteredTasks.map((task) => {
-          // Check if the current task has a corresponding UserTask with isProof = true
           const userTask = userTasks.find((ut) => ut.TaskId === task.id);
-          const showAddProof = userTask?.isProof === "askProof";
 
           return (
             <li key={task.id} className="task-list-item">
@@ -308,16 +310,14 @@ function Dashboard() {
                   platformIcons[task.platformLogo?.toLowerCase()] || defaultIcon
                 }`}
               ></i>
-              {/* Task details */}
               <div className="task-details">
                 <h4 className="task-title">{task.title}</h4>
                 <p style={{ color: "greenyellow", fontSize: "12px" }}>
                   +{task.reward} BP
                 </p>
               </div>
-              {/* Add proof or start/claim task */}
               <div>
-                {showAddProof ? (
+                {userTask?.isProof ? (
                   <button
                     className="redirect-icon"
                     onClick={() => openProofModal(task.id)}
@@ -335,7 +335,6 @@ function Dashboard() {
                   </button>
                 ) : (
                   <>
-                    {/* Claim Button */}
                     {task.status === "claimAward" ? (
                       <button
                         className="redirect-icon"
@@ -351,42 +350,39 @@ function Dashboard() {
                       >
                         Claim
                         <i
-                          className="bi bi-currency-bitcoin"
+                          className="bi bi-currency-dollar"
                           style={{
-                            fontSize: "18px",
+                            fontSize: "16px",
                             marginLeft: "8px",
                           }}
                         ></i>
                       </button>
                     ) : (
-                      <>
-                        {/* Start or Completed Task Button */}
-                        <button
-                          className={`redirect-icon ${
-                            task.status === "completed" ? "disabled" : ""
-                          }`}
-                          onClick={() =>
-                            task.status === "approved" &&
-                            handleCompleteTask(task.id, task.link)
-                          }
-                          disabled={task.status === "completed"}
-                          style={{
-                            cursor:
-                              task.status === "completed"
-                                ? "not-allowed"
-                                : "pointer",
-                          }}
-                        >
-                          {task.status === "completed" ? (
-                            <i
-                              className="bi bi-check2-all"
-                              style={{ fontSize: "20px", color: "#000" }}
-                            ></i>
-                          ) : (
-                            "Start"
-                          )}
-                        </button>
-                      </>
+                      <button
+                        className={`redirect-icon ${
+                          task.status === "completed" ? "disabled" : ""
+                        }`}
+                        onClick={() =>
+                          task.status === "approved" &&
+                          handleCompleteTask(task.id, task.link)
+                        }
+                        disabled={task.status === "completed"}
+                        style={{
+                          cursor:
+                            task.status === "completed"
+                              ? "not-allowed"
+                              : "pointer",
+                        }}
+                      >
+                        {task.status === "completed" ? (
+                          <i
+                            className="bi bi-check2-all"
+                            style={{ fontSize: "20px", color: "#000" }}
+                          ></i>
+                        ) : (
+                          "Start"
+                        )}
+                      </button>
                     )}
                   </>
                 )}
@@ -526,10 +522,14 @@ function Dashboard() {
                     onClick={() => setProofModalOpen(false)}
                     style={{ cursor: "pointer" }}
                   >
-                    <i class="bi bi-x-square"></i>
+                    <i className="bi bi-x-square"></i>
                   </span>
                 </h4>
-                <input type="file" onChange={handleProofFileChange} />
+                {currentTaskUserTask?.isProof === "link" ? (
+                  <input type="file" onChange={handleProofFileChange} />
+                ) : (
+                  <p>Invalid Proof Type</p>
+                )}
                 <button className="modal_submit_btn" onClick={submitProof}>
                   Submit Proof
                 </button>

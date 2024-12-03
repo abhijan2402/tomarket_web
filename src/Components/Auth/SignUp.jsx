@@ -44,12 +44,18 @@ function SignUp() {
 
     if (password !== confirmPassword) {
       setLoading(false);
-      setError("Passwords do not match. Please ensure both passwords are identical.");
+      setError(
+        "Passwords do not match. Please ensure both passwords are identical."
+      );
       return;
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
       // Add user to Firestore
       const user = userCredential.user;
@@ -58,7 +64,7 @@ function SignUp() {
         age: parseInt(age, 10),
         email: user.email,
         wallet: 500,
-        userID:user.uid,
+        userID: user.uid,
         createdAt: new Date().toISOString(),
       });
 
@@ -167,13 +173,20 @@ function SignUp() {
                     onClick={() => setShowPassword(!showPassword)}
                     style={{ cursor: "pointer" }}
                   >
-                    {showPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                    {showPassword ? (
+                      <i className="bi bi-eye-slash"></i>
+                    ) : (
+                      <i className="bi bi-eye"></i>
+                    )}
                   </span>
                 </div>
               </div>
 
               <div className="mb-3">
-                <label htmlFor="confirmPassword" className="form-label text-white">
+                <label
+                  htmlFor="confirmPassword"
+                  className="form-label text-white"
+                >
                   Confirm Password
                 </label>
                 <div className="input-group">
@@ -191,7 +204,11 @@ function SignUp() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     style={{ cursor: "pointer" }}
                   >
-                    {showConfirmPassword ? <i className="bi bi-eye-slash"></i> : <i className="bi bi-eye"></i>}
+                    {showConfirmPassword ? (
+                      <i className="bi bi-eye-slash"></i>
+                    ) : (
+                      <i className="bi bi-eye"></i>
+                    )}
                   </span>
                 </div>
               </div>
