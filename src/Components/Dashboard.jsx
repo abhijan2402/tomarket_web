@@ -30,6 +30,7 @@ function Dashboard() {
   const { categories } = useContext(AppContext);
   const [proofModalOpen, setProofModalOpen] = useState(false);
   const [proofFile, setProofFile] = useState(null);
+  const [proofLink, setProofLink] = useState(null);
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [userTasks, setUserTasks] = useState([]);
   const [selectedGroupTasks, setSelectedGroupTasks] = useState([]);
@@ -66,30 +67,61 @@ function Dashboard() {
     setProofModalOpen(true);
   };
 
+  const handleProoflink = (event) => {
+    setProofLink(event.target.value);
+  };
+
   const handleProofFileChange = (event) => {
     setProofFile(event.target.files[0]);
   };
 
   const submitProof = async () => {
-    if (!proofFile || !selectedTaskId) {
-      toast.error("Please upload a proof file.");
+    if (!selectedTaskId) {
+      toast.error("Task ID is required.");
       return;
     }
 
-    const proofRef = ref(storage, `proofs/${selectedTaskId}/${proofFile.name}`);
-
     try {
-      // Upload file to Firebase Storage
-      const uploadResult = await uploadBytes(proofRef, proofFile);
-      const proofURL = await getDownloadURL(uploadResult.ref);
-
-      // Update Firestore with proof URL
       const taskDocRef = doc(db, "UserSingleTasks", selectedTaskId);
-      await updateDoc(taskDocRef, { proofURL, isProof: "proofAdded" });
 
+      if (currentTaskUserTask?.isProof === "proof") {
+        // Handle file upload proof
+        if (!proofFile) {
+          toast.error("Please upload a proof file.");
+          return;
+        }
+
+        const proofRef = ref(
+          storage,
+          `proofs/${selectedTaskId}/${proofFile.name}`
+        );
+        const uploadResult = await uploadBytes(proofRef, proofFile);
+        const proofURL = await getDownloadURL(uploadResult.ref);
+
+        // Update Firestore with proof URL
+        await updateDoc(taskDocRef, { proofURL, isProof: "proofAdded" });
+
+        toast.success("Proof file submitted successfully!");
+      } else if (currentTaskUserTask?.isProof === "link") {
+        // Handle proof link submission
+        if (!proofLink) {
+          toast.error("Please provide a proof link.");
+          return;
+        }
+
+        // Update Firestore with proof link
+        await updateDoc(taskDocRef, { proofLink, isProof: "proofLinkAdded" });
+
+        toast.success("Proof link submitted successfully!");
+      } else {
+        toast.info("No proof required for this task.");
+        return;
+      }
+
+      // Reset states and close modal
       setProofModalOpen(false);
       setProofFile(null);
-      toast.success("Proof submitted successfully!");
+      setProofLink(null);
     } catch (error) {
       toast.error("Failed to submit proof. Please try again.");
       console.error(error);
@@ -526,10 +558,17 @@ function Dashboard() {
                   </span>
                 </h4>
                 {currentTaskUserTask?.isProof === "link" ? (
+                  <input
+                    type="text"
+                    placeholder="Enter the link for proof"
+                    onChange={handleProoflink}
+                  />
+                ) : currentTaskUserTask?.isProof === "screenshot" ? (
                   <input type="file" onChange={handleProofFileChange} />
                 ) : (
-                  <p>Invalid Proof Type</p>
+                  <p>No proof required</p>
                 )}
+
                 <button className="modal_submit_btn" onClick={submitProof}>
                   Submit Proof
                 </button>
