@@ -404,12 +404,16 @@ function Dashboard() {
                             task.status === "completed"
                               ? "not-allowed"
                               : "pointer",
+                          borderRadius:
+                            task.status === "completed" ? "10px" : "",
+                          padding:
+                            task.status === "completed" ? "4px 10px" : "",
                         }}
                       >
                         {task.status === "completed" ? (
                           <i
                             className="bi bi-check2-all"
-                            style={{ fontSize: "20px", color: "#000" }}
+                            style={{ fontSize: "18px", color: "#000" }}
                           ></i>
                         ) : (
                           "Start"

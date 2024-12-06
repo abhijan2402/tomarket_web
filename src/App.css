@@ -33,15 +33,17 @@
   letter-spacing: 1px;
   font-weight: 600;
   outline: none;
-  border: none;
-  background-color: goldenrod;
+  border: 2px solid goldenrod;
+  background-color: transparent;
   cursor: pointer;
-  color: #000;
+  color: #fff;
   transition: 0.5s all;
+  font-weight: 700;
 }
 
 .header_log button:hover {
-  background-color: #686c70e9;
+  background-color: goldenrod;
+  color: #000;
 }
 
 /* Hamburger menu */

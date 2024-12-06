@@ -47,11 +47,11 @@ const Topbar = ({ Logo }) => {
             <div className="header_log">
               <Link to="/task">
                 <button style={{ fontSize: "14px" }}>
-                  <i
+                  {/* <i
                     className="bi bi-plus-circle"
-                    style={{ fontSize: "12px", marginRight: "5px" }}
-                  ></i>
-                  Task
+                    style={{ fontSize: "14px", marginRight: "5px" }}
+                  ></i> */}
+                  📜Task
                 </button>
               </Link>
             </div>
