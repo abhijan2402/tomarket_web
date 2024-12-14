@@ -18,7 +18,6 @@ const MyTask = ({ DetailedUserTasks }) => {
   const [selectedTaskId, setSelectedTaskId] = useState(null);
   const [loading, setLoading] = useState(true);
 
-
   const platformIcons = {
     youtube: "bi-youtube",
     twitter: "bi-twitter",
@@ -239,7 +238,7 @@ const MyTask = ({ DetailedUserTasks }) => {
                           onClick={() => updateRewardStatus(item.id)}
                         >
                           <i
-                            className="bi bi-currency-bitcoin"
+                            class="bi bi-currency-dollar"
                             style={{ fontSize: "20px" }}
                           ></i>
                         </button>

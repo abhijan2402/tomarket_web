@@ -2,15 +2,12 @@ import React from "react";
 import "./Card.css";
 
 const Card = ({ card_data, handleCompleteTask, openProofModal, userTasks }) => {
-
-
   return (
     <>
       {card_data.map((item, index) => {
         // Safely find the userTask corresponding to the current item
         const userTask = userTasks?.find((ut) => ut.TaskId === item.id);
         const showAddProof = userTask?.isProof;
-      
 
         return (
           <div className="card-space" key={index}>
@@ -37,7 +34,7 @@ const Card = ({ card_data, handleCompleteTask, openProofModal, userTasks }) => {
                 </button>
               ) : (
                 <button
-                  className={`redirect-icons ${
+                  className={`start-redirect-icons ${
                     item.status === "completed" ? "disabled" : ""
                   }`}
                   onClick={() =>
@@ -46,10 +43,15 @@ const Card = ({ card_data, handleCompleteTask, openProofModal, userTasks }) => {
                   }
                   disabled={item.status === "completed"}
                   style={{
-                    cursor: item.status === "completed" ? "not-allowed" : "pointer",
+                    cursor:
+                      item.status === "completed" ? "not-allowed" : "pointer",
                   }}
                 >
-                  {item.status === "completed" ? <i class="bi bi-check2-all"></i> : "Start"}
+                  {item.status === "completed" ? (
+                    <i class="bi bi-check2-all"></i>
+                  ) : (
+                    "Start"
+                  )}
                 </button>
               )}
             </div>

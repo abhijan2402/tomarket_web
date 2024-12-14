@@ -23,7 +23,7 @@ import MyTask from "./MyTask";
 
 function Dashboard() {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState("New");
+  const [activeTab, setActiveTab] = useState("OnChain");
   const [singleTasks, setSingleTasks] = useState([]);
   const [multiTasks, setMultiTasks] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,14 +37,36 @@ function Dashboard() {
   const [groupTaskId, setGroupTaskId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [DetailedUserTasks, setDetailedUserTasks] = useState();
+  const [selectedTask, setSelectedTask] = useState(null);
+
+  // Instruction Modal
+  const [instructionModal, setInstructionModal] = useState(false);
+  const [instructiontaskId, setInstructiontaskId] = useState(null);
+  const [instructiontaskLink, setInstructionLink] = useState(null);
+  const [instructionDetails, setInstructionDetails] = useState(null);
   console.log("details user", DetailedUserTasks);
 
   const storage = getStorage();
+
+  const handleTaskDetailsInstructionModal = (taskId, link, desc) => {
+    setInstructionModal(true);
+    setInstructiontaskId(taskId);
+    setInstructionLink(link);
+    setInstructionDetails(desc);
+  };
+  const handleTaskDetailsInstructionModalClose = () => {
+    setInstructionModal(false);
+  };
 
   const handleOpenModal = (tasks, taskId) => {
     setGroupTaskId(taskId);
     setSelectedGroupTasks(tasks);
     setShowModal(true);
+  };
+
+  const handleOpenSingleTaskDetailsModal = (tasks, taskId) => {
+    const task = singleTasks.find((t) => t.id === taskId);
+    setSelectedTask(task);
   };
 
   const handleCloseModal = () => {
@@ -244,7 +266,6 @@ function Dashboard() {
   // Handling the Individual task in a new tab and saving the details in UserTasks collection
   const handleCompleteTask = async (taskId, youtubeLink) => {
     // Open the YouTube link in a new tab
-    alert("hake");
     window.open(youtubeLink, "_blank");
     console.log(taskId);
 
@@ -280,6 +301,7 @@ function Dashboard() {
           task.id === taskId ? { ...task, status: "completed" } : task
         )
       );
+      handleTaskDetailsInstructionModalClose();
       toast.info("Task is completed and tracked.");
     } catch (error) {
       toast.error("Failed to process the task.");
@@ -304,15 +326,16 @@ function Dashboard() {
   const renderTasks = () => {
     let filteredTasks = [];
 
-    if (activeTab === "New") {
-      filteredTasks = singleTasks.filter(
-        (task) =>
-          (task.status === "approved" ||
-            task.status === "completed" ||
-            task.status === "claimAward") &&
-          task.createdBy !== user.uid
-      );
-    } else if (activeTab === "OnChain") {
+    // if (activeTab === "New") {
+    //   filteredTasks = singleTasks.filter(
+    //     (task) =>
+    //       (task.status === "approved" ||
+    //         task.status === "completed" ||
+    //         task.status === "claimAward") &&
+    //       task.createdBy !== user.uid
+    //   );
+    // }
+    if (activeTab === "OnChain") {
       filteredTasks = singleTasks.filter(
         (task) =>
           (task.status === "completed" ||
@@ -349,7 +372,7 @@ function Dashboard() {
                 </p>
               </div>
               <div>
-                {userTask?.isProof ? (
+                {userTask?.isProof === "link" && "screenshot" ? (
                   <button
                     className="redirect-icon"
                     onClick={() => openProofModal(task.id)}
@@ -391,12 +414,16 @@ function Dashboard() {
                       </button>
                     ) : (
                       <button
-                        className={`redirect-icon ${
+                        className={`start-redirect-icon ${
                           task.status === "completed" ? "disabled" : ""
                         }`}
                         onClick={() =>
                           task.status === "approved" &&
-                          handleCompleteTask(task.id, task.link)
+                          handleTaskDetailsInstructionModal(
+                            task.id,
+                            task.link,
+                            task.description
+                          )
                         }
                         disabled={task.status === "completed"}
                         style={{
@@ -408,12 +435,14 @@ function Dashboard() {
                             task.status === "completed" ? "10px" : "",
                           padding:
                             task.status === "completed" ? "4px 10px" : "",
+                          backgroundColor:
+                            task.status === "completed" ? "transparent" : null,
                         }}
                       >
                         {task.status === "completed" ? (
                           <i
-                            className="bi bi-check2-all"
-                            style={{ fontSize: "18px", color: "#000" }}
+                            class="bi bi-check2-circle"
+                            style={{ fontSize: "20px" }}
                           ></i>
                         ) : (
                           "Start"
@@ -509,16 +538,40 @@ function Dashboard() {
           {/* Tab Navigation */}
           <div className="tabs-container">
             {categories
-              ?.filter((category) => category.name !== "Weekly") // Filter out "Weekly"
-              .map((category) => (
-                <button
-                  key={category.name} // Add a key for React's reconciliation
-                  className={activeTab === category.name ? "active" : ""}
-                  onClick={() => setActiveTab(category.name)}
-                >
-                  {category.name}
-                </button>
-              ))}
+              ?.filter(
+                (category) =>
+                  category.name !== "Weekly" && category.name !== "New"
+              )
+              .map((category) => {
+                // Check if there are any incomplete tasks for this category
+                const hasIncompleteTasks = singleTasks.some(
+                  (task) =>
+                    task.category === category.name &&
+                    task.status === "approved"
+                );
+
+                return (
+                  <button
+                    key={category.name}
+                    className={activeTab === category.name ? "active" : ""}
+                    onClick={() => setActiveTab(category.name)}
+                  >
+                    {category.name}
+                    {hasIncompleteTasks && ( // Show dot only if there are incomplete tasks
+                      <i
+                        className="bi bi-dot"
+                        style={{
+                          color: "goldenrod",
+                          fontSize: "24px",
+                          position: "relative",
+                          right: "6px",
+                          top: "-6px",
+                        }}
+                      ></i>
+                    )}
+                  </button>
+                );
+              })}
             <p
               className={activeTab === "mytask" ? "active" : ""}
               onClick={() => setActiveTab("mytask")}
@@ -694,6 +747,95 @@ function Dashboard() {
                         </div>
                       );
                     })}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showModal && selectedTask && (
+            <div
+              className="modal fade show custom-modal"
+              style={{
+                display: "block",
+              }}
+            >
+              <div className="modal-dialog modal-lg">
+                <div className="modal-content modal-tsk-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Task Instructions</h5>
+                    <i
+                      className="bi bi-x-square"
+                      style={{ fontSize: "1.5rem", cursor: "pointer" }}
+                      onClick={handleCloseModal}
+                    ></i>
+                  </div>
+                  <div className="modal-body">
+                    <h6>{selectedTask.title}</h6>
+                    <p>
+                      {selectedTask.instructions ||
+                        "No detailed instructions provided."}
+                    </p>
+                  </div>
+                  <div className="modal-footer">
+                    <button
+                      className="btn btn-success"
+                      onClick={() => {
+                        handleCompleteTask(selectedTask.id, selectedTask.link);
+                        handleCloseModal();
+                      }}
+                    >
+                      Start Task
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Task Complition Instruction */}
+          {instructionModal && (
+            <div
+              className="modal fade show custom-modal"
+              style={{
+                display: "block",
+              }}
+            >
+              <div className="modal-dialog modal-lg">
+                <div className="modal-content modal-tsk-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">
+                      Tasks Instructions Completion Details
+                    </h5>
+                    <i
+                      className="bi bi-x-square"
+                      style={{ fontSize: "1.5rem", cursor: "pointer" }}
+                      onClick={() => handleTaskDetailsInstructionModalClose()}
+                    ></i>
+                  </div>
+                  <div className="modal-body">
+                    <div
+                      style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        textAlign: "left",
+                      }}
+                    >
+                      <p>{instructionDetails}</p>
+                      <div className="task-btn-complication-proceed">
+                        <button
+                          className="start-redirect-icon"
+                          onClick={() =>
+                            handleCompleteTask(
+                              instructiontaskId,
+                              instructiontaskLink
+                            )
+                          }
+                        >
+                          Complete Task
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>

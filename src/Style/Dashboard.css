@@ -311,21 +311,25 @@
   border: none;
 }
 
-.redirect-icon.task-completed {
-  background-color: #28a745;
-  cursor: not-allowed;
-}
-
-.redirect-icon:disabled {
-  cursor: not-allowed; /* Shows restricted cursor */
-  opacity: 0.6; /* Makes the button visually distinct */
+.start-redirect-icon {
+  font-size: 14px;
   color: #000;
+  background-color: #fcc419;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 25px;
+  border-radius: 40px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  border: none;
 }
 
 .tabs-container {
+  /* border: 1px solid red; */
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 10px;
+  margin-top: 10px;
   margin-bottom: 20px;
   overflow-x: scroll;
   scrollbar-width: none;
@@ -348,7 +352,7 @@
 }
 
 .tabs-container button {
-  padding: 10px 10px;
+  padding: 0px 10px;
   border-radius: 4px;
   font-size: 18px;
   letter-spacing: 1px;
@@ -422,7 +426,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 30px;
+    padding: 8px 25px;
     font-size: 14px;
   }
 }

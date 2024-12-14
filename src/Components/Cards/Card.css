@@ -59,12 +59,24 @@
   font-size: 12px;
 }
 .redirect-icons {
-  font-size: 16px;
+  font-size: 14px;
   color: #000;
   background-color: #fcc419;
   text-decoration: none;
   font-weight: 600;
-  padding: 10px 20px;
+  padding: 8px 20px;
+  border-radius: 40px;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+  border: none;
+}
+.start-redirect-icons {
+  font-size: 14px;
+  color: #000;
+  background-color: #fcc419;
+  text-decoration: none;
+  font-weight: 600;
+  padding: 8px 20px;
   border-radius: 40px;
   transition: background-color 0.3s ease;
   cursor: pointer;
