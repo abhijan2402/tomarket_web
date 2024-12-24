@@ -422,7 +422,7 @@ function Dashboard() {
                           handleTaskDetailsInstructionModal(
                             task.id,
                             task.link,
-                            task.description
+                            task.title
                           )
                         }
                         disabled={task.status === "completed"}
@@ -500,7 +500,7 @@ function Dashboard() {
                     </div>
                     <div className="advert_space_details card-body">
                       <h5 className="card-title fs-4">
-                        {firstTask?.description || "Untitled Task"}
+                        {firstTask?.title || "Untitled Task"}
                       </h5>
                       <p className="text-success fs-5">{`+${
                         firstTask?.reward || 0
@@ -685,7 +685,7 @@ function Dashboard() {
                                     }`}
                                   ></i>
                                 </span>
-                                {task?.description || "Untitled Task"}
+                                {task?.title || "Untitled Task"}
                               </h6>
                               <p className="text-success fs-6 pt-1">
                                 +{task?.reward || 0} BP
