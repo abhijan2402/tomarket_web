@@ -418,9 +418,9 @@ function SingleTask() {
                         style={{
                           color: "goldenrod",
                           fontSize: "24px",
-                          position: "relative",
-                          right: "6px",
-                          top: "-6px",
+                          position: "absolute",
+                          right: "-15px",
+                          top: "-16px",
                         }}
                       ></i>
                     )}
@@ -430,6 +430,7 @@ function SingleTask() {
             <button
               className={activeTab === "mytask" ? "active" : ""}
               onClick={() => setActiveTab("mytask")}
+              style={{textWrap: "nowrap"}}
             >
               My task
             </button>

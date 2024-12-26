@@ -340,21 +340,12 @@
   display: none;
 }
 
-.tabs-container p {
-  font-size: 18px;
-  letter-spacing: 1px;
-  color: gray;
-  font-weight: 600;
-}
-.tabs-container p.active {
-  color: #fff;
-  font-weight: 700;
-}
+
 
 .tabs-container button {
-  padding: 0px 10px;
+  padding: 0px 0px;
   border-radius: 4px;
-  font-size: 18px;
+  font-size: 16px;
   letter-spacing: 1px;
   cursor: pointer;
   background-color: #000;
@@ -363,6 +354,7 @@
   font-weight: 600;
   outline: none;
   transition: background-color 0.3s;
+  position: relative;
 }
 
 .tabs-container button.active {
