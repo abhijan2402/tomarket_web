@@ -41,7 +41,7 @@ function Reward() {
       const grpTask = await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: new Date(),
-        createdBy: "User",
+        createdBy: user.uid,
         status: "pending",
         type: "group",
       });

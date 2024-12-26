@@ -13,7 +13,7 @@ const Card = ({ card_data, handleCompleteTask, openProofModal, userTasks }) => {
           <div className="card-space" key={index}>
             <div className="card_space_details">
               <h5>{item?.title || "Untitled Task"}</h5>
-              <p>+ {item?.reward || 0} BP</p>
+              <p>+ {item?.reward || 0} $</p>
             </div>
             <div className="card_space_btn">
               {showAddProof ? (
