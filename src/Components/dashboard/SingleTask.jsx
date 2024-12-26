@@ -112,34 +112,57 @@ function SingleTask() {
         return;
       }
 
-      const existingUserTasks = taskDoc.data().userTasks || [];
-      const userTaskIndex = existingUserTasks.findIndex(
-        (task) => task.userId === user.uid
-      );
-
-      if (userTaskIndex === -1) {
-        toast.error("User task not found.");
-        return;
-      }
-
-      if (proofFile && proofFile.type.startsWith("image/")) {
-        const proofRef = ref(
-          storage,
-          `proofs/${selectedTaskId}/${proofFile.name}`
+      if (taskDoc.data().proof === "link") {
+        const existingUserTasks = taskDoc.data().userTasks || [];
+        const userTaskIndex = existingUserTasks.findIndex(
+          (task) => task.userId === user.uid
         );
-        const uploadResult = await uploadBytes(proofRef, proofFile);
-        const proofURL = await getDownloadURL(uploadResult.ref);
 
-        existingUserTasks[userTaskIndex].proofUrl = proofURL;
+        if (userTaskIndex === -1) {
+          toast.error("User task not found.");  
+          return;
+        }
+
+        existingUserTasks[userTaskIndex].proofUrl = proofLink;
         existingUserTasks[userTaskIndex].status = "submitted";
         existingUserTasks[userTaskIndex].timestamp = new Date();
 
         await updateDoc(taskDocRef, { userTasks: existingUserTasks });
 
-        toast.success("Proof file submitted successfully!");
+        toast.success("Proof link submitted successfully!");
         setProofModalOpen(false);
+      } else if (taskDoc.data().proof === "screenshot") {
+        const existingUserTasks = taskDoc.data().userTasks || [];
+        const userTaskIndex = existingUserTasks.findIndex(
+          (task) => task.userId === user.uid
+        );
+
+        if (userTaskIndex === -1) {
+          toast.error("User task not found.");
+          return;
+        }
+
+        if (proofFile && proofFile.type.startsWith("image/")) {
+          const proofRef = ref(
+            storage,
+            `proofs/${selectedTaskId}/${proofFile.name}-${Date.now()}`
+          );
+          const uploadResult = await uploadBytes(proofRef, proofFile);
+          const proofURL = await getDownloadURL(uploadResult.ref);
+
+          existingUserTasks[userTaskIndex].proofUrl = proofURL;
+          existingUserTasks[userTaskIndex].status = "submitted";
+          existingUserTasks[userTaskIndex].timestamp = new Date();
+
+          await updateDoc(taskDocRef, { userTasks: existingUserTasks });
+
+          toast.success("Proof file submitted successfully!");
+          setProofModalOpen(false);
+        } else {
+          toast.error("Invalid proof file.");
+        }
       } else {
-        toast.error("Invalid proof file.");
+        toast.error("Proof is not required.");
       }
     } catch (error) {
       toast.error("Failed to submit proof.");
@@ -234,7 +257,7 @@ function SingleTask() {
                       ></i>
                     </button>
                   ) : null
-                ) : userTask.status === "submitted" ? (
+                ) : userTask?.status === "submitted" ? (
                   <div
                     className={`start-redirect-icon`}
                     style={{
@@ -245,7 +268,7 @@ function SingleTask() {
                   >
                     Under Review
                   </div>
-                ) : userTask.status === "approved" ? (
+                ) : userTask?.status === "approved" ? (
                   <button
                     className="redirect-icon"
                     onClick={() => handleClaimTask(task)}
@@ -268,17 +291,18 @@ function SingleTask() {
                       }}
                     ></i>
                   </button>
-                ) : userTask.status === "claimed" ? (
+                ) : userTask?.status === "claimed" ? (
                   <div
                     className="redirect-icon"
                     style={{
-                      cursor: "pointer",
+                      cursor: "not-allowed",
                       backgroundColor: "#4caf50",
                       color: "#fff",
                       padding: "5px 10px",
                       borderRadius: "5px",
                       border: "none",
                       textWrap: "nowrap",
+                      opacity: "0.7",
                     }}
                   >
                     Claimed
