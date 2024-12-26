@@ -11,7 +11,6 @@ export const useAuth = () => useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null); // Store user details
   const [loading, setLoading] = useState(true);
-  console.log("User Details:", user)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {

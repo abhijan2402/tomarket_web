@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import "../../Style/Dashboard.css";
 import {
   collection,
@@ -14,14 +14,14 @@ import {
 import "react-toastify/dist/ReactToastify.css";
 import { db, storage } from "../../firebase";
 import SkeletonList from "../SkeletonList/SkeletonList";
-import { AppContext } from "../../context/AppContext";
+import { AppContext, useApp } from "../../context/AppContext";
 import { useAuth } from "../../context/AuthContext";
 import MyTask from "../MyTask";
 import { platformIcons } from "../../constant/icons";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { use } from "react";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import ProofModal from "./ProofModal";
 
 const fetchTasks = async (userUid) => {
   const q = query(
@@ -44,27 +44,37 @@ const fetchTasks = async (userUid) => {
 function SingleTask() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("OnChain");
-  const [singleTasks, setSingleTasks] = useState([]);
   const { categories } = useContext(AppContext);
   const [DetailedUserTasks, setDetailedUserTasks] = useState();
   const [selectedTask, setSelectedTask] = useState(null);
   const [proofModalOpen, setProofModalOpen] = useState(false);
   const [proofFile, setProofFile] = useState(null);
   const [proofLink, setProofLink] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [btnLoading, setBtnLoading] = useState(false);
+  const { mySingleStasks } = useApp();
 
-  const { data: tasks = [], isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["tasks", user.uid],
     queryFn: () => fetchTasks(user.uid),
     staleTime: 300000,
   });
+
+  useEffect(() => {
+    if (data) {
+      setTasks(data);
+    }
+  }, [data]);
 
   const openProofModal = (task) => {
     setSelectedTask(task);
     setProofModalOpen(true);
   };
 
-  const handleCompleteTask = async (taskId, link) => {
+  const handleStartTask = async (taskId, link) => {
     window.open(link, "_blank");
+
+    setBtnLoading(true);
 
     try {
       const taskDocRef = doc(db, "singletasks", taskId);
@@ -88,9 +98,16 @@ function SingleTask() {
       await updateDoc(taskDocRef, { userTasks: updatedUserTasks });
 
       toast.info("Task is completed and tracked.");
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === taskId ? { ...task, userTasks: updatedUserTasks } : task
+        )
+      );
     } catch (error) {
       toast.error("Failed to process the task.");
       console.error(error);
+    } finally {
+      setBtnLoading(false);
     }
   };
 
@@ -103,6 +120,9 @@ function SingleTask() {
       toast.error("Invalid proof data.");
       return;
     }
+
+    setBtnLoading(true);
+
     try {
       const taskDocRef = doc(db, "singletasks", selectedTaskId);
       const taskDoc = await getDoc(taskDocRef);
@@ -112,36 +132,37 @@ function SingleTask() {
         return;
       }
 
-      if (taskDoc.data().proof === "link") {
-        const existingUserTasks = taskDoc.data().userTasks || [];
-        const userTaskIndex = existingUserTasks.findIndex(
-          (task) => task.userId === user.uid
-        );
+      const existingUserTasks = taskDoc.data().userTasks || [];
+      const userTaskIndex = existingUserTasks.findIndex(
+        (task) => task.userId === user.uid
+      );
 
-        if (userTaskIndex === -1) {
-          toast.error("User task not found.");  
-          return;
-        }
+      if (userTaskIndex === -1) {
+        toast.error("User task not found.");
+        return;
+      }
 
-        existingUserTasks[userTaskIndex].proofUrl = proofLink;
+      const updateTaskProof = async (proofUrl) => {
+        existingUserTasks[userTaskIndex].proofUrl = proofUrl;
         existingUserTasks[userTaskIndex].status = "submitted";
         existingUserTasks[userTaskIndex].timestamp = new Date();
 
         await updateDoc(taskDocRef, { userTasks: existingUserTasks });
-
-        toast.success("Proof link submitted successfully!");
+        toast.success("Proof submitted successfully!");
         setProofModalOpen(false);
-      } else if (taskDoc.data().proof === "screenshot") {
-        const existingUserTasks = taskDoc.data().userTasks || [];
-        const userTaskIndex = existingUserTasks.findIndex(
-          (task) => task.userId === user.uid
+
+        setTasks((prevTasks) =>
+          prevTasks.map((task) =>
+            task.id === selectedTaskId
+              ? { ...task, userTasks: existingUserTasks }
+              : task
+          )
         );
+      };
 
-        if (userTaskIndex === -1) {
-          toast.error("User task not found.");
-          return;
-        }
-
+      if (taskDoc.data().proof === "link") {
+        await updateTaskProof(proofLink);
+      } else if (taskDoc.data().proof === "screenshot") {
         if (proofFile && proofFile.type.startsWith("image/")) {
           const proofRef = ref(
             storage,
@@ -149,15 +170,7 @@ function SingleTask() {
           );
           const uploadResult = await uploadBytes(proofRef, proofFile);
           const proofURL = await getDownloadURL(uploadResult.ref);
-
-          existingUserTasks[userTaskIndex].proofUrl = proofURL;
-          existingUserTasks[userTaskIndex].status = "submitted";
-          existingUserTasks[userTaskIndex].timestamp = new Date();
-
-          await updateDoc(taskDocRef, { userTasks: existingUserTasks });
-
-          toast.success("Proof file submitted successfully!");
-          setProofModalOpen(false);
+          await updateTaskProof(proofURL);
         } else {
           toast.error("Invalid proof file.");
         }
@@ -167,10 +180,13 @@ function SingleTask() {
     } catch (error) {
       toast.error("Failed to submit proof.");
       console.error(error);
+    } finally {
+      setBtnLoading(false);
     }
   };
 
   const handleClaimTask = async (task) => {
+    setBtnLoading(true);
     try {
       const taskDocRef = doc(db, "singletasks", task.id);
       const taskDoc = await getDoc(taskDocRef);
@@ -195,16 +211,23 @@ function SingleTask() {
 
       await updateDoc(taskDocRef, { userTasks: existingUserTasks });
 
-      // // Update the user's wallet in the users table
       const userRef = doc(db, "users", user.uid);
       await updateDoc(userRef, {
         wallet: increment(Number(task.reward)),
       });
 
       toast.success("Reward claimed successfully!");
+
+      setTasks((prevTasks) =>
+        prevTasks.map((item) =>
+          item.id === task.id ? { ...item, userTasks: existingUserTasks } : item
+        )
+      );
     } catch (error) {
       console.error("Failed to claim the task:", error);
       toast.error("Failed to claim the reward.");
+    } finally {
+      setBtnLoading(false);
     }
   };
 
@@ -212,9 +235,9 @@ function SingleTask() {
     let filteredTasks = [];
 
     if (activeTab === "OnChain") {
-      filteredTasks = tasks.filter((task) => task.category === "OnChain");
+      filteredTasks = tasks?.filter((task) => task.category === "OnChain");
     } else if (activeTab === "Socials") {
-      filteredTasks = tasks.filter((task) => task.category === "Socials");
+      filteredTasks = tasks?.filter((task) => task.category === "Socials");
     }
 
     return (
@@ -226,12 +249,30 @@ function SingleTask() {
 
           return (
             <li key={task.id} className="task-list-item">
-              <i
-                className={`bi ${
-                  platformIcons[task.platformLogo?.toLowerCase()] ||
-                  platformIcons.defaultIcon
-                }`}
-              ></i>
+              {task.platformLogo === "twitter" ||
+              task.platformLogo === "facebook" ||
+              task.platformLogo === "instagram" ||
+              task.platformLogo === "reddit" ||
+              task.platformLogo === "youtube" ? (
+                <i
+                  className={`bi ${
+                    platformIcons[task.platformLogo?.toLowerCase()] ||
+                    platformIcons.defaultIcon
+                  }`}
+                ></i>
+              ) : (
+                <img
+                  style={{
+                    width: 45,
+                    height: 45,
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                  }}
+                  src={task.platformLogo}
+                  alt=""
+                />
+              )}
+
               <div className="task-details">
                 <h4 className="task-title">{task.title}</h4>
                 <p style={{ color: "greenyellow", fontSize: "12px" }}>
@@ -242,6 +283,7 @@ function SingleTask() {
                 {userTask?.status === "started" ? (
                   task.proof !== "no" ? (
                     <button
+                      disabled={btnLoading}
                       className="redirect-icon"
                       onClick={() => openProofModal(task)}
                       style={{ display: "flex", alignItems: "center" }}
@@ -259,6 +301,7 @@ function SingleTask() {
                   ) : null
                 ) : userTask?.status === "submitted" ? (
                   <div
+                    disabled={btnLoading}
                     className={`start-redirect-icon`}
                     style={{
                       textWrap: "nowrap",
@@ -270,6 +313,7 @@ function SingleTask() {
                   </div>
                 ) : userTask?.status === "approved" ? (
                   <button
+                    disabled={btnLoading}
                     className="redirect-icon"
                     onClick={() => handleClaimTask(task)}
                     style={{
@@ -282,39 +326,55 @@ function SingleTask() {
                       textWrap: "nowrap",
                     }}
                   >
-                    Claim
-                    <i
-                      className="bi bi-currency-dollar"
-                      style={{
-                        fontSize: "16px",
-                        marginLeft: "8px",
-                      }}
-                    ></i>
+                    {btnLoading ? (
+                      <div
+                        class="spinner-border text-light spinner-border-sm"
+                        role="status"
+                      ></div>
+                    ) : (
+                      <>
+                        Claim
+                        <i
+                          className="bi bi-currency-dollar"
+                          style={{
+                            fontSize: "16px",
+                            marginLeft: "8px",
+                          }}
+                        ></i>
+                      </>
+                    )}
                   </button>
                 ) : userTask?.status === "claimed" ? (
                   <div
-                    className="redirect-icon"
+                    className={`start-redirect-icon disabled`}
                     style={{
                       cursor: "not-allowed",
-                      backgroundColor: "#4caf50",
-                      color: "#fff",
-                      padding: "5px 10px",
-                      borderRadius: "5px",
-                      border: "none",
-                      textWrap: "nowrap",
-                      opacity: "0.7",
+                      borderRadius: "10px",
+                      padding: "4px 10px",
+                      // backgroundColor:"transparent",
                     }}
                   >
-                    Claimed
+                    <i
+                      class="bi bi-check2-circle"
+                      style={{ fontSize: "20px" }}
+                    ></i>
                   </div>
                 ) : (
                   <button
+                    disabled={btnLoading}
                     className={`start-redirect-icon`}
                     onClick={() => {
-                      handleCompleteTask(task.id, task.link);
+                      handleStartTask(task.id, task.link);
                     }}
                   >
-                    Start
+                    {btnLoading ? (
+                      <div
+                        class="spinner-border text-light spinner-border-sm"
+                        role="status"
+                      ></div>
+                    ) : (
+                      "Start"
+                    )}
                   </button>
                 )}
               </div>
@@ -335,10 +395,14 @@ function SingleTask() {
             {categories
               ?.filter((category) => category.name !== "Weekly")
               .map((category) => {
-                const hasIncompleteTasks = singleTasks.some(
+                const hasIncompleteTasks = tasks.some(
                   (task) =>
                     task.category === category.name &&
-                    task.status === "approved"
+                    !task.userTasks?.some(
+                      (userTask) =>
+                        userTask.userId === user.uid &&
+                        userTask.status === "claimed"
+                    )
                 );
 
                 return (
@@ -363,18 +427,18 @@ function SingleTask() {
                   </button>
                 );
               })}
-            <p
+            <button
               className={activeTab === "mytask" ? "active" : ""}
               onClick={() => setActiveTab("mytask")}
             >
               My task
-            </p>
+            </button>
           </div>
 
           {/* Tab Content */}
           <div className="task-container">
             {activeTab === "mytask" ? (
-              <MyTask DetailedUserTasks={DetailedUserTasks} />
+              <MyTask DetailedUserTasks={mySingleStasks} />
             ) : (
               renderTasks()
             )}
@@ -382,45 +446,15 @@ function SingleTask() {
         </>
       )}
 
-      {proofModalOpen && (
-        <div className="modal-overlay" onClick={() => setProofModalOpen(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h4
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                marginBottom: "18px",
-              }}
-            >
-              Upload Proof{" "}
-              <span
-                onClick={() => setProofModalOpen(false)}
-                style={{ cursor: "pointer" }}
-              >
-                <i className="bi bi-x-square"></i>
-              </span>
-            </h4>
-            {selectedTask?.proof === "link" ? (
-              <input
-                type="text"
-                placeholder="Enter the link for proof"
-                onChange={(e) => setProofLink(e.target.value)}
-              />
-            ) : selectedTask?.proof === "screenshot" ? (
-              <input type="file" onChange={handleProofFileChange} />
-            ) : (
-              <p>Proof is not required</p>
-            )}
-
-            <button
-              className="modal_submit_btn"
-              onClick={() => submitProof(selectedTask.id)}
-            >
-              Submit Proof
-            </button>
-          </div>
-        </div>
-      )}
+      <ProofModal
+        proofModalOpen={proofModalOpen}
+        setProofModalOpen={setProofModalOpen}
+        setProofLink={setProofLink}
+        selectedTask={selectedTask}
+        btnLoading={btnLoading}
+        submitProof={submitProof}
+        handleProofFileChange={handleProofFileChange}
+      />
     </>
   );
 }

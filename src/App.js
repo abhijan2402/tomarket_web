@@ -19,7 +19,7 @@ import ForgotPassword from "./Components/Auth/ForgotPassword";
 import Topbar from "./Components/Topbar/Topbar";
 import Profile from "./Components/Profile";
 import Home from "./Components/Home";
-import { AuthProvider, useAuth } from "./context/AuthContext"; // import AuthProvider and useAuth
+import { useAuth } from "./context/AuthContext"; // import AuthProvider and useAuth
 import PrivateRoute from "./Components/PrivateRoute";
 import LandingPage from "./Components/LandingPage";
 
@@ -41,11 +41,10 @@ function App() {
   }, []);
 
   return (
-    <AuthProvider>
+    
       <Router>
         <AppContent Logo={Logo} />
       </Router>
-    </AuthProvider>
   );
 }
 
