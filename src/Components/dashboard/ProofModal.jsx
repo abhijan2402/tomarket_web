@@ -22,7 +22,9 @@ const ProofModal = ({
         >
           Upload Proof{" "}
           <span
-            onClick={() => setProofModalOpen(false)}
+            onClick={() => {
+              if(!btnLoading) setProofModalOpen(false);
+            }}
             style={{ cursor: "pointer" }}
           >
             <i className="bi bi-x-square"></i>

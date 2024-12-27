@@ -42,7 +42,7 @@ function GroupTask() {
   const { user } = useAuth();
   const [selectedGroup, setSelectedGroup] = useState();
   const [showModal, setShowModal] = useState(false);
-  const [btnLoading, setBtnLoading] = useState(false);
+  const [btnLoading, setBtnLoading] = useState({});
   const [proofBtnLoading, setProofBtnLoading] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [proofModalOpen, setProofModalOpen] = useState(false);
@@ -68,7 +68,7 @@ function GroupTask() {
   };
 
   const handleClaimTask = async (group, index) => {
-    setBtnLoading(true);
+    setBtnLoading((prev) => ({ ...prev, [index]: true }));
     try {
       const taskDocRef = doc(db, "tasks", group.id);
       const taskDoc = await getDoc(taskDocRef);
@@ -117,14 +117,14 @@ function GroupTask() {
       console.error("Failed to claim the task:", error);
       toast.error("Failed to claim the reward.");
     } finally {
-      setBtnLoading(false);
+      setBtnLoading((prev) => ({ ...prev, [index]: false }));
     }
   };
 
   const handleStartTask = async (taskId, index, link) => {
     window.open(link, "_blank");
 
-    setBtnLoading(true);
+    setBtnLoading((prev) => ({ ...prev, [index]: true }));
 
     try {
       console.log(taskId);
@@ -148,8 +148,6 @@ function GroupTask() {
 
       const updatedUserTasks = [...existingUserTasks, newUserTask];
 
-      console.log(updatedUserTasks);
-
       const updatedTasks = data.tasks.map((task, idx) =>
         idx === index ? { ...task, userTasks: updatedUserTasks } : task
       );
@@ -169,10 +167,9 @@ function GroupTask() {
       toast.error("Failed to process the task.");
       console.error(error);
     } finally {
-      setBtnLoading(false);
+      setBtnLoading((prev) => ({ ...prev, [index]: false }));
     }
   };
-
 
   const submitProof = async () => {
     if (!selectedTask) {
@@ -216,15 +213,15 @@ function GroupTask() {
 
         setTasks((prevTasks) =>
           prevTasks.map((item) =>
-            item.id === selectedGroup.id ? { ...item, tasks: updatedTasks } : item
+            item.id === selectedGroup.id
+              ? { ...item, tasks: updatedTasks }
+              : item
           )
         );
-  
+
         setSelectedGroup({ ...selectedGroup, tasks: updatedTasks });
         toast.success("Proof submitted successfully!");
         setProofModalOpen(false);
-
-        
       };
 
       if (data?.tasks[taskIndex].proof === "link") {
@@ -408,7 +405,7 @@ function GroupTask() {
                           {userTask?.status === "started" ? (
                             task.proof !== "no" ? (
                               <button
-                                disabled={btnLoading}
+                                disabled={proofBtnLoading}
                                 className="redirect-icon"
                                 onClick={() => openProofModal(task, index)}
                                 style={{
@@ -429,7 +426,6 @@ function GroupTask() {
                             ) : null
                           ) : userTask?.status === "submitted" ? (
                             <div
-                              disabled={btnLoading}
                               className={`start-redirect-icon`}
                               style={{
                                 textWrap: "nowrap",
@@ -441,7 +437,7 @@ function GroupTask() {
                             </div>
                           ) : userTask?.status === "approved" ? (
                             <button
-                              disabled={btnLoading}
+                              disabled={btnLoading[index]}
                               className="redirect-icon"
                               onClick={() =>
                                 handleClaimTask(selectedGroup, index)
@@ -456,7 +452,7 @@ function GroupTask() {
                                 textWrap: "nowrap",
                               }}
                             >
-                              {btnLoading ? (
+                              {btnLoading[index] ? (
                                 <div
                                   class="spinner-border text-light spinner-border-sm"
                                   role="status"
@@ -491,7 +487,7 @@ function GroupTask() {
                             </div>
                           ) : (
                             <button
-                              disabled={btnLoading}
+                              disabled={btnLoading[index]}
                               className={`start-redirect-icon`}
                               onClick={() => {
                                 handleStartTask(
@@ -501,7 +497,7 @@ function GroupTask() {
                                 );
                               }}
                             >
-                              {btnLoading ? (
+                              {btnLoading[index] ? (
                                 <div
                                   class="spinner-border text-light spinner-border-sm"
                                   role="status"

@@ -50,7 +50,7 @@ function SingleTask() {
   const [proofFile, setProofFile] = useState(null);
   const [proofLink, setProofLink] = useState(null);
   const [tasks, setTasks] = useState([]);
-  const [btnLoading, setBtnLoading] = useState(false);
+  const [btnLoading, setBtnLoading] = useState({});
   const [proofBtnLoading, setProofBtnLoading] = useState(false);
   const { mySingleStasks } = useApp();
 
@@ -74,7 +74,7 @@ function SingleTask() {
   const handleStartTask = async (taskId, link) => {
     window.open(link, "_blank");
 
-    setBtnLoading(true);
+    setBtnLoading((prev) => ({ ...prev, [taskId]: true }));
 
     try {
       const taskDocRef = doc(db, "singletasks", taskId);
@@ -107,7 +107,7 @@ function SingleTask() {
       toast.error("Failed to process the task.");
       console.error(error);
     } finally {
-      setBtnLoading(false);
+      setBtnLoading((prev) => ({ ...prev, [taskId]: false }));
     }
   };
 
@@ -186,7 +186,7 @@ function SingleTask() {
   };
 
   const handleClaimTask = async (task) => {
-    setBtnLoading(true);
+    setBtnLoading((prev) => ({ ...prev, [task.id]: true }));
     try {
       const taskDocRef = doc(db, "singletasks", task.id);
       const taskDoc = await getDoc(taskDocRef);
@@ -227,7 +227,7 @@ function SingleTask() {
       console.error("Failed to claim the task:", error);
       toast.error("Failed to claim the reward.");
     } finally {
-      setBtnLoading(false);
+      setBtnLoading((prev) => ({ ...prev, [task.id]: false }));
     }
   };
 
@@ -283,7 +283,7 @@ function SingleTask() {
                 {userTask?.status === "started" ? (
                   task.proof !== "no" ? (
                     <button
-                      disabled={btnLoading}
+                      disabled={proofBtnLoading}
                       className="redirect-icon"
                       onClick={() => openProofModal(task)}
                       style={{ display: "flex", alignItems: "center" }}
@@ -301,7 +301,6 @@ function SingleTask() {
                   ) : null
                 ) : userTask?.status === "submitted" ? (
                   <div
-                    disabled={btnLoading}
                     className={`start-redirect-icon`}
                     style={{
                       textWrap: "nowrap",
@@ -313,7 +312,7 @@ function SingleTask() {
                   </div>
                 ) : userTask?.status === "approved" ? (
                   <button
-                    disabled={btnLoading}
+                    disabled={btnLoading[task.id]}
                     className="redirect-icon"
                     onClick={() => handleClaimTask(task)}
                     style={{
@@ -326,7 +325,7 @@ function SingleTask() {
                       textWrap: "nowrap",
                     }}
                   >
-                    {btnLoading ? (
+                    {btnLoading[task.id] ? (
                       <div
                         class="spinner-border text-light spinner-border-sm"
                         role="status"
@@ -361,13 +360,13 @@ function SingleTask() {
                   </div>
                 ) : (
                   <button
-                    disabled={btnLoading}
+                    disabled={btnLoading[task.id]}
                     className={`start-redirect-icon`}
                     onClick={() => {
                       handleStartTask(task.id, task.link);
                     }}
                   >
-                    {btnLoading ? (
+                    {btnLoading[task.id] ? (
                       <div
                         class="spinner-border text-light spinner-border-sm"
                         role="status"
