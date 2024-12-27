@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
 import "../../Style/Dashboard.css";
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  increment,
+  orderBy,
+  query,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { db } from "../../firebase";
-import SkeletonList from "../SkeletonList/SkeletonList";
+import { db, storage } from "../../firebase";
 import { useAuth } from "../../context/AuthContext";
 import { platformIcons } from "../../constant/icons";
 import { useQuery } from "@tanstack/react-query";
 import GroupTaskSkeleton from "../SkeletonList/GroupTaskSkeleton";
+import ProofModal from "./ProofModal";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 const fetchTasks = async (userUid) => {
   const q = query(
@@ -23,30 +34,239 @@ const fetchTasks = async (userUid) => {
     ...doc.data(),
   }));
 
+  console.log(tasks);
   return tasks;
 };
 
 function GroupTask() {
   const { user } = useAuth();
-  const [selectedGroupTasks, setSelectedGroupTasks] = useState([]);
+  const [selectedGroup, setSelectedGroup] = useState();
   const [showModal, setShowModal] = useState(false);
+  const [btnLoading, setBtnLoading] = useState(false);
+  const [proofBtnLoading, setProofBtnLoading] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [proofModalOpen, setProofModalOpen] = useState(false);
+  const [tasks, setTasks] = useState([]);
+  const [proofLink, setProofLink] = useState(null);
+  const [proofFile, setProofFile] = useState(null);
+  const [taskIndex, setTaskIndex] = useState(null);
 
-  const handleOpenModal = (tasks, taskId) => {
-    setSelectedGroupTasks(tasks);
+  const handleOpenModal = (group) => {
+    setSelectedGroup(group);
     setShowModal(true);
+  };
+
+  const openProofModal = (task, index) => {
+    setSelectedTask(task);
+    setTaskIndex(index);
+    setProofModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedGroupTasks([]);
+    setSelectedGroup({});
   };
 
-  const { data: tasks = [], isLoading } = useQuery({
+  const handleClaimTask = async (group, index) => {
+    setBtnLoading(true);
+    try {
+      const taskDocRef = doc(db, "tasks", group.id);
+      const taskDoc = await getDoc(taskDocRef);
+
+      if (!taskDoc.exists()) {
+        toast.error("Task not found.");
+        return;
+      }
+
+      const data = taskDoc.data();
+
+      const existingUserTasks = data?.tasks[index].userTasks || [];
+      const userTaskIndex = existingUserTasks.findIndex(
+        (task) => task.userId === user.uid
+      );
+
+      if (userTaskIndex === -1) {
+        toast.error("User task not found.");
+        return;
+      }
+
+      existingUserTasks[userTaskIndex].status = "claimed";
+      existingUserTasks[userTaskIndex].timestamp = new Date();
+
+      const updatedTasks = data.tasks.map((task, idx) =>
+        idx === taskIndex ? { ...task, userTasks: existingUserTasks } : task
+      );
+
+      await updateDoc(taskDocRef, { tasks: updatedTasks });
+
+      setTasks((prevTasks) =>
+        prevTasks.map((item) =>
+          item.id === group.id ? { ...item, tasks: updatedTasks } : item
+        )
+      );
+
+      setSelectedGroup({ ...selectedGroup, tasks: updatedTasks });
+
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        wallet: increment(Number(group?.tasks[index].reward)),
+      });
+
+      toast.success("Reward claimed successfully!");
+    } catch (error) {
+      console.error("Failed to claim the task:", error);
+      toast.error("Failed to claim the reward.");
+    } finally {
+      setBtnLoading(false);
+    }
+  };
+
+  const handleStartTask = async (taskId, index, link) => {
+    window.open(link, "_blank");
+
+    setBtnLoading(true);
+
+    try {
+      console.log(taskId);
+      const taskDocRef = doc(db, "tasks", taskId);
+      const taskDoc = await getDoc(taskDocRef);
+
+      let existingUserTasks = [];
+
+      const data = taskDoc.data();
+
+      if (taskDoc.exists()) {
+        existingUserTasks = data?.tasks[index]?.userTasks || [];
+      }
+
+      const newUserTask = {
+        userId: user.uid,
+        status: "started",
+        proofUrl: "",
+        timestamp: new Date(),
+      };
+
+      const updatedUserTasks = [...existingUserTasks, newUserTask];
+
+      console.log(updatedUserTasks);
+
+      const updatedTasks = data.tasks.map((task, idx) =>
+        idx === index ? { ...task, userTasks: updatedUserTasks } : task
+      );
+
+      await updateDoc(taskDocRef, { tasks: updatedTasks });
+
+      setTasks((prevTasks) =>
+        prevTasks.map((item) =>
+          item.id === taskId ? { ...item, tasks: updatedTasks } : item
+        )
+      );
+
+      setSelectedGroup({ ...selectedGroup, tasks: updatedTasks });
+
+      toast.info("Task is completed and tracked.");
+    } catch (error) {
+      toast.error("Failed to process the task.");
+      console.error(error);
+    } finally {
+      setBtnLoading(false);
+    }
+  };
+
+
+  const submitProof = async () => {
+    if (!selectedTask) {
+      toast.error("Invalid proof data.");
+      return;
+    }
+
+    setProofBtnLoading(true);
+
+    try {
+      const taskDocRef = doc(db, "tasks", selectedGroup.id);
+      const taskDoc = await getDoc(taskDocRef);
+
+      if (!taskDoc.exists()) {
+        toast.error("Task not found.");
+        return;
+      }
+
+      const data = taskDoc.data();
+
+      const existingUserTasks = data?.tasks[taskIndex].userTasks || [];
+      const userTaskIndex = existingUserTasks.findIndex(
+        (task) => task.userId === user.uid
+      );
+
+      if (userTaskIndex === -1) {
+        toast.error("User task not found.");
+        return;
+      }
+
+      const updateTaskProof = async (proofUrl) => {
+        existingUserTasks[userTaskIndex].proofUrl = proofUrl;
+        existingUserTasks[userTaskIndex].status = "submitted";
+        existingUserTasks[userTaskIndex].timestamp = new Date();
+
+        const updatedTasks = data.tasks.map((task, idx) =>
+          idx === taskIndex ? { ...task, userTasks: existingUserTasks } : task
+        );
+
+        await updateDoc(taskDocRef, { tasks: updatedTasks });
+
+        setTasks((prevTasks) =>
+          prevTasks.map((item) =>
+            item.id === selectedGroup.id ? { ...item, tasks: updatedTasks } : item
+          )
+        );
+  
+        setSelectedGroup({ ...selectedGroup, tasks: updatedTasks });
+        toast.success("Proof submitted successfully!");
+        setProofModalOpen(false);
+
+        
+      };
+
+      if (data?.tasks[taskIndex].proof === "link") {
+        await updateTaskProof(proofLink);
+      } else if (data?.tasks[taskIndex].proof === "screenshot") {
+        if (proofFile && proofFile.type.startsWith("image/")) {
+          const proofRef = ref(
+            storage,
+            `proofs/${selectedGroup.id}/${proofFile.name}-${Date.now()}`
+          );
+          const uploadResult = await uploadBytes(proofRef, proofFile);
+          const proofURL = await getDownloadURL(uploadResult.ref);
+          await updateTaskProof(proofURL);
+        } else {
+          toast.error("Invalid proof file.");
+        }
+      } else {
+        toast.error("Proof is not required.");
+      }
+    } catch (error) {
+      toast.error("Failed to submit proof.");
+      console.error(error);
+    } finally {
+      setProofBtnLoading(false);
+    }
+  };
+
+  const handleProofFileChange = (event) => {
+    setProofFile(event.target.files[0]);
+  };
+
+  const { data, isLoading } = useQuery({
     queryKey: ["group-tasks", user.uid],
     queryFn: () => fetchTasks(user.uid),
     staleTime: 300000,
   });
 
+  useEffect(() => {
+    if (data) {
+      setTasks(data);
+    }
+  }, [data]);
 
   return (
     <>
@@ -56,13 +276,6 @@ function GroupTask() {
         ) : (
           tasks?.length > 0 &&
           tasks?.map((group, index) => {
-            if (
-              !group.tasks ||
-              !Array.isArray(group.tasks) ||
-              group.tasks.length === 0
-            ) {
-              return null;
-            }
             const firstTask = group.tasks[0];
             return (
               <div
@@ -88,7 +301,7 @@ function GroupTask() {
                 <div className="advert_space_btn  d-flex justify-content-between align-items-center">
                   <button
                     className="advert_space_btn1"
-                    onClick={() => handleOpenModal(group.tasks, group?.id)}
+                    onClick={() => handleOpenModal(group)}
                   >
                     Open
                   </button>
@@ -117,8 +330,28 @@ function GroupTask() {
                   onClick={handleCloseModal}
                 ></i>
               </div>
+
+              <div></div>
               <div className="modal-body">
-                {selectedGroupTasks.map((task, index) => {
+                <div>
+                  <div>
+                    <img
+                      style={{ width: "100%", height: 200, objectFit: "cover" }}
+                      src="https://i.ytimg.com/vi/Nii_fBGb0_c/maxresdefault.jpg"
+                    />
+                  </div>
+                  <p style={{ marginTop: "10px", textAlign: "left" }}>
+                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                    Harum, esse.
+                  </p>
+                </div>
+
+                <hr />
+                {selectedGroup?.tasks?.map((task, index) => {
+                  const userTask = task.userTasks?.find(
+                    (task) => task.userId === user.uid
+                  );
+
                   return (
                     <div className="mb-2" key={index}>
                       <div className="custome-card">
@@ -136,70 +369,148 @@ function GroupTask() {
                                 display: "flex",
                               }}
                             >
-                              <i
-                                className={`bi ${
-                                  platformIcons[
-                                    task.platformLogo?.toLowerCase()
-                                  ] || platformIcons.defaultIcon
-                                }`}
-                              ></i>
+                              {task.platformLogo.toLowerCase() === "twitter" ||
+                              task.platformLogo.toLowerCase() === "facebook" ||
+                              task.platformLogo.toLowerCase() === "instagram" ||
+                              task.platformLogo.toLowerCase() === "reddit" ||
+                              task.platformLogo.toLowerCase() === "youtube" ? (
+                                <i
+                                  className={`bi ${
+                                    platformIcons[
+                                      task.platformLogo?.toLowerCase()
+                                    ] || platformIcons.defaultIcon
+                                  }`}
+                                ></i>
+                              ) : (
+                                <img
+                                  style={{
+                                    width: 45,
+                                    height: 45,
+                                    objectFit: "cover",
+                                    borderRadius: "50%",
+                                  }}
+                                  src={task.platformLogo}
+                                  alt=""
+                                />
+                              )}
                             </span>
                             {task?.title || "Untitled Task"}
                           </h6>
-                          <p className="text-success fs-6 pt-1">
+                          <p
+                            className="text-success fs-6 pt-1"
+                            style={{ textAlign: "left", paddingLeft: "20px" }}
+                          >
                             +{task?.reward || 0} $
                           </p>
                         </div>
+
                         <div>
-                          {/* {showAddProof ? (
-                                <button
-                                  className="redirect-icon"
+                          {userTask?.status === "started" ? (
+                            task.proof !== "no" ? (
+                              <button
+                                disabled={btnLoading}
+                                className="redirect-icon"
+                                onClick={() => openProofModal(task, index)}
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                }}
+                              >
+                                Proof
+                                <i
+                                  className="bi bi-upload"
                                   style={{
-                                    display: "flex",
-                                    alignItems: "center",
+                                    fontSize: "14px",
+                                    color: "#000",
+                                    marginLeft: "8px",
                                   }}
-                                >
-                                  Proof
+                                ></i>
+                              </button>
+                            ) : null
+                          ) : userTask?.status === "submitted" ? (
+                            <div
+                              disabled={btnLoading}
+                              className={`start-redirect-icon`}
+                              style={{
+                                textWrap: "nowrap",
+                                opacity: "0.8",
+                                cursor: "not-allowed",
+                              }}
+                            >
+                              Under Review
+                            </div>
+                          ) : userTask?.status === "approved" ? (
+                            <button
+                              disabled={btnLoading}
+                              className="redirect-icon"
+                              onClick={() =>
+                                handleClaimTask(selectedGroup, index)
+                              }
+                              style={{
+                                cursor: "pointer",
+                                backgroundColor: "#4caf50",
+                                color: "#fff",
+                                padding: "5px 10px",
+                                borderRadius: "5px",
+                                border: "none",
+                                textWrap: "nowrap",
+                              }}
+                            >
+                              {btnLoading ? (
+                                <div
+                                  class="spinner-border text-light spinner-border-sm"
+                                  role="status"
+                                ></div>
+                              ) : (
+                                <>
+                                  Claim
                                   <i
-                                    className="bi bi-upload"
+                                    className="bi bi-currency-dollar"
                                     style={{
-                                      fontSize: "14px",
-                                      color: "#000",
+                                      fontSize: "16px",
                                       marginLeft: "8px",
                                     }}
                                   ></i>
-                                </button>
+                                </>
+                              )}
+                            </button>
+                          ) : userTask?.status === "claimed" ? (
+                            <div
+                              className={`start-redirect-icon disabled`}
+                              style={{
+                                cursor: "not-allowed",
+                                borderRadius: "10px",
+                                padding: "4px 10px",
+                                // backgroundColor:"transparent",
+                              }}
+                            >
+                              <i
+                                class="bi bi-check2-circle"
+                                style={{ fontSize: "20px" }}
+                              ></i>
+                            </div>
+                          ) : (
+                            <button
+                              disabled={btnLoading}
+                              className={`start-redirect-icon`}
+                              onClick={() => {
+                                handleStartTask(
+                                  selectedGroup.id,
+                                  index,
+                                  task.link
+                                );
+                              }}
+                            >
+                              {btnLoading ? (
+                                <div
+                                  class="spinner-border text-light spinner-border-sm"
+                                  role="status"
+                                ></div>
                               ) : (
-                                <button
-                                  className={`redirect-icon ${
-                                    task.status === "completed"
-                                      ? "disabled"
-                                      : ""
-                                  }`}
-                                  onClick={() =>
-                                    handleCompleteTask(groupTaskId, task.link)
-                                  }
-                                  disabled={task.status === "completed"}
-                                  style={{
-                                    cursor:
-                                      task.status === "completed"
-                                        ? "not-allowed"
-                                        : "pointer",
-                                  }}
-                                >
-                                  {task.status === "completed" ? (
-                                    <i
-                                      className="bi bi-check2-all"
-                                      style={{
-                                        fontSize: "20px",
-                                        color: "#000",
-                                      }}
-                                    ></i>
-                                  ) : (
-                                    "Start"
-                                  )}
-                                </button>
-                              )} */}
+                                "Start"
+                              )}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -210,6 +521,16 @@ function GroupTask() {
           </div>
         </div>
       )}
+
+      <ProofModal
+        proofModalOpen={proofModalOpen}
+        setProofModalOpen={setProofModalOpen}
+        setProofLink={setProofLink}
+        selectedTask={selectedTask}
+        btnLoading={proofBtnLoading}
+        submitProof={submitProof}
+        handleProofFileChange={handleProofFileChange}
+      />
     </>
   );
 }

@@ -45,13 +45,13 @@ function SingleTask() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("OnChain");
   const { categories } = useContext(AppContext);
-  const [DetailedUserTasks, setDetailedUserTasks] = useState();
   const [selectedTask, setSelectedTask] = useState(null);
   const [proofModalOpen, setProofModalOpen] = useState(false);
   const [proofFile, setProofFile] = useState(null);
   const [proofLink, setProofLink] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [btnLoading, setBtnLoading] = useState(false);
+  const [proofBtnLoading, setProofBtnLoading] = useState(false);
   const { mySingleStasks } = useApp();
 
   const { data, isLoading } = useQuery({
@@ -121,7 +121,7 @@ function SingleTask() {
       return;
     }
 
-    setBtnLoading(true);
+    setProofBtnLoading(true);
 
     try {
       const taskDocRef = doc(db, "singletasks", selectedTaskId);
@@ -181,7 +181,7 @@ function SingleTask() {
       toast.error("Failed to submit proof.");
       console.error(error);
     } finally {
-      setBtnLoading(false);
+      setProofBtnLoading(false);
     }
   };
 
@@ -249,11 +249,11 @@ function SingleTask() {
 
           return (
             <li key={task.id} className="task-list-item">
-              {task.platformLogo === "twitter" ||
-              task.platformLogo === "facebook" ||
-              task.platformLogo === "instagram" ||
-              task.platformLogo === "reddit" ||
-              task.platformLogo === "youtube" ? (
+              {task.platformLogo.toLowerCase() === "twitter" ||
+              task.platformLogo.toLowerCase() === "facebook" ||
+              task.platformLogo.toLowerCase() === "instagram" ||
+              task.platformLogo.toLowerCase() === "reddit" ||
+              task.platformLogo.toLowerCase() === "youtube" ? (
                 <i
                   className={`bi ${
                     platformIcons[task.platformLogo?.toLowerCase()] ||
@@ -452,7 +452,7 @@ function SingleTask() {
         setProofModalOpen={setProofModalOpen}
         setProofLink={setProofLink}
         selectedTask={selectedTask}
-        btnLoading={btnLoading}
+        btnLoading={proofBtnLoading}
         submitProof={submitProof}
         handleProofFileChange={handleProofFileChange}
       />

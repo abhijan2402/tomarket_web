@@ -11,7 +11,7 @@ const ProofModal = ({
 }) => {
   if (!proofModalOpen) return null;
   return (
-    <div className="modal-overlay" onClick={() => setProofModalOpen(false)}>
+    <div className="modal-overlay" style={{zIndex: '888888'}} onClick={() => setProofModalOpen(false)}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <h4
           style={{
