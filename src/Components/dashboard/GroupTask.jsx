@@ -403,7 +403,8 @@ function GroupTask() {
 
                         <div>
                           {userTask?.status === "started" ? (
-                            task.proof !== "no" ? (
+                            task.proof === "screenshot" ||
+                            task.proof === "link" ? (
                               <button
                                 disabled={proofBtnLoading}
                                 className="redirect-icon"
@@ -423,7 +424,42 @@ function GroupTask() {
                                   }}
                                 ></i>
                               </button>
-                            ) : null
+                            ) : (
+                              <button
+                                disabled={btnLoading[index]}
+                                className="redirect-icon"
+                                onClick={() =>
+                                  handleClaimTask(selectedGroup, index)
+                                }
+                                style={{
+                                  cursor: "pointer",
+                                  backgroundColor: "#4caf50",
+                                  color: "#fff",
+                                  padding: "5px 10px",
+                                  borderRadius: "5px",
+                                  border: "none",
+                                  textWrap: "nowrap",
+                                }}
+                              >
+                                {btnLoading[index] ? (
+                                  <div
+                                    class="spinner-border text-light spinner-border-sm"
+                                    role="status"
+                                  ></div>
+                                ) : (
+                                  <>
+                                    Claim
+                                    <i
+                                      className="bi bi-currency-dollar"
+                                      style={{
+                                        fontSize: "16px",
+                                        marginLeft: "8px",
+                                      }}
+                                    ></i>
+                                  </>
+                                )}
+                              </button>
+                            )
                           ) : userTask?.status === "submitted" ? (
                             <div
                               className={`start-redirect-icon`}

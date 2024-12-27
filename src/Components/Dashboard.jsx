@@ -7,7 +7,7 @@ const Dashboard = () => {
   return (
     <div className="dashboard-container">
       <GroupTask />
-      {/* <WeeklyTask /> */}
+      <WeeklyTask />
       <SingleTask />
     </div>
   );
