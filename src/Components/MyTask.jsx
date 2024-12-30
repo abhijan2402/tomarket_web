@@ -9,14 +9,14 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { toast } from "react-toastify";
+import { useApp } from "../context/AppContext";
 
-const MyTask = ({ DetailedUserTasks }) => {
+const MyTask = () => {
   const [showModal, setShowModal] = useState(false);
-  const [proofType, setProofType] = useState("");
-  const [showProofModal, setShowProofModal] = useState(false);
-  const [UserSingleTasks, setUserSingleTasks] = useState([]);
-  const [selectedTaskId, setSelectedTaskId] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [approvedLoading, setApprovedLoading] = React.useState({});
+  const [rejectedLoading, setRejectedLoading] = React.useState({});
+  const { setMySingleTasks, mySingleStasks } = useApp();
 
   const platformIcons = {
     youtube: "bi-youtube",
@@ -25,120 +25,153 @@ const MyTask = ({ DetailedUserTasks }) => {
     facebook: "bi-facebook",
     reddit: "bi bi-reddit",
   };
-  const defaultIcon = "bi bi-card-checklist";
 
-  const handleOpenModal = (taskId) => {
-    setSelectedTaskId(taskId);
+  const handleOpenModal = (task) => {
+    setSelectedTask(task);
     setShowModal(true);
   };
 
   const handleCloseModal = () => {
     setShowModal(false);
-    setSelectedTaskId(null);
   };
 
-  const getUserSingleTasks = async () => {
-    setLoading(true);
+  const approveProof = async (index) => {
+    setApprovedLoading((prev) => ({ ...prev, [index]: true }));
     try {
-      const q = query(collection(db, "UserSingleTasks"));
-      const querySnapshot = await getDocs(q);
+      const taskDocRef = doc(db, "singletasks", selectedTask.id);
+      const taskDoc = await getDoc(taskDocRef);
 
-      const tasks = querySnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
-      setUserSingleTasks(tasks);
-    } catch (error) {
-      toast.error("Failed to load user-single-tasks-details.");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    getUserSingleTasks();
-  }, []);
-
-  const openProofModal = (taskId) => {
-    setSelectedTaskId(taskId);
-    setShowProofModal(true);
-  };
-
-  const closeProofModal = () => {
-    setShowProofModal(false);
-    setProofType("");
-  };
-
-  // Ask Proof Form User
-  const updateProofStatus = async () => {
-    if (!selectedTaskId || !proofType) {
-      toast.error("Invalid task or proof type.");
-      return;
-    }
-    try {
-      const taskDoc = doc(db, "UserSingleTasks", selectedTaskId);
-      await updateDoc(taskDoc, { isProof: proofType });
-      toast.success("Proof status updated successfully!");
-      setUserSingleTasks((prevTasks) =>
-        prevTasks.map((task) =>
-          task.id === selectedTaskId ? { ...task, isProof: proofType } : task
-        )
-      );
-    } catch (error) {
-      console.error("Failed to update proof status:", error);
-      toast.error("Failed to update proof status.");
-    }
-    closeProofModal();
-  };
-
-  // Give Reward to User
-
-  const updateRewardStatus = async (taskId) => {
-    console.log("Attempting to update task:", taskId);
-    try {
-      const taskRef = doc(db, "singletasks", taskId);
-
-      // Check if the document exists
-      const taskDoc = await getDoc(taskRef);
       if (!taskDoc.exists()) {
-        console.error("Task not found in Firestore:", taskId);
-        toast.error("Task does not exist in Firestore!");
+        toast.error("Task not found.");
         return;
       }
 
-      console.log("Task found, updating status...");
-      await updateDoc(taskRef, { status: "claimAward" });
-      console.log("Status updated successfully!");
-      toast.success("Reward status updated successfully!");
+      const existingUserTasks = taskDoc.data().userTasks || [];
+
+      existingUserTasks[index].status = "approved";
+      existingUserTasks[index].timestamp = new Date();
+
+      await updateDoc(taskDocRef, { userTasks: existingUserTasks });
+
+      toast.success("Approvred successfully!");
+
+      setMySingleTasks((prevTasks) =>
+        prevTasks.map((item) =>
+          item.id === selectedTask.id
+            ? { ...item, userTasks: existingUserTasks }
+            : item
+        )
+      );
+      setSelectedTask({
+        ...selectedTask,
+        userTasks: existingUserTasks,
+      });
     } catch (error) {
-      console.error("Failed to update reward status:", error);
-      toast.error("Failed to update reward status.");
+      console.error("Failed to claim the task:", error);
+      toast.error("Failed to claim the reward.");
+    } finally {
+      setApprovedLoading((prev) => ({ ...prev, [index]: false }));
     }
-    handleCloseModal();
   };
 
-  const filteredUsers = UserSingleTasks.filter(
-    (userTask) => userTask.TaskId === selectedTaskId
-  );
+  const rejectProof = async (index) => {
+    setRejectedLoading((prev) => ({ ...prev, [index]: true }));
+    try {
+      const taskDocRef = doc(db, "singletasks", selectedTask.id);
+      const taskDoc = await getDoc(taskDocRef);
+
+      if (!taskDoc.exists()) {
+        toast.error("Task not found.");
+        return;
+      }
+
+      const existingUserTasks = taskDoc.data().userTasks || [];
+
+      existingUserTasks[index].status = "rejected";
+      existingUserTasks[index].timestamp = new Date();
+
+      await updateDoc(taskDocRef, { userTasks: existingUserTasks });
+
+      toast.success("Rejected!");
+
+      setMySingleTasks((prevTasks) =>
+        prevTasks.map((item) =>
+          item.id === selectedTask.id
+            ? { ...item, userTasks: existingUserTasks }
+            : item
+        )
+      );
+
+      setSelectedTask({
+        ...selectedTask,
+        userTasks: existingUserTasks,
+      });
+    } catch (error) {
+      console.error("Failed to claim the task:", error);
+      toast.error("Failed to claim the reward.");
+    } finally {
+      setRejectedLoading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
+
 
   return (
     <>
       <ul className="task-list">
-        {DetailedUserTasks?.map((userTask) => {
-          const task = userTask;
+        {mySingleStasks?.map((task) => {
           return (
-            <li key={userTask.id} className="task-list-item">
-              <i
-                className={`bi ${
-                  platformIcons[task?.platformLogo?.toLowerCase()] ||
-                  defaultIcon
-                }`}
-              ></i>
+            <li key={task.id} className="task-list-item">
+              <div style={{ position: "relative" }}>
+                {task.platformLogo.toLowerCase() === "twitter" ||
+                task.platformLogo.toLowerCase() === "facebook" ||
+                task.platformLogo.toLowerCase() === "instagram" ||
+                task.platformLogo.toLowerCase() === "reddit" ||
+                task.platformLogo.toLowerCase() === "youtube" ? (
+                  <div style={{ width: 45, height: 45 }}>
+                    <i
+                      className={`bi ${
+                        platformIcons[task.platformLogo?.toLowerCase()] ||
+                        platformIcons.defaultIcon
+                      }`}
+                    ></i>
+                  </div>
+                ) : (
+                  <div>
+                    <img
+                      style={{
+                        width: 45,
+                        height: 45,
+                        objectFit: "cover",
+                        borderRadius: "50%",
+                      }}
+                      src={task.platformLogo}
+                      alt=""
+                    />
+                  </div>
+                )}
+
+                <div
+                  style={{
+                    width: 10,
+                    height: 10,
+                    backgroundColor:
+                      task.status === "approved"
+                        ? "greenyellow"
+                        : task.status === "reject"
+                        ? "red"
+                        : "gray",
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    borderRadius: 999,
+                  }}
+                ></div>
+              </div>
+
               <div className="task-details">
                 <h4 className="task-title">{task?.title}</h4>
                 <p style={{ color: "greenyellow", fontSize: "12px" }}>
-                  +{task?.reward} BP
+                  +{task?.reward || 0} $,
                 </p>
               </div>
               <div className="task-actions">
@@ -150,7 +183,7 @@ const MyTask = ({ DetailedUserTasks }) => {
                     gap: "5px",
                     alignItems: "center",
                   }}
-                  onClick={() => handleOpenModal(userTask.id)}
+                  onClick={() => handleOpenModal(task)}
                 >
                   <i
                     class="bi bi-list-check"
@@ -163,6 +196,7 @@ const MyTask = ({ DetailedUserTasks }) => {
           );
         })}
       </ul>
+
       {showModal && (
         <div
           className="modal fade show custom-modal"
@@ -181,8 +215,8 @@ const MyTask = ({ DetailedUserTasks }) => {
                 ></i>
               </div>
               <div className="modal-body">
-                {filteredUsers.length > 0 ? (
-                  filteredUsers.map((item, index) => (
+                {selectedTask?.userTasks?.length > 0 ? (
+                  selectedTask?.userTasks?.map((item, index) => (
                     <div key={index} className="custome-card">
                       <div className="grp-tsk-desc">
                         <h6
@@ -192,7 +226,7 @@ const MyTask = ({ DetailedUserTasks }) => {
                             alignItems: "center",
                           }}
                         >
-                          {item.UserObject?.name || "No Name Provided"}
+                          {item.userName || "No Name Provided"}
                         </h6>
                       </div>
                       <div
@@ -203,91 +237,145 @@ const MyTask = ({ DetailedUserTasks }) => {
                         }}
                       >
                         {/* Add Proof Button */}
-                        <button
-                          className="add-proof-btn"
-                          style={{
-                            backgroundColor: "#007bff",
-                            color: "#fff",
-                            marginRight: "10px",
-                            border: "none",
-                            padding: "5px 10px",
-                            cursor: "pointer",
-                            borderRadius: "5px",
-                          }}
-                          onClick={() => openProofModal(item.id)}
-                          // disabled={item.isProof}
-                        >
-                          {item.isProof === "proofAdded" ? (
-                            <i class="bi bi-check-all"></i>
-                          ) : (
-                            <i class="bi bi-cloud-arrow-up"></i>
-                          )}
-                        </button>
+                        {item.proofUrl ? (
+                          <a
+                            href={item.proofUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <button
+                              className="add-proof-btn"
+                              style={{
+                                backgroundColor: "#007bff",
+                                color: "#fff",
+                                marginRight: "10px",
+                                border: "none",
+                                padding: "8px 14px",
+                                cursor: "pointer",
+                                borderRadius: "5px",
+                              }}
+                            >
+                              {item.status === "claimed" ? (
+                                <i class="bi bi-check-all"></i>
+                              ) : (
+                                <i class="bi bi-cloud-arrow-up"></i>
+                              )}
+                            </button>
+                          </a>
+                        ) : null}
+
+                        {item?.status === "started" ? (
+                          <div
+                            className={`start-redirect-icon`}
+                            style={{
+                              color: "#fff",
+                              textWrap: "nowrap",
+                              paddingLeft: 15,
+                              textTransform: "capitalize",
+                              paddingRight: 15,
+                              cursor: "not-allowed",
+                              opacity: "0.8",
+                            }}
+                          >
+                            {item?.status}
+                          </div>
+                        ) : item.status === "submitted" ? (
+                          <>
+                            <button
+                              className="claim-btn"
+                              style={{
+                                backgroundColor: "red",
+                                color: "#fff",
+                                border: "none",
+                                padding: "5px 10px",
+                                cursor: "pointer",
+                                borderRadius: "5px",
+                              }}
+                              disabled={
+                                approvedLoading[index] || rejectedLoading[index]
+                              }
+                              onClick={() => rejectProof(index)}
+                            >
+                              {rejectedLoading[index] ? (
+                                <div
+                                  class="spinner-border text-light spinner-border-sm my-1"
+                                  role="status"
+                                ></div>
+                              ) : (
+                                <i
+                                  class="bi bi-x"
+                                  style={{ fontSize: "20px" }}
+                                ></i>
+                              )}
+                            </button>{" "}
+                            <button
+                              className="claim-btn"
+                              disabled={
+                                approvedLoading[index] || rejectedLoading[index]
+                              }
+                              style={{
+                                backgroundColor: " #4caf50",
+                                color: "#fff",
+                                border: "none",
+                                padding: "5px 10px",
+                                cursor: "pointer",
+                                borderRadius: "5px",
+                              }}
+                              onClick={() => approveProof(index)}
+                            >
+                              {approvedLoading[index] ? (
+                                <div
+                                  class="spinner-border text-light spinner-border-sm my-1"
+                                  role="status"
+                                ></div>
+                              ) : (
+                                <i
+                                  class="bi bi-check"
+                                  style={{ fontSize: "20px" }}
+                                ></i>
+                              )}
+                            </button>{" "}
+                          </>
+                        ) : item.status === "approved" ? (
+                          <div
+                            className={`start-redirect-icon`}
+                            style={{
+                              color: "#fff",
+                              textWrap: "nowrap",
+                              paddingLeft: 15,
+                              textTransform: "capitalize",
+                              paddingRight: 15,
+                              cursor: "not-allowed",
+                              opacity: "0.8",
+                            }}
+                          >
+                            {item?.status}
+                          </div>
+                        ) : item.status === "rejected" ? (
+                          <div
+                            className={`start-redirect-icon`}
+                            style={{
+                              color: "#fff",
+                              textWrap: "nowrap",
+                              background: "red",
+                              paddingLeft: 15,
+                              textTransform: "capitalize",
+                              paddingRight: 15,
+                              cursor: "not-allowed",
+                              opacity: "0.8",
+                            }}
+                          >
+                            {item?.status}
+                          </div>
+                        ) : null}
 
                         {/* Claim Button */}
-                        <button
-                          className="claim-btn"
-                          style={{
-                            backgroundColor: " #4caf50",
-                            color: "#fff",
-                            border: "none",
-                            padding: "5px 10px",
-                            cursor: "pointer",
-                            borderRadius: "5px",
-                          }}
-                          onClick={() => updateRewardStatus(item.id)}
-                        >
-                          <i
-                            class="bi bi-currency-dollar"
-                            style={{ fontSize: "20px" }}
-                          ></i>
-                        </button>
                       </div>
                     </div>
                   ))
                 ) : (
                   <p>No users have completed this task yet.</p>
                 )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showProofModal && (
-        <div
-          className="modal fade show custom-modal"
-          style={{ display: "block" }}
-        >
-          <div className="modal-dialog modal-md">
-            <div className="modal-content modal-tsk-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Provide Proof Details</h5>
-                <i
-                  className="bi bi-x-square"
-                  style={{ fontSize: "1.5rem", cursor: "pointer" }}
-                  onClick={closeProofModal}
-                ></i>
-              </div>
-              <div className="modal-body">
-                <div className="form-group">
-                  <label>Proof Type:</label>
-                  <select
-                    className="form-control"
-                    value={proofType}
-                    onChange={(e) => setProofType(e.target.value)}
-                  >
-                    <option value="">Select Proof Type</option>
-                    <option value="link">Link</option>
-                    <option value="screenshot">Screenshot</option>
-                  </select>
-                </div>
-                <button
-                  className="btn btn-primary mt-3"
-                  onClick={() => updateProofStatus(selectedTaskId)}
-                >
-                  Submit Proof
-                </button>
               </div>
             </div>
           </div>

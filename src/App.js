@@ -22,6 +22,7 @@ import Home from "./Components/Home";
 import { useAuth } from "./context/AuthContext"; // import AuthProvider and useAuth
 import PrivateRoute from "./Components/PrivateRoute";
 import LandingPage from "./Components/LandingPage";
+import MyTaskPage from "./pages/MyTaskPage";
 
 function App() {
   const [Logo, setLogo] = useState([]);
@@ -71,6 +72,7 @@ function AppContent({ Logo }) {
                 {/* Protected Routes */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/taskdashboard" element={<Dashboard />} />
+                <Route path="/my-task" element={<MyTaskPage />} />
                 <Route path="/daily-task" element={<DailyTask />} />
                 <Route path="/completed-task" element={<CompletedTask />} />
                 <Route path="/pending-task" element={<PendingTask />} />

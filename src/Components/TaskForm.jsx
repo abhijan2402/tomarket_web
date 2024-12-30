@@ -2,38 +2,55 @@ import React, { useContext, useState } from "react";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AppContext } from "../context/AppContext";
+import { storage } from "../firebase";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-function TaskForm({ addTaskToList }) {
+function TaskForm({ addTaskToList, isGroupTask }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [link, setLink] = useState("");
   const [reward, setReward] = useState("");
   const [category, setCategory] = useState("");
+  const [proof, setProof] = useState("no");
   const [selectedPlatform, setSelectedPlatform] = useState("");
-  const [customLogo, setCustomLogo] = useState(null); // For custom image upload
+  const [customLogo, setCustomLogo] = useState(null);
   const { categories } = useContext(AppContext);
 
-  const handleAddTask = () => {
+  const handleAddTask = async () => {
     if (
-      !title ||
-      !description ||
-      !link ||
-      !reward ||
-      !category ||
-      !selectedPlatform
+      title === "" ||
+      link === "" ||
+      reward === "" ||
+      proof === "" ||
+      (!isGroupTask && (description === "" || category === "")) ||
+      selectedPlatform === ""
     ) {
-      return toast.error("All fields are required");
+      return toast.error("All required fields must be filled");
     }
 
-    // Send task back to parent component
+    let platformLogo = selectedPlatform;
+
+    if (selectedPlatform === "Other") {
+      if (!customLogo) {
+        return toast.error("Please upload a custom logo");
+      }
+
+      const storageRef = ref(
+        storage,
+        `platformLogo/${customLogo.name}-${Date.now()}`
+      );
+      const uploadResult = await uploadBytes(storageRef, customLogo);
+      platformLogo = await getDownloadURL(uploadResult.ref);
+    }
+
     addTaskToList({
       title,
       description,
       link,
       reward,
       category,
-      platformLogo:
-        selectedPlatform === "Other" ? customLogo : selectedPlatform,
+      proof,
+      platformLogo,
     });
 
     // Reset form fields
@@ -43,6 +60,7 @@ function TaskForm({ addTaskToList }) {
     setReward("");
     setCategory("");
     setSelectedPlatform("");
+    setProof("no");
     setCustomLogo(null);
   };
 
@@ -50,13 +68,13 @@ function TaskForm({ addTaskToList }) {
     const platform = e.target.value;
     setSelectedPlatform(platform);
     if (platform !== "Other") {
-      setCustomLogo(null); // Reset custom logo if not "Other"
+      setCustomLogo(null);
     }
   };
 
   const handleImageChange = (e) => {
     if (e.target.files.length > 0) {
-      setCustomLogo(URL.createObjectURL(e.target.files[0]));
+      setCustomLogo(e.target.files[0]);
     }
   };
 
@@ -65,6 +83,7 @@ function TaskForm({ addTaskToList }) {
       <div className="task_form_field">
         <label htmlFor="title">Title</label>
         <input
+          // style={{backgroundColor: "red"}}
           type="text"
           id="title"
           placeholder="Title"
@@ -72,15 +91,19 @@ function TaskForm({ addTaskToList }) {
           onChange={(e) => setTitle(e.target.value)}
         />
       </div>
-      <div className="task_form_field">
-        <label htmlFor="desc">Description</label>
-        <textarea
-          id="desc"
-          placeholder="Description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-      </div>
+
+      {!isGroupTask && (
+        <div className="task_form_field">
+          <label htmlFor="desc">Description</label>
+          <textarea
+            id="desc"
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
+        </div>
+      )}
+
       <div className="task_form_field">
         <label htmlFor="link">Link</label>
         <input
@@ -101,21 +124,24 @@ function TaskForm({ addTaskToList }) {
           onChange={(e) => setReward(e.target.value)}
         />
       </div>
-      <div className="task_form_field">
-        <label htmlFor="category">Category</label>
-        <select
-          id="category"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        >
-          <option value="">Select a category</option>
-          {categories?.map((category, index) => (
-            <option key={index} value={category.name}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-      </div>
+
+      {!isGroupTask && (
+        <div className="task_form_field">
+          <label htmlFor="category">Category</label>
+          <select
+            id="category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
+            <option value="">Select a category</option>
+            {categories?.map((category, index) => (
+              <option key={index} value={category.name}>
+                {category.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="task_form_field">
         <label htmlFor="platform">Task Logo</label>
@@ -154,6 +180,22 @@ function TaskForm({ addTaskToList }) {
           </div>
         </div>
       )}
+
+      <div className="task_form_field">
+        <label htmlFor="proof">Proof</label>
+        <select
+          id="proof"
+          value={proof}
+          onChange={(e) => setProof(e.target.value)}
+        >
+          <option value="" disabled>
+            Select a proof
+          </option>
+          <option value="no">No</option>
+          <option value="screenshot">Screenshot</option>
+          <option value="link">Link</option>
+        </select>
+      </div>
 
       <button onClick={handleAddTask} style={{ marginTop: "10px" }}>
         Add Task

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { addDoc, collection, doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { db, storage } from "../firebase";
 import { getAuth } from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import TaskForm from "./TaskForm";
@@ -9,6 +9,7 @@ import CustomPopup from "./Popups/CustomPopup";
 import "react-toastify/dist/ReactToastify.css";
 import "../Style/Reward.css";
 import { useAuth } from "../context/AuthContext";
+import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
 function Reward() {
   const { user } = useAuth();
@@ -18,8 +19,9 @@ function Reward() {
   const [showPopup, setShowPopup] = useState(false);
   const [popupType, setPopupType] = useState("");
   const [popupMsgType, setPopupMsgType] = useState("");
-  const taskCount = tasks.length;
-  console.log(taskCount);
+  const [description, setDescription] = useState("");
+  const [thumbnail, setThumbnail] = useState(null);
+
 
   const addTaskToList = (task) => {
     setTasks((prev) => [...prev, task]);
@@ -38,33 +40,39 @@ function Reward() {
         return toast.error("Please add tasks first");
       }
 
-      const grpTask = await addDoc(collection(db, "tasks"), {
+      if (!description) {
+        return toast.error("Please add a description");
+      }
+
+      if (!thumbnail) {
+        return toast.error("Please add a thumbnail");
+      }
+
+      const storageRef = ref(
+        storage,
+        `thumbnail/${thumbnail.name}-${Date.now()}`
+      );
+      const uploadResult = await uploadBytes(storageRef, thumbnail);
+      const thumbnailUrl = await getDownloadURL(uploadResult.ref);
+
+      await addDoc(collection(db, "tasks"), {
         tasks,
         createdAt: new Date(),
         createdBy: user.uid,
         status: "pending",
         type: "group",
+        thumbnail: thumbnailUrl,
+        description,
       });
 
       setTasks([]);
-
-      await addDoc(collection(db, "userGroupTask"), {
-        UserGroupTaskId: `UGT${Date.now()}`,
-        UserId: user.uid,
-        TaskId: grpTask.id,
-        UserObject: {
-          name: user.displayName || "John Doe",
-          role: "Designer",
-        },
-        TotalTask: taskCount,
-        NumberOfTaskCompleted: 0,
-        CurrentStatus: "pending",
-        isAllCompleted: false,
-      });
+      setDescription("");
+      setThumbnail(null);
 
       toast.success("Tasks have been submitted for review!");
     } catch (error) {
       toast.error("Error adding document: " + error.message);
+      console.log(error)
     }
   };
 
@@ -111,6 +119,42 @@ function Reward() {
     <div className="task_Container">
       <ToastContainer />
       <div className="task_form">
+        {isGroupTask && (
+          <div>
+            <div className="task_form_field">
+              <label htmlFor="description">Description</label>
+              <input
+                type="text"
+                id="description"
+                placeholder="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div className="task_form_field">
+              <label htmlFor="thumbnail">Thumbnail</label>
+              <div className="file-upload">
+                <input
+                  type="file"
+                  id="thumbnail"
+                  accept="image/*"
+                  onChange={(e) => setThumbnail(e.target.files[0])}
+                  style={{ display: "none" }}
+                />
+                <label htmlFor="thumbnail" className="file-upload-label">
+                  {
+                    thumbnail ? thumbnail.name : "Choose File"
+                  }
+                </label>
+                <span className="upload-icon">
+                  <i class="bi bi-upload"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {tasks.length === 0 ? null : (
           <TaskList
             tasks={tasks}
@@ -128,7 +172,7 @@ function Reward() {
             >
               <i
                 className="bi bi-plus-circle"
-                onClick={() => handleShowPopup("single")} // Show single task popup
+                onClick={() => handleShowPopup("single")}
               ></i>
             </button>
 
@@ -137,7 +181,7 @@ function Reward() {
               <span>
                 <i
                   className="bi bi-exclamation-circle-fill"
-                  onClick={() => handleShowMsgPopup("single")} // Show single task popup
+                  onClick={() => handleShowMsgPopup("single")}
                   style={{ cursor: "pointer" }}
                 ></i>
               </span>
@@ -169,6 +213,7 @@ function Reward() {
         {showForm && (
           <TaskForm
             addTaskToList={isGroupTask ? addTaskToList : handleSubmitSingle}
+            isGroupTask={isGroupTask}
           />
         )}
       </div>

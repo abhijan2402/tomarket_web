@@ -18,11 +18,13 @@
   opacity: 0;
   transition: all 0.3s ease-in-out;
   font-size: 14px;
+  display: none;
 }
 
 .popup.show {
   bottom: 30px; /* Visible position */
   opacity: 1;
+  display: block;
 }
 
 .popup-content {

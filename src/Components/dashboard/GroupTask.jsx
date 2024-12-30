@@ -141,6 +141,7 @@ function GroupTask() {
 
       const newUserTask = {
         userId: user.uid,
+        userName: user.name,
         status: "started",
         proofUrl: "",
         timestamp: new Date(),
@@ -267,7 +268,7 @@ function GroupTask() {
 
   return (
     <>
-      <div className="advert-container ">
+      <div className="advert-container">
         {isLoading ? (
           <GroupTaskSkeleton />
         ) : (
@@ -331,15 +332,17 @@ function GroupTask() {
               <div></div>
               <div className="modal-body">
                 <div>
-                  <div>
+                  {
+                    selectedGroup?.thumbnail ? <div>
                     <img
-                      style={{ width: "100%", height: 200, objectFit: "cover" }}
-                      src="https://i.ytimg.com/vi/Nii_fBGb0_c/maxresdefault.jpg"
+                      style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: "10px" }}
+                      src={selectedGroup?.thumbnail}
                     />
-                  </div>
+                  </div> : null
+                  }
+                  
                   <p style={{ marginTop: "10px", textAlign: "left" }}>
-                    Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                    Harum, esse.
+                    {selectedGroup?.description}
                   </p>
                 </div>
 
@@ -362,7 +365,7 @@ function GroupTask() {
                           >
                             <span
                               style={{
-                                marginRight: "14px",
+                                marginRight: "10px",
                                 display: "flex",
                               }}
                             >
@@ -395,7 +398,7 @@ function GroupTask() {
                           </h6>
                           <p
                             className="text-success fs-6 pt-1"
-                            style={{ textAlign: "left", paddingLeft: "20px" }}
+                            style={{ textAlign: "left", paddingLeft: "30px" }}
                           >
                             +{task?.reward || 0} $
                           </p>
@@ -427,18 +430,15 @@ function GroupTask() {
                             ) : (
                               <button
                                 disabled={btnLoading[index]}
-                                className="redirect-icon"
+                                className={`start-redirect-icon`}
                                 onClick={() =>
                                   handleClaimTask(selectedGroup, index)
                                 }
                                 style={{
-                                  cursor: "pointer",
-                                  backgroundColor: "#4caf50",
                                   color: "#fff",
-                                  padding: "5px 10px",
-                                  borderRadius: "5px",
-                                  border: "none",
                                   textWrap: "nowrap",
+                                  paddingLeft: 15,
+                                paddingRight: 15
                                 }}
                               >
                                 {btnLoading[index] ? (
@@ -453,7 +453,6 @@ function GroupTask() {
                                       className="bi bi-currency-dollar"
                                       style={{
                                         fontSize: "16px",
-                                        marginLeft: "8px",
                                       }}
                                     ></i>
                                   </>
@@ -474,18 +473,16 @@ function GroupTask() {
                           ) : userTask?.status === "approved" ? (
                             <button
                               disabled={btnLoading[index]}
-                              className="redirect-icon"
+                              className={`start-redirect-icon`}
+                            
                               onClick={() =>
                                 handleClaimTask(selectedGroup, index)
                               }
                               style={{
-                                cursor: "pointer",
-                                backgroundColor: "#4caf50",
                                 color: "#fff",
-                                padding: "5px 10px",
-                                borderRadius: "5px",
-                                border: "none",
                                 textWrap: "nowrap",
+                                paddingLeft: 15,
+                                paddingRight: 15
                               }}
                             >
                               {btnLoading[index] ? (
@@ -500,7 +497,6 @@ function GroupTask() {
                                     className="bi bi-currency-dollar"
                                     style={{
                                       fontSize: "16px",
-                                      marginLeft: "8px",
                                     }}
                                   ></i>
                                 </>
@@ -513,7 +509,8 @@ function GroupTask() {
                                 cursor: "not-allowed",
                                 borderRadius: "10px",
                                 padding: "4px 10px",
-                                // backgroundColor:"transparent",
+                                backgroundColor: "transparent",
+                                color: "#fff",
                               }}
                             >
                               <i

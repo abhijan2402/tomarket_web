@@ -14,9 +14,8 @@ import {
 import "react-toastify/dist/ReactToastify.css";
 import { db, storage } from "../../firebase";
 import SkeletonList from "../SkeletonList/SkeletonList";
-import { AppContext, useApp } from "../../context/AppContext";
+import { AppContext } from "../../context/AppContext";
 import { useAuth } from "../../context/AuthContext";
-import MyTask from "../MyTask";
 import { platformIcons } from "../../constant/icons";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
@@ -52,7 +51,6 @@ function SingleTask() {
   const [tasks, setTasks] = useState([]);
   const [btnLoading, setBtnLoading] = useState({});
   const [proofBtnLoading, setProofBtnLoading] = useState(false);
-  const { mySingleStasks } = useApp();
 
   const { data, isLoading } = useQuery({
     queryKey: ["tasks", user.uid],
@@ -88,6 +86,7 @@ function SingleTask() {
 
       const newUserTask = {
         userId: user.uid,
+        userName: user.name,
         status: "started",
         proofUrl: "",
         timestamp: new Date(),
@@ -261,6 +260,7 @@ function SingleTask() {
                   }`}
                 ></i>
               ) : (
+                <div>
                 <img
                   style={{
                     width: 45,
@@ -271,6 +271,7 @@ function SingleTask() {
                   src={task.platformLogo}
                   alt=""
                 />
+                </div>
               )}
 
               <div className="task-details">
@@ -281,7 +282,7 @@ function SingleTask() {
               </div>
               <div>
                 {userTask?.status === "started" ? (
-                  task.proof === "screenshoot" || task.proof === "link" ? (
+                  task.proof === "screenshot" || task.proof === "link" ? (
                     <button
                       disabled={proofBtnLoading}
                       className="redirect-icon"
@@ -301,16 +302,13 @@ function SingleTask() {
                   ) : (
                     <button
                       disabled={btnLoading[task.id]}
-                      className="redirect-icon"
+                      className={`start-redirect-icon`}
                       onClick={() => handleClaimTask(task)}
                       style={{
-                        cursor: "pointer",
-                        backgroundColor: "#4caf50",
                         color: "#fff",
-                        padding: "5px 10px",
-                        borderRadius: "5px",
-                        border: "none",
                         textWrap: "nowrap",
+                        paddingLeft: 15,
+                        paddingRight: 15,
                       }}
                     >
                       {btnLoading[task.id] ? (
@@ -325,7 +323,6 @@ function SingleTask() {
                             className="bi bi-currency-dollar"
                             style={{
                               fontSize: "16px",
-                              marginLeft: "8px",
                             }}
                           ></i>
                         </>
@@ -346,16 +343,13 @@ function SingleTask() {
                 ) : userTask?.status === "approved" ? (
                   <button
                     disabled={btnLoading[task.id]}
-                    className="redirect-icon"
+                    className={`start-redirect-icon`}
                     onClick={() => handleClaimTask(task)}
                     style={{
-                      cursor: "pointer",
-                      backgroundColor: "#4caf50",
                       color: "#fff",
-                      padding: "5px 10px",
-                      borderRadius: "5px",
-                      border: "none",
                       textWrap: "nowrap",
+                      paddingLeft: 15,
+                      paddingRight: 15,
                     }}
                   >
                     {btnLoading[task.id] ? (
@@ -370,20 +364,30 @@ function SingleTask() {
                           className="bi bi-currency-dollar"
                           style={{
                             fontSize: "16px",
-                            marginLeft: "8px",
                           }}
                         ></i>
                       </>
                     )}
                   </button>
-                ) : userTask?.status === "claimed" ? (
+                ): userTask?.status === 'rejected'? (<div
+                  className={`start-redirect-icon`}
+                  style={{
+                    textWrap: "nowrap",
+                    opacity: "0.8",
+                    cursor: "not-allowed",
+                    backgroundColor: "red",
+                    color: "#fff",
+                  }}
+                >
+                  Rejected
+                </div>) : userTask?.status === "claimed" ? (
                   <div
                     className={`start-redirect-icon disabled`}
                     style={{
                       cursor: "not-allowed",
                       borderRadius: "10px",
                       padding: "4px 10px",
-                      // backgroundColor:"transparent",
+                      backgroundColor: "transparent",
                     }}
                   >
                     <i
@@ -459,23 +463,10 @@ function SingleTask() {
                   </button>
                 );
               })}
-            <button
-              className={activeTab === "mytask" ? "active" : ""}
-              onClick={() => setActiveTab("mytask")}
-              style={{ textWrap: "nowrap" }}
-            >
-              My task
-            </button>
           </div>
 
           {/* Tab Content */}
-          <div className="task-container">
-            {activeTab === "mytask" ? (
-              <MyTask DetailedUserTasks={mySingleStasks} />
-            ) : (
-              renderTasks()
-            )}
-          </div>
+          <div className="task-container">{renderTasks()}</div>
         </>
       )}
 

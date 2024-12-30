@@ -91,6 +91,7 @@ function WeeklyTask() {
       const newUserTask = {
         userId: user.uid,
         status: "started",
+        userName: user.name,
         proofUrl: "",
         timestamp: new Date(),
       };
@@ -266,6 +267,7 @@ function WeeklyTask() {
                         }`}
                       ></i>
                     ) : (
+                      <div>
                       <img
                         style={{
                           width: 45,
@@ -276,6 +278,7 @@ function WeeklyTask() {
                         src={item.platformLogo}
                         alt=""
                       />
+                      </div>
                     )}
 
                     <div>
@@ -285,7 +288,7 @@ function WeeklyTask() {
                   </div>
                   <div className="card_space_btn">
                     {userTask?.status === "started" ? (
-                      item.proof === "screenshoot" || item.proof === "link" ? (
+                      item.proof === "screenshot" || item.proof === "link" ? (
                         <button
                           disabled={proofBtnLoading}
                           className="redirect-icon"
@@ -304,17 +307,14 @@ function WeeklyTask() {
                         </button>
                       ) : (
                         <button
+                        className={`start-redirect-icon`}
                           disabled={btnLoading[item.id]}
-                          className="redirect-icon"
                           onClick={() => handleClaimTask(item)}
                           style={{
-                            cursor: "pointer",
-                            backgroundColor: "#4caf50",
                             color: "#fff",
-                            padding: "5px 10px",
-                            borderRadius: "5px",
-                            border: "none",
                             textWrap: "nowrap",
+                            paddingLeft: 15,
+                                paddingRight: 15
                           }}
                         >
                           {btnLoading[item.id] ? (
@@ -329,7 +329,6 @@ function WeeklyTask() {
                                 className="bi bi-currency-dollar"
                                 style={{
                                   fontSize: "16px",
-                                  marginLeft: "8px",
                                 }}
                               ></i>
                             </>
@@ -350,16 +349,13 @@ function WeeklyTask() {
                     ) : userTask?.status === "approved" ? (
                       <button
                         disabled={btnLoading[item.id]}
-                        className="redirect-icon"
+                        className={`start-redirect-icon`}
                         onClick={() => handleClaimTask(item)}
                         style={{
-                          cursor: "pointer",
-                          backgroundColor: "#4caf50",
                           color: "#fff",
-                          padding: "5px 10px",
-                          borderRadius: "5px",
-                          border: "none",
                           textWrap: "nowrap",
+                          paddingLeft: 15,
+                                paddingRight: 15
                         }}
                       >
                         {btnLoading[item.id] ? (
@@ -374,7 +370,6 @@ function WeeklyTask() {
                               className="bi bi-currency-dollar"
                               style={{
                                 fontSize: "16px",
-                                marginLeft: "8px",
                               }}
                             ></i>
                           </>
@@ -387,7 +382,8 @@ function WeeklyTask() {
                           cursor: "not-allowed",
                           borderRadius: "10px",
                           padding: "4px 10px",
-                          // backgroundColor:"transparent",
+                          color: "#fff",
+                          backgroundColor:"transparent",
                         }}
                       >
                         <i

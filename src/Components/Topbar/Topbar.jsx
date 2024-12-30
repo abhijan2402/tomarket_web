@@ -45,6 +45,9 @@ const Topbar = ({ Logo }) => {
             location.pathname
           ) && (
             <div className="header_log">
+              <Link to="/my-task">
+                <button style={{ fontSize: "14px" }}>My Task</button>
+              </Link>
               <Link to="/task">
                 <button style={{ fontSize: "14px" }}>
                   {/* <i

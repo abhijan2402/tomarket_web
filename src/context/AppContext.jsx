@@ -51,7 +51,7 @@ function AppProvider({ children }) {
   }, []);
 
   return (
-    <AppContext.Provider value={{ categories, mySingleStasks }}>
+    <AppContext.Provider value={{ categories, mySingleStasks, setMySingleTasks }}>
       {children}
     </AppContext.Provider>
   );
