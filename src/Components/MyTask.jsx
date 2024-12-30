@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  collection,
-  getDocs,
-  query,
   doc,
   updateDoc,
   getDoc,
