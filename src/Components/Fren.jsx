@@ -6,7 +6,7 @@ const Fren = () => {
   const { user } = useAuth();
 
   const handleInviteClick = () => {
-    const referralLink = `http://localhost:3000/signup?referralCode=${user?.referralCode}`;
+    const referralLink = `https://tomarket-web.cineview.tech/signup?referralCode=${user?.referralCode}`;
     const referralText = `Join Blum using my referral code (${user?.referralCode}) and earn rewards!`;
 
     // Check if the Web Share API is available
