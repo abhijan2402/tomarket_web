@@ -210,7 +210,11 @@ const MyTask = () => {
                   style={{ fontSize: "1.5rem", cursor: "pointer" }}
                   onClick={handleCloseModal}
                 ></i>
+
               </div>
+              <div style={{textAlign: 'left', display: 'flex', justifyContent: 'space-between', marginTop: 10}}>
+                <p>Participants </p> <p>{selectedTask?.userTasks?.length || '0' }</p>
+                </div>
               <div className="modal-body">
                 {selectedTask?.userTasks?.length > 0 ? (
                   selectedTask?.userTasks?.map((item, index) => (

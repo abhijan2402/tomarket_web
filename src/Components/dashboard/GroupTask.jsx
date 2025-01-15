@@ -67,7 +67,36 @@ function GroupTask() {
     setSelectedGroup({});
   };
 
+  function areAllTasksEligible(groupTask) {
+    return groupTask.tasks.every((task) => {
+      // Tasks with "screenshot" or "link" proof require at least one approved user task for the logged-in user
+      if (task.proof === "screenshot" || task.proof === "link") {
+        return task.userTasks.some(
+          (userTask) =>
+            userTask.userId === user.uid &&
+            (userTask.status === "approved" || userTask.status === "claimed")
+        );
+      } else {
+        return task.userTasks.some(
+          (userTask) =>
+            userTask.userId === user.uid &&
+            (userTask.status === "started" || userTask.status === "claimed")
+        );
+      }
+
+      // Tasks with other proof types are always eligible
+      return false;
+    });
+  }
+
   const handleClaimTask = async (group, index) => {
+
+   const isEligibe = areAllTasksEligible(group)
+
+    if(!isEligibe) {
+     return alert('Please complete all task to get reward')
+    }
+
     setBtnLoading((prev) => ({ ...prev, [index]: true }));
     try {
       const taskDocRef = doc(db, "tasks", group.id);
@@ -332,15 +361,20 @@ function GroupTask() {
               <div></div>
               <div className="modal-body">
                 <div>
-                  {
-                    selectedGroup?.thumbnail ? <div>
-                    <img
-                      style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: "10px" }}
-                      src={selectedGroup?.thumbnail}
-                    />
-                  </div> : null
-                  }
-                  
+                  {selectedGroup?.thumbnail ? (
+                    <div>
+                      <img
+                        style={{
+                          width: "100%",
+                          height: 160,
+                          objectFit: "cover",
+                          borderRadius: "10px",
+                        }}
+                        src={selectedGroup?.thumbnail}
+                      />
+                    </div>
+                  ) : null}
+
                   <p style={{ marginTop: "10px", textAlign: "left" }}>
                     {selectedGroup?.description}
                   </p>
@@ -438,7 +472,7 @@ function GroupTask() {
                                   color: "#fff",
                                   textWrap: "nowrap",
                                   paddingLeft: 15,
-                                paddingRight: 15
+                                  paddingRight: 15,
                                 }}
                               >
                                 {btnLoading[index] ? (
@@ -474,7 +508,6 @@ function GroupTask() {
                             <button
                               disabled={btnLoading[index]}
                               className={`start-redirect-icon`}
-                            
                               onClick={() =>
                                 handleClaimTask(selectedGroup, index)
                               }
@@ -482,7 +515,7 @@ function GroupTask() {
                                 color: "#fff",
                                 textWrap: "nowrap",
                                 paddingLeft: 15,
-                                paddingRight: 15
+                                paddingRight: 15,
                               }}
                             >
                               {btnLoading[index] ? (
@@ -503,7 +536,9 @@ function GroupTask() {
                               )}
                             </button>
                           ) : userTask?.status === "claimed" ? (
-                            <div
+                            <a
+                              href={task.link}
+                              target="_blank"
                               className={`start-redirect-icon disabled`}
                               style={{
                                 cursor: "not-allowed",
@@ -517,7 +552,7 @@ function GroupTask() {
                                 class="bi bi-check2-circle"
                                 style={{ fontSize: "20px" }}
                               ></i>
-                            </div>
+                            </a>
                           ) : (
                             <button
                               disabled={btnLoading[index]}

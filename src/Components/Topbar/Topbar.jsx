@@ -41,25 +41,7 @@ const Topbar = ({ Logo }) => {
           </Link>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
-          {!["/", "/Frens", "/Wallet", "/task", "/profile", "/home"].includes(
-            location.pathname
-          ) && (
-            <div className="header_log">
-              <Link to="/my-task">
-                <button style={{ fontSize: "14px" }}>My Task</button>
-              </Link>
-              <Link to="/task">
-                <button style={{ fontSize: "14px" }}>
-                  {/* <i
-                    className="bi bi-plus-circle"
-                    style={{ fontSize: "14px", marginRight: "5px" }}
-                  ></i> */}
-                  📜Task
-                </button>
-              </Link>
-            </div>
-          )}
-
+        
           {/* Dropdown on click */}
           <div className="dropdown">
             <button
@@ -76,6 +58,16 @@ const Topbar = ({ Logo }) => {
               ></i>
             </button>
             <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+              <li>
+                <Link className="dropdown-item" to="/my-task">
+                  My Task
+                </Link>
+              </li>
+              <li>
+                <Link className="dropdown-item" to="/task">
+                  Create Task
+                </Link>
+              </li>
               <li>
                 <Link className="dropdown-item" to="/profile">
                   Profile

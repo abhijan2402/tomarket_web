@@ -381,7 +381,7 @@ function SingleTask() {
                 >
                   Rejected
                 </div>) : userTask?.status === "claimed" ? (
-                  <div
+                  <a href={task.link} target="_blank"
                     className={`start-redirect-icon disabled`}
                     style={{
                       cursor: "not-allowed",
@@ -394,7 +394,7 @@ function SingleTask() {
                       class="bi bi-check2-circle"
                       style={{ fontSize: "20px" }}
                     ></i>
-                  </div>
+                  </a>
                 ) : (
                   <button
                     disabled={btnLoading[task.id]}

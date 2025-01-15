@@ -376,7 +376,7 @@ function WeeklyTask() {
                         )}
                       </button>
                     ) : userTask?.status === "claimed" ? (
-                      <div
+                      <a href={item.link} target="_blank"
                         className={`start-redirect-icon disabled`}
                         style={{
                           cursor: "not-allowed",
@@ -390,7 +390,7 @@ function WeeklyTask() {
                           class="bi bi-check2-circle"
                           style={{ fontSize: "20px" }}
                         ></i>
-                      </div>
+                      </a>
                     ) : (
                       <button
                         disabled={btnLoading[item.id]}
