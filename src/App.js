@@ -23,6 +23,9 @@ import { useAuth } from "./context/AuthContext"; // import AuthProvider and useA
 import PrivateRoute from "./Components/PrivateRoute";
 import LandingPage from "./Components/LandingPage";
 import MyTaskPage from "./pages/MyTaskPage";
+import HowItsWork from "./pages/HowItsWork";
+import Support from "./pages/Support";
+import SupportQuery from "./pages/SupportQuery";
 
 function App() {
   const [Logo, setLogo] = useState([]);
@@ -79,7 +82,10 @@ function AppContent({ Logo }) {
                 <Route path="/task" element={<Reward />} />
                 <Route path="/wallet" element={<Wallet />} />
                 <Route path="/frens" element={<Fren />} />
+                <Route path="/how-its-work" element={<HowItsWork />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/support/query" element={<SupportQuery />} />
               </Route>
 
               {/* Catch-all route for unauthenticated users */}

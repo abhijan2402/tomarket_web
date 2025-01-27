@@ -1,9 +1,19 @@
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, doc, getDocs, query, setDoc, updateDoc, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
+import { useApp } from "../../context/AppContext";
 
 function SignUp() {
   const [name, setName] = useState("");
@@ -16,9 +26,10 @@ function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { refferalPoint, joiningAmount } = useApp();
 
   const navigate = useNavigate();
-  const location = useLocation()
+  const location = useLocation();
 
   useEffect(() => {
     const queryParams = new URLSearchParams(location.search);
@@ -38,10 +49,7 @@ function SignUp() {
 
   // Function to check if a referral code is unique in Firestore
   const isReferralCodeUnique = async (code) => {
-    const q = query(
-      collection(db, "users"),
-      where("referralCode", "==", code)
-    );
+    const q = query(collection(db, "users"), where("referralCode", "==", code));
     const querySnapshot = await getDocs(q);
     return querySnapshot.empty;
   };
@@ -73,13 +81,11 @@ function SignUp() {
     const referredUserDoc = querySnapshot.docs[0];
     const referredUserRef = doc(db, "users", referredUserDoc.id);
     const referredUserData = referredUserDoc.data();
-    const updatedWallet = (referredUserData.wallet || 0) + 10;
+    const updatedPoints = (referredUserData.points || 0) + refferalPoint;
 
-    await updateDoc(referredUserRef, { wallet: updatedWallet });
+    await updateDoc(referredUserRef, { points: updatedPoints });
     return true;
   };
-
-
 
   const handleCreateAccount = async (e) => {
     e.preventDefault();
@@ -138,7 +144,7 @@ function SignUp() {
         name: name.trim(),
         age: parseInt(age, 10),
         email: user.email,
-        wallet: 500,
+        wallet: joiningAmount,
         userID: user.uid,
         referralCode, // Save the generated referral code
         referredBy: referralCodeInput.trim() || null, // Save the entered referral code (if any)
@@ -278,9 +284,7 @@ function SignUp() {
                   />
                   <span
                     className="input-group-text"
-                    onClick={() =>
-                      setShowConfirmPassword(!showConfirmPassword)
-                    }
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     style={{ cursor: "pointer" }}
                   >
                     {showConfirmPassword ? (
@@ -293,10 +297,7 @@ function SignUp() {
               </div>
 
               <div className="mb-3">
-                <label
-                  htmlFor="referralCode"
-                  className="form-label text-white"
-                >
+                <label htmlFor="referralCode" className="form-label text-white">
                   Referral Code (Optional)
                 </label>
                 <input

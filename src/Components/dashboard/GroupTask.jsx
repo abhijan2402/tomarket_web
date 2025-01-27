@@ -67,36 +67,16 @@ function GroupTask() {
     setSelectedGroup({});
   };
 
-  function areAllTasksEligible(groupTask) {
-    return groupTask.tasks.every((task) => {
-      // Tasks with "screenshot" or "link" proof require at least one approved user task for the logged-in user
-      if (task.proof === "screenshot" || task.proof === "link") {
-        return task.userTasks.some(
-          (userTask) =>
-            userTask.userId === user.uid &&
-            (userTask.status === "approved" || userTask.status === "claimed")
-        );
-      } else {
-        return task.userTasks.some(
-          (userTask) =>
-            userTask.userId === user.uid &&
-            (userTask.status === "started" || userTask.status === "claimed")
-        );
-      }
-
-      // Tasks with other proof types are always eligible
-      return false;
-    });
+  function areAllTasksClaimed(groupTask, userId) {
+    return groupTask.tasks.every((task) =>
+      task.userTasks?.some(
+        (userTask) =>
+          userTask.userId === userId && userTask.status === "claimed"
+      )
+    );
   }
 
   const handleClaimTask = async (group, index) => {
-
-   const isEligibe = areAllTasksEligible(group)
-
-    if(!isEligibe) {
-     return alert('Please complete all task to get reward')
-    }
-
     setBtnLoading((prev) => ({ ...prev, [index]: true }));
     try {
       const taskDocRef = doc(db, "tasks", group.id);
@@ -136,17 +116,68 @@ function GroupTask() {
 
       setSelectedGroup({ ...selectedGroup, tasks: updatedTasks });
 
-      const userRef = doc(db, "users", user.uid);
-      await updateDoc(userRef, {
-        wallet: increment(Number(group?.tasks[index].reward)),
-      });
-
-      toast.success("Reward claimed successfully!");
+      // const userRef = doc(db, "users", user.uid);
+      // await updateDoc(userRef, {
+      //   wallet: increment(Number(group?.tasks[index].reward)),
+      // });
     } catch (error) {
       console.error("Failed to claim the task:", error);
       toast.error("Failed to claim the reward.");
     } finally {
       setBtnLoading((prev) => ({ ...prev, [index]: false }));
+    }
+  };
+
+  function calculateTotalReward(groupTask) {
+    return groupTask.tasks.reduce((total, task) => {
+      // Parse the reward as a number (in case it's stored as a string)
+      const reward = parseFloat(task.reward) || 0;
+      return total + reward;
+    }, 0);
+  }
+
+  const handleClaimReward = async (group) => {
+    try {
+      const isEleigible = areAllTasksClaimed(group, user.uid);
+
+      if (!isEleigible) {
+        toast.error("All tasks are not completed yet.");
+        return;
+      }
+
+      const taskDocRef = doc(db, "tasks", group.id);
+      const taskDoc = await getDoc(taskDocRef);
+
+      if (!taskDoc.exists()) {
+        toast.error("Task not found.");
+        return;
+      }
+
+      const data = taskDoc.data();
+
+      if (data.isClaimedReward) {
+        toast.error("Already claimed.");
+        return;
+      }
+
+      const totalReward = calculateTotalReward(data);
+
+      console.log(totalReward);
+
+      const userRef = doc(db, "users", user.uid);
+      await updateDoc(userRef, {
+        wallet: increment(Number(totalReward)),
+      });
+
+      await updateDoc(taskDocRef, {
+        isClaimedReward: true,
+      });
+
+      setSelectedGroup({ ...selectedGroup, isClaimedReward: true });
+
+      toast.success("Reward claimed successfully!");
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -481,15 +512,7 @@ function GroupTask() {
                                     role="status"
                                   ></div>
                                 ) : (
-                                  <>
-                                    Claim
-                                    <i
-                                      className="bi bi-currency-dollar"
-                                      style={{
-                                        fontSize: "16px",
-                                      }}
-                                    ></i>
-                                  </>
+                                  <>Claim</>
                                 )}
                               </button>
                             )
@@ -524,15 +547,7 @@ function GroupTask() {
                                   role="status"
                                 ></div>
                               ) : (
-                                <>
-                                  Claim
-                                  <i
-                                    className="bi bi-currency-dollar"
-                                    style={{
-                                      fontSize: "16px",
-                                    }}
-                                  ></i>
-                                </>
+                                <>Claim</>
                               )}
                             </button>
                           ) : userTask?.status === "claimed" ? (
@@ -580,6 +595,20 @@ function GroupTask() {
                     </div>
                   );
                 })}
+              </div>
+
+              <div>
+                <button
+                  disabled={
+                    !areAllTasksClaimed(selectedGroup, user.uid) ||
+                    selectedGroup.isClaimedReward
+                  }
+                  style={{ borderRadius: 40 }}
+                  onClick={() => handleClaimReward(selectedGroup)}
+                  className="invite_btn"
+                >
+                  {selectedGroup.isClaimedReward ? "Claimed" : "Claim Reward"}
+                </button>
               </div>
             </div>
           </div>

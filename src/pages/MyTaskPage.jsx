@@ -4,9 +4,9 @@ import { useApp } from "../context/AppContext";
 import "../Style/mytask.css";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import MyGroupTask from "../Components/MyGroupTask";
 
 const MyTaskPage = () => {
-  const { mySingleStasks } = useApp();
 
   const [activeTab, setActiveTab] = useState("single_task");
 
@@ -29,7 +29,8 @@ const MyTaskPage = () => {
           Group Task
         </button>
 
-        <Link to='/task'
+        <Link
+          to="/task"
           style={{
             textWrap: "nowrap",
             marginLeft: "auto",
@@ -37,11 +38,12 @@ const MyTaskPage = () => {
             padding: "8px 20px",
             backgroundColor: "#fcc419",
             borderRadius: 30,
-            fontSize: 14
+            fontSize: 14,
+            textDecoration: "none",
           }}
         >
           Create Task
-        </ Link>
+        </Link>
       </div>
 
       {activeTab === "single_task" ? (
@@ -49,7 +51,9 @@ const MyTaskPage = () => {
           <MyTask />
         </div>
       ) : (
-        <div>{/* <MyTask DetailedUserTasks={mySingleStasks} /> */}</div>
+        <div>
+          <MyGroupTask  />
+          </div>
       )}
     </div>
   );

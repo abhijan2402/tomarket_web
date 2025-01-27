@@ -1,4 +1,12 @@
-import { collection, getDocs, orderBy, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../firebase";
 import { useAuth } from "./AuthContext";
@@ -11,6 +19,32 @@ function AppProvider({ children }) {
   const { user } = useAuth();
   const [categories, setCategories] = useState([]);
   const [mySingleStasks, setMySingleTasks] = useState([]);
+  const [myGrouptasks, setMyGroupTasks] = useState([]);
+
+  const [joiningAmount, setJoiningAmount] = useState("");
+  const [refferalPoint, setRefferalPoint] = useState("");
+
+  useEffect(() => {
+    const fetchContent = async () => {
+      try {
+        const joiningAmount = await getDoc(
+          doc(db, "settings", "joiningAmount")
+        );
+
+        setJoiningAmount(joiningAmount.data().value);
+
+        const referralPoint = await getDoc(
+          doc(db, "settings", "referralPoint")
+        );
+
+        setRefferalPoint(referralPoint.data().value);
+      } catch (error) {
+        console.error("Error fetching settings:", error);
+      }
+    };
+
+    fetchContent();
+  }, []);
 
   const fetchCategories = async () => {
     try {
@@ -24,7 +58,6 @@ function AppProvider({ children }) {
       console.log(error);
     }
   };
-  
 
   const fetchMySingleTasks = async () => {
     try {
@@ -45,13 +78,44 @@ function AppProvider({ children }) {
     }
   };
 
+  const fetchMyGroupTasks = async () => {
+    console.log("object");
+    try {
+      const q = query(
+        collection(db, "tasks"),
+        where("createdBy", "==", user.uid),
+        orderBy("createdAt", "desc")
+      );
+      const querySnapshot = await getDocs(q);
+      const tasks = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log(tasks);
+      setMyGroupTasks(tasks);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     fetchCategories();
     fetchMySingleTasks();
+    fetchMyGroupTasks();
   }, []);
 
   return (
-    <AppContext.Provider value={{ categories, mySingleStasks, setMySingleTasks }}>
+    <AppContext.Provider
+      value={{
+        categories,
+        mySingleStasks,
+        setMySingleTasks,
+        setMyGroupTasks,
+        myGrouptasks,
+        refferalPoint,
+        joiningAmount
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

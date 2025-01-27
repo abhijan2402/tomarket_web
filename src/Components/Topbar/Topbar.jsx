@@ -73,6 +73,11 @@ const Topbar = ({ Logo }) => {
                   Profile
                 </Link>
               </li>
+              <li>
+                <Link className="dropdown-item" to="/support">
+                Support
+                </Link>
+              </li>
               {!user ? (
                 <li>
                   <Link className="dropdown-item" to="/login">
