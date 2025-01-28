@@ -446,3 +446,17 @@ button {
   background-color: #000;
   color: #fff;
 }
+
+
+.invite_btn {
+  background-color: #fcc419;
+  color: #000;
+  font-size: 14px;
+  margin-top: 20px;
+}
+
+.invite_btn:disabled {
+  background-color: rgba(256, 256, 256, 0.2);
+  color: #ffffffdb;
+  cursor: not-allowed;
+}

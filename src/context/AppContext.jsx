@@ -24,6 +24,22 @@ function AppProvider({ children }) {
   const [joiningAmount, setJoiningAmount] = useState();
   const [refferalPoint, setRefferalPoint] = useState();
 
+  const [Logo, setLogo] = useState([]);
+
+  const getData = async () => {
+    let resultArray = [];
+    const q = query(collection(db, "settings"));
+    const querySnapshot = await getDocs(q);
+    querySnapshot.forEach((doc) => {
+      resultArray.push({ id: doc.id, ...doc.data() });
+    });
+    setLogo(resultArray);
+  };
+
+  useEffect(() => {
+    getData();
+  }, []);
+
   useEffect(() => {
     const fetchContent = async () => {
       try {
@@ -63,7 +79,7 @@ function AppProvider({ children }) {
     try {
       const q = query(
         collection(db, "singletasks"),
-        where("createdBy", "==", user.uid),
+        where("createdBy", "==", user?.uid),
         orderBy("createdAt", "desc")
       );
       const querySnapshot = await getDocs(q);
@@ -83,7 +99,7 @@ function AppProvider({ children }) {
     try {
       const q = query(
         collection(db, "tasks"),
-        where("createdBy", "==", user.uid),
+        where("createdBy", "==", user?.uid),
         orderBy("createdAt", "desc")
       );
       const querySnapshot = await getDocs(q);
@@ -113,7 +129,8 @@ function AppProvider({ children }) {
         setMyGroupTasks,
         myGrouptasks,
         refferalPoint,
-        joiningAmount
+        joiningAmount,
+        Logo
       }}
     >
       {children}

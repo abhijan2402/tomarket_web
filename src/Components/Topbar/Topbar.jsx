@@ -27,7 +27,7 @@ const Topbar = ({ Logo }) => {
   };
 
   return (
-    <div>
+    <div style={{position: 'sticky', top: 0, zIndex: 1000}}>
       <header className="navbar">
         <div className="logo">
           <Link to="/">

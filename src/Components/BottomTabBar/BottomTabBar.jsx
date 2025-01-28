@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./BottomTabBar.css";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const BottomTabBar = () => {
+  const { pathname } = useLocation();
   const [activeTab, setActiveTab] = useState("/");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (pathname) {
+      setActiveTab(pathname);
+    }
+  }, [pathname]);
+
   const handleTabClick = (tab) => {
-    setActiveTab(tab);
     if (tab === "/") {
       navigate("/");
     } else {
@@ -26,7 +32,7 @@ const BottomTabBar = () => {
       </div>
 
       <div
-        className={`tab-item ${activeTab === "taskdashboard" ? "active" : ""}`}
+        className={`tab-item ${activeTab === "/taskdashboard" ? "active" : ""}`}
         onClick={() => handleTabClick("taskdashboard")}
       >
         <i className="bi bi-list-task tab-icon"></i>
@@ -34,7 +40,7 @@ const BottomTabBar = () => {
       </div>
 
       <div
-        className={`tab-item ${activeTab === "Frens" ? "active" : ""}`}
+        className={`tab-item ${activeTab === "/Frens" ? "active" : ""}`}
         onClick={() => handleTabClick("Frens")}
       >
         <i className="bi bi-people tab-icon"></i>
@@ -42,7 +48,7 @@ const BottomTabBar = () => {
       </div>
 
       <div
-        className={`tab-item ${activeTab === "Wallet" ? "active" : ""}`}
+        className={`tab-item ${activeTab === "/Wallet" ? "active" : ""}`}
         onClick={() => handleTabClick("Wallet")}
       >
         <i className="bi bi-wallet tab-icon"></i>

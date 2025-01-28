@@ -3,6 +3,7 @@ import { doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { toast } from "react-toastify";
 import { useApp } from "../context/AppContext";
+import ProofButtons from "./buttons/ProofButtons";
 
 const MyGroupTask = () => {
   const [showModal, setShowModal] = useState(false);
@@ -80,8 +81,9 @@ const MyGroupTask = () => {
 
   const rejectProof = async (index) => {
     setRejectedLoading((prev) => ({ ...prev, [index]: true }));
+
     try {
-      const taskDocRef = doc(db, "tasks", selectedTask.id);
+      const taskDocRef = doc(db, "tasks", selectedGroup.id); // Use selectedGroup.id for consistency
       const taskDoc = await getDoc(taskDocRef);
 
       if (!taskDoc.exists()) {
@@ -89,13 +91,23 @@ const MyGroupTask = () => {
         return;
       }
 
-      
       const data = taskDoc.data();
-
       const task = data.tasks[selectedTaskIndex];
+
+      if (!task) {
+        toast.error("Selected task not found.");
+        return;
+      }
 
       const existingUserTasks = task.userTasks || [];
 
+      if (!existingUserTasks[index]) {
+        console.error(`No user task found at index ${index}`);
+        toast.error("Task not found at the specified index.");
+        return;
+      }
+
+      // Update the status and timestamp
       existingUserTasks[index].status = "rejected";
       existingUserTasks[index].timestamp = new Date();
 
@@ -105,9 +117,11 @@ const MyGroupTask = () => {
           : task
       );
 
+      // Update Firestore document
       await updateDoc(taskDocRef, { tasks: updatedTasks });
-      toast.success("Rejected!");
+      toast.success("Rejected successfully!");
 
+      // Update local state
       setMyGroupTasks((prevTasks) =>
         prevTasks.map((item) =>
           item.id === selectedTask.id ? { ...item, tasks: updatedTasks } : item
@@ -115,11 +129,9 @@ const MyGroupTask = () => {
       );
       setSelectedGroup({ ...selectedGroup, tasks: updatedTasks });
       setSelectedTask({ ...selectedTask, userTasks: existingUserTasks });
-
-      
     } catch (error) {
-      console.error("Failed to claim the task:", error);
-      toast.error("Failed to claim the reward.");
+      console.error("Failed to reject the task:", error);
+      toast.error("Failed to reject the task.");
     } finally {
       setRejectedLoading((prev) => ({ ...prev, [index]: false }));
     }
@@ -197,7 +209,7 @@ const MyGroupTask = () => {
                     borderRadius: 30,
                     fontSize: 14,
                     textDecoration: "none",
-                    color: '#fff'
+                    color: "#fff",
                   }}
                   onClick={() => {
                     setOpenModal(true);
@@ -208,7 +220,6 @@ const MyGroupTask = () => {
                     class="bi bi-list-check"
                     style={{ fontSize: "14px", color: "#fff" }}
                   ></i>
-                  
                 </button>
               </div>
             </li>
@@ -244,10 +255,21 @@ const MyGroupTask = () => {
                 <p>Participants </p>{" "}
                 <p>{selectedTask?.userTasks?.length || "0"}</p>
               </div>
-              <div className="modal-body">
+              <div
+                className="modal-body scrollable-container"
+                style={{ maxHeight: "60vh", overflowY: "auto" }}
+              >
                 {selectedTask?.userTasks?.length > 0 ? (
                   selectedTask?.userTasks?.map((item, index) => (
-                    <div key={index} className="custome-card">
+                    <div
+                      key={index}
+                      className="custome-card"
+                      style={{
+                        borderBottom: "0.5px solid #ccc",
+                        padding: "10px 0",
+                        marginBottom: 10,
+                      }}
+                    >
                       <div className="grp-tsk-desc">
                         <h6
                           className="card-title fs-5"
@@ -259,148 +281,14 @@ const MyGroupTask = () => {
                           {item.userName || "No Name Provided"}
                         </h6>
                       </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "5px",
-                        }}
-                      >
-                        {/* Add Proof Button */}
-                        {item.proofUrl ? (
-                          <a
-                            href={item.proofUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            <button
-                              className="add-proof-btn"
-                              style={{
-                                backgroundColor: "#007bff",
-                                color: "#fff",
-                                marginRight: "10px",
-                                border: "none",
-                                padding: "8px 14px",
-                                cursor: "pointer",
-                                borderRadius: "5px",
-                              }}
-                            >
-                              {item.status === "claimed" ? (
-                                <i class="bi bi-check-all"></i>
-                              ) : (
-                                <i class="bi bi-cloud-arrow-up"></i>
-                              )}
-                            </button>
-                          </a>
-                        ) : null}
 
-                        {item?.status === "started" ? (
-                          <div
-                            className={`start-redirect-icon`}
-                            style={{
-                              color: "#fff",
-                              textWrap: "nowrap",
-                              paddingLeft: 15,
-                              textTransform: "capitalize",
-                              paddingRight: 15,
-                              cursor: "not-allowed",
-                              opacity: "0.8",
-                            }}
-                          >
-                            {item?.status}
-                          </div>
-                        ) : item.status === "submitted" ? (
-                          <>
-                            <button
-                              className="claim-btn"
-                              style={{
-                                backgroundColor: "red",
-                                color: "#fff",
-                                border: "none",
-                                padding: "5px 10px",
-                                cursor: "pointer",
-                                borderRadius: "5px",
-                              }}
-                              disabled={
-                                approvedLoading[index] || rejectedLoading[index]
-                              }
-                              onClick={() => rejectProof(index)}
-                            >
-                              {rejectedLoading[index] ? (
-                                <div
-                                  class="spinner-border text-light spinner-border-sm my-1"
-                                  role="status"
-                                ></div>
-                              ) : (
-                                <i
-                                  class="bi bi-x"
-                                  style={{ fontSize: "20px" }}
-                                ></i>
-                              )}
-                            </button>{" "}
-                            <button
-                              className="claim-btn"
-                              disabled={
-                                approvedLoading[index] || rejectedLoading[index]
-                              }
-                              style={{
-                                backgroundColor: " #4caf50",
-                                color: "#fff",
-                                border: "none",
-                                padding: "5px 10px",
-                                cursor: "pointer",
-                                borderRadius: "5px",
-                              }}
-                              onClick={() => approveProof(index)}
-                            >
-                              {approvedLoading[index] ? (
-                                <div
-                                  class="spinner-border text-light spinner-border-sm my-1"
-                                  role="status"
-                                ></div>
-                              ) : (
-                                <i
-                                  class="bi bi-check"
-                                  style={{ fontSize: "20px" }}
-                                ></i>
-                              )}
-                            </button>{" "}
-                          </>
-                        ) : item.status === "approved" ? (
-                          <div
-                            className={`start-redirect-icon`}
-                            style={{
-                              color: "#fff",
-                              textWrap: "nowrap",
-                              paddingLeft: 15,
-                              textTransform: "capitalize",
-                              paddingRight: 15,
-                              cursor: "not-allowed",
-                              opacity: "0.8",
-                            }}
-                          >
-                            {item?.status}
-                          </div>
-                        ) : item.status === "rejected" ? (
-                          <div
-                            className={`start-redirect-icon`}
-                            style={{
-                              color: "#fff",
-                              textWrap: "nowrap",
-                              background: "red",
-                              paddingLeft: 15,
-                              textTransform: "capitalize",
-                              paddingRight: 15,
-                              cursor: "not-allowed",
-                              opacity: "0.8",
-                            }}
-                          >
-                            {item?.status}
-                          </div>
-                        ) : null}
-
-                        {/* Claim Button */}
-                      </div>
+                      <ProofButtons
+                        item={item}
+                        approveProofHandle={() => approveProof(index)}
+                        rejectProofHandle={() => rejectProof(index)}
+                        approvedLoading={approvedLoading[index]}
+                        rejectedLoading={rejectedLoading[index]}
+                      />
                     </div>
                   ))
                 ) : (
@@ -517,7 +405,7 @@ const MyGroupTask = () => {
                               borderRadius: 30,
                               fontSize: 14,
                               textDecoration: "none",
-                              color: '#fff'
+                              color: "#fff",
                             }}
                             onClick={() => handleOpenModal(task, index)}
                           >
@@ -525,7 +413,6 @@ const MyGroupTask = () => {
                               class="bi bi-list-check"
                               style={{ fontSize: "14px", color: "#fff" }}
                             ></i>
-                          
                           </button>
                         </div>
                       </div>

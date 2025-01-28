@@ -25,3 +25,14 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 }
+
+
+.scrollable-container {
+  overflow-y: scroll; /* Enable vertical scrolling */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+  -ms-overflow-style: none; /* Hide scrollbar in IE/Edge */
+}
+
+.scrollable-container::-webkit-scrollbar {
+  display: none; /* Hide scrollbar in Webkit-based browsers */
+}
