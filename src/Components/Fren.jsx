@@ -1,16 +1,31 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import "../Style/Fren.css";
 import { useAuth } from "../context/AuthContext";
 import { Link } from "react-router-dom";
+import { AppContext } from "../context/AppContext";
 
 const Fren = () => {
   const { user } = useAuth();
+  const { refferalPoint } = useContext(AppContext);
+  const [isCopied, setIsCopied] = useState(false); // State to track copy action
+
+  const referralLink = `https://tomarket-web.cineview.tech/signup?referralCode=${user?.referralCode}`;
+
+  const handleCopyClick = () => {
+    navigator.clipboard
+      .writeText(referralLink)
+      .then(() => {
+        setIsCopied(true); // Set copied state to true
+        setTimeout(() => setIsCopied(false), 2000); // Reset state after 2 seconds
+      })
+      .catch((error) =>
+        console.error("Error copying referral link:", error)
+      );
+  };
 
   const handleInviteClick = () => {
-    const referralLink = `https://tomarket-web.cineview.tech/signup?referralCode=${user?.referralCode}`;
     const referralText = `Join Blum using my referral code (${user?.referralCode}) and earn rewards!`;
 
-    // Check if the Web Share API is available
     if (navigator.share) {
       navigator
         .share({
@@ -21,7 +36,6 @@ const Fren = () => {
         .then(() => console.log("Referral link shared successfully!"))
         .catch((error) => console.error("Error sharing referral link:", error));
     } else {
-      // Fallback: Copy the referral text with the referral link to clipboard
       const fallbackText = `${referralText}\nSign up here: ${referralLink}`;
       navigator.clipboard
         .writeText(fallbackText)
@@ -33,88 +47,95 @@ const Fren = () => {
   return (
     <>
       <div className="invite_fren">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            width: "100%",
-            marginTop: 20,
-            gap: 12,
-            marginBottom: 20,
-          }}
-        >
-          <i style={{ fontSize: 30 }} className="bi bi-people-fill"></i>
-          <i
-            style={{ fontSize: 20, color: "#fff" }}
-            class="bi bi-arrow-right"
-          ></i>
-          <div
-            style={{
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              width: 30,
-              height: 30,
-              borderRadius: 50,
-              display: "flex",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <i
-              style={{ fontSize: 20, color: "white" }}
-              class="bi bi-currency-dollar"
-            ></i>
+        <h1 style={{ marginTop: 30, marginBottom: 20 }}>
+          Your Invitation Link
+        </h1>
+
+        <div className="invite_link">
+          <p>{referralLink.slice(0, 23)}...</p>
+
+          <div style={{ display: "flex" }}>
+            <button onClick={handleCopyClick}>
+              {isCopied ? (
+                <i className="bi bi-clipboard-check-fill"></i>
+              ) : (
+                <i className="bi bi-copy"></i>
+              )}
+            </button>
+            <button
+              onClick={handleInviteClick}
+              style={{ backgroundColor: "#fab005" }}
+            >
+              <i className="bi bi-box-arrow-up-right"></i>
+            </button>
           </div>
         </div>
 
-        <h1>Invite frens. Earn points</h1>
-        <p className="invite_desc">
-          Spread the crypto among friends, let them join to-market and earn % of
-          their farmed points.
-        </p>
-
-        <div className="invite_score">
-          <div className="invite_score_item">
-            <h3>Score</h3>
-            <h2>10%</h2>
-            <p>of farmed by frens</p>
+        <div className="invite_fren_stats">
+          <div className="invite_fren_stats_item">
+            <h2>{user?.referralCount || 0}</h2>
+            <p>Friends Invited</p>
           </div>
 
-          <div className="invite_score_item">
-            <h3>Score</h3>
-            <h2>2.5%</h2>
-            <p>from their refs</p>
+          <div className="invite_fren_stats_item">
+            <h2>{user?.points || 0}</h2>
+            <p>DOGS Rewards</p>
           </div>
         </div>
 
-        <Link to="/how-its-work" className="how_it_works">
-          <div style={{ fontSize: 30 }}>📖</div>
+        <h1 style={{ marginTop: 20, marginBottom: 20 }}>Invitation Reward</h1>
+
+        <div className="invite_fren_reward">
           <div>
-            <h3>How it works</h3>
-            <p>Referral program rules</p>
+            <div className="invite_fren_reward_icon">🐶</div>
           </div>
 
-          <i
-            style={{ fontSize: 20, color: "#fff", marginLeft: "auto" }}
-            class="bi bi-chevron-right"
-          ></i>
-        </Link>
-      </div>
+          <h3>
+            Receive {refferalPoint || 0} DOGS for every referral that makes a
+            claim.
+          </h3>
+        </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          width: "100%",
-          position: "fixed",
-          bottom: 0,
-          backgroundColor: "#000",
-          paddingLeft: 5,
-          paddingRight: 15,
-          paddingBottom: 60,
-        }}
-      >
-        <div className="invite_btn" onClick={handleInviteClick}>
-          Invite a fren
+        <div className="hr" />
+
+        <div className="invite_fren_reward">
+          <div>
+            <div className="invite_fren_reward_icon">
+              <i className="bi bi-graph-up-arrow"></i>
+            </div>
+          </div>
+
+          <h3>
+            Receive 100 AIGO Tokens for every invite.{" "}
+            <i className="bi bi-info-circle"></i>
+          </h3>
+        </div>
+
+        <div className="hr" />
+
+        <div className="invite_fren_reward">
+          <div>
+            <div className="invite_fren_reward_icon">
+              <i className="bi bi-triangle-half"></i>
+            </div>
+          </div>
+
+          <h3>
+            Additional Working Capital from every friend that makes a claim.{" "}
+            <i className="bi bi-info-circle"></i>
+          </h3>
+        </div>
+
+        <div className="hr" />
+
+        <div className="invite_fren_reward">
+          <div>
+            <div className="invite_fren_reward_icon">
+              <i className="bi bi-triangle-half"></i>
+            </div>
+          </div>
+
+          <h3>Receive 50% of friend's contract value as commission.</h3>
         </div>
       </div>
     </>

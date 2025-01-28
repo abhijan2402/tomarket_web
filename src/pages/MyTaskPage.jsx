@@ -40,9 +40,11 @@ const MyTaskPage = () => {
             borderRadius: 30,
             fontSize: 14,
             textDecoration: "none",
+            color: '#fff',
+            marginRight: 15
           }}
         >
-          Create Task
+          <i class="bi bi-plus-circle"></i>
         </Link>
       </div>
 

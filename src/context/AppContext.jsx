@@ -21,8 +21,8 @@ function AppProvider({ children }) {
   const [mySingleStasks, setMySingleTasks] = useState([]);
   const [myGrouptasks, setMyGroupTasks] = useState([]);
 
-  const [joiningAmount, setJoiningAmount] = useState("");
-  const [refferalPoint, setRefferalPoint] = useState("");
+  const [joiningAmount, setJoiningAmount] = useState();
+  const [refferalPoint, setRefferalPoint] = useState();
 
   useEffect(() => {
     const fetchContent = async () => {
@@ -31,13 +31,13 @@ function AppProvider({ children }) {
           doc(db, "settings", "joiningAmount")
         );
 
-        setJoiningAmount(joiningAmount.data().value);
+        setJoiningAmount(Number(joiningAmount.data().value || 0));
 
         const referralPoint = await getDoc(
           doc(db, "settings", "referralPoint")
         );
 
-        setRefferalPoint(referralPoint.data().value);
+        setRefferalPoint(Number(referralPoint.data().value || 0));
       } catch (error) {
         console.error("Error fetching settings:", error);
       }

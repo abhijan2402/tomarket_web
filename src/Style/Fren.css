@@ -4,99 +4,102 @@
   margin-top: 0rem;
   padding: 0 10px;
 }
-.invite_fren i {
-  font-size: 60px;
-  color: goldenrod;
-}
+
 .invite_fren h1 {
   color: #fff;
   letter-spacing: 1px;
+  font-size: 24px;
 }
 
-.invite_desc {
-  color: #fff;
-  font-size: 16px;
-  letter-spacing: 1px;
-  opacity: 0.7;
-}
-
-.invite_score {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  margin-top: 1.5rem;
-  gap: 15px;
-}
-
-.invite_score_item {
-  background-color: rgba(255, 255, 255, 0.1);
-  padding: 15px;
-  border-radius: 8px;
-  padding-left: 10;
-  padding-right: 0;
-}
-
-.invite_score_item h3 {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 16px;
-  margin-bottom: 1rem;
-}
-
-.invite_score_item h2 {
-  color: #fff;
-  font-size: 30px;
-  letter-spacing: 1px;
-  margin-right: 1rem;
-  font-weight: bold;
-}
-
-.invite_score_item p {
-  color: #fab005c7;
-  font-size: 14px;
-  letter-spacing: 1px;
-}
-
-.how_it_works {
+.invite_link {
   display: flex;
-  background-color: rgba(255, 255, 255, 0.1);
-  margin-top: 1rem;
-  border-radius: 8px;
-  padding: 15px;
+  justify-content: space-between;
   align-items: center;
-  gap: 15px;
-  text-decoration: none;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 10px;
+  border-radius: 8px;
 }
 
-.how_it_works h3 {
-  color: #fff;
-  font-size: 20px;
-  letter-spacing: 1px;
-  font-weight: bold;
-}
-
-.how_it_works p {
+.invite_link p {
   color: #fff;
   font-size: 16px;
   letter-spacing: 1px;
-  opacity: 0.7;
 }
 
-/* Invite button */
-.invite_btn {
-  color: #000;
+.invite_link i {
+  font-size: 18px;
+  color: white;
+}
+
+.invite_link button {
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
   display: flex;
-  align-items: center;
   justify-content: center;
-  background-color: #fab005;
-  font-weight: 700;
-  padding: 15px 0;
+  align-items: center;
+}
+
+.invite_fren_stats {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 0.7rem;
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.invite_fren_stats_item {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 15px;
   border-radius: 8px;
-  cursor: pointer;
-  transition: 0.5s all;
   width: 100%;
 }
 
-.invite_btn:disabled {
-  background-color: rgba(255, 255, 255, 0.1);
-  cursor: not-allowed;
-  color: #ffffffa2;
+.invite_fren_stats_item h2 {
+  color: #fff;
+  font-size: 30px;
+  letter-spacing: 1px;
+}
+
+.invite_fren_stats_item p {
+  color: #fff;
+  font-size: 16px;
+  letter-spacing: 1px;
+}
+
+.invite_fren_reward {
+  display: flex;
+  padding: 0 20px;
+  gap: 10px;
+  align-items: center;
+}
+
+.invite_fren_reward_icon {
+  width: 50px;
+  height: 50px;
+  background-color: #fab005;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  font-size: 22px;
+  color: #fff;
+}
+
+.invite_fren_reward h3 {
+  color: #fff;
+  font-size: 16px;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  margin-bottom: 0;
+}
+
+.hr {
+  height: 0.5px;
+  background-color: rgba(255, 255, 255, 0.2);
+  margin-top: 20px;
+  margin-bottom: 20px;
 }

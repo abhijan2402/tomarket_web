@@ -43,7 +43,7 @@ const fetchTasks = async (userUid) => {
 function SingleTask() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("OnChain");
-  const { categories } = useContext(AppContext);
+  const { categories, refferalPoint } = useContext(AppContext);
   const [selectedTask, setSelectedTask] = useState(null);
   const [proofModalOpen, setProofModalOpen] = useState(false);
   const [proofFile, setProofFile] = useState(null);
@@ -215,6 +215,35 @@ function SingleTask() {
         wallet: increment(Number(task.reward)),
       });
 
+      // if (user?.isFirstClaimed) {
+      //   const q = query(
+      //     collection(db, "users"),
+      //     where("referralCode", "==", user?.referredBy)
+      //   );
+      //   const querySnapshot = await getDocs(q);
+
+      //   if (querySnapshot.empty) {
+      //     return false;
+      //   }
+
+      //   // If valid, update the referred user's wallet
+      //   const referredUserDoc = querySnapshot.docs[0];
+      //   const referredUserRef = doc(db, "users", referredUserDoc.id);
+      //   const referredUserData = referredUserDoc.data();
+      //   const updatedPoints = (referredUserData.points || 0) + refferalPoint;
+
+      //   await updateDoc(referredUserRef, {
+      //     points: updatedPoints,
+      //   });
+
+      //   await updateDoc(userRef, {
+      //     isFirstClaimed: false,
+      //   });
+  
+
+
+      // }
+
       toast.success("Reward claimed successfully!");
 
       setTasks((prevTasks) =>
@@ -261,16 +290,16 @@ function SingleTask() {
                 ></i>
               ) : (
                 <div>
-                <img
-                  style={{
-                    width: 45,
-                    height: 45,
-                    objectFit: "cover",
-                    borderRadius: "50%",
-                  }}
-                  src={task.platformLogo}
-                  alt=""
-                />
+                  <img
+                    style={{
+                      width: 45,
+                      height: 45,
+                      objectFit: "cover",
+                      borderRadius: "50%",
+                    }}
+                    src={task.platformLogo}
+                    alt=""
+                  />
                 </div>
               )}
 
@@ -369,19 +398,23 @@ function SingleTask() {
                       </>
                     )}
                   </button>
-                ): userTask?.status === 'rejected'? (<div
-                  className={`start-redirect-icon`}
-                  style={{
-                    textWrap: "nowrap",
-                    opacity: "0.8",
-                    cursor: "not-allowed",
-                    backgroundColor: "red",
-                    color: "#fff",
-                  }}
-                >
-                  Rejected
-                </div>) : userTask?.status === "claimed" ? (
-                  <a href={task.link} target="_blank"
+                ) : userTask?.status === "rejected" ? (
+                  <div
+                    className={`start-redirect-icon`}
+                    style={{
+                      textWrap: "nowrap",
+                      opacity: "0.8",
+                      cursor: "not-allowed",
+                      backgroundColor: "red",
+                      color: "#fff",
+                    }}
+                  >
+                    Rejected
+                  </div>
+                ) : userTask?.status === "claimed" ? (
+                  <a
+                    href={task.link}
+                    target="_blank"
                     className={`start-redirect-icon disabled`}
                     style={{
                       cursor: "not-allowed",

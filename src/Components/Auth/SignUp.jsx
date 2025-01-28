@@ -26,7 +26,7 @@ function SignUp() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { refferalPoint, joiningAmount } = useApp();
+  const { joiningAmount, refferalPoint } = useApp();
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -82,8 +82,12 @@ function SignUp() {
     const referredUserRef = doc(db, "users", referredUserDoc.id);
     const referredUserData = referredUserDoc.data();
     const updatedPoints = (referredUserData.points || 0) + refferalPoint;
+    const updatedReferralCount = (referredUserData.referralCount || 0) + 1;
 
-    await updateDoc(referredUserRef, { points: updatedPoints });
+    await updateDoc(referredUserRef, {
+      points: updatedPoints,
+      referralCount: updatedReferralCount,
+    });
     return true;
   };
 
@@ -146,7 +150,8 @@ function SignUp() {
         email: user.email,
         wallet: joiningAmount,
         userID: user.uid,
-        referralCode, // Save the generated referral code
+        referralCode,
+        isFirstClaimed: referralCodeInput.trim() ? true : false,
         referredBy: referralCodeInput.trim() || null, // Save the entered referral code (if any)
         createdAt: new Date().toISOString(),
       });

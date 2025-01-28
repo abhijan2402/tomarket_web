@@ -188,12 +188,16 @@ const MyGroupTask = () => {
               </div>
               <div className="task-actions">
                 <button
-                  className="redirect-icon"
                   style={{
-                    cursor: "pointer",
-                    display: "flex",
-                    gap: "5px",
-                    alignItems: "center",
+                    textWrap: "nowrap",
+                    marginLeft: "auto",
+                    color: "#000",
+                    padding: "8px 20px",
+                    backgroundColor: "#fcc419",
+                    borderRadius: 30,
+                    fontSize: 14,
+                    textDecoration: "none",
+                    color: '#fff'
                   }}
                   onClick={() => {
                     setOpenModal(true);
@@ -202,9 +206,9 @@ const MyGroupTask = () => {
                 >
                   <i
                     class="bi bi-list-check"
-                    style={{ fontSize: "14px", color: "#000" }}
+                    style={{ fontSize: "14px", color: "#fff" }}
                   ></i>
-                  Detail
+                  
                 </button>
               </div>
             </li>
@@ -504,20 +508,24 @@ const MyGroupTask = () => {
 
                         <div>
                           <button
-                            className="redirect-icon"
                             style={{
-                              cursor: "pointer",
-                              display: "flex",
-                              gap: "5px",
-                              alignItems: "center",
+                              textWrap: "nowrap",
+                              marginLeft: "auto",
+                              color: "#000",
+                              padding: "8px 20px",
+                              backgroundColor: "#fcc419",
+                              borderRadius: 30,
+                              fontSize: 14,
+                              textDecoration: "none",
+                              color: '#fff'
                             }}
                             onClick={() => handleOpenModal(task, index)}
                           >
                             <i
                               class="bi bi-list-check"
-                              style={{ fontSize: "14px", color: "#000" }}
+                              style={{ fontSize: "14px", color: "#fff" }}
                             ></i>
-                            Detail
+                          
                           </button>
                         </div>
                       </div>

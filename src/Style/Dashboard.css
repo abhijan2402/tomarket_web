@@ -118,13 +118,7 @@
   }
 }
 
-.redirect-icon {
-  border-radius: 5px;
-  padding: 8px 16px;
-  color: #000;
-  cursor: pointer;
-  transition: background-color 0.5s ease;
-}
+
 
 .task-completed {
   background-color: grey;
@@ -283,17 +277,6 @@
   letter-spacing: 1px;
 }
 
-/* .redirect-icon {
-  font-size: 24px;
-  color: #fff;
-  transition: color 0.3s ease;
-  background-color: #282828;
-  text-decoration: none;
-  font-size: 18px;
-  font-weight: 600;
-  padding: 10px 20px;
-  border-radius: 40%;
-} */
 
 .redirect-icon:hover {
   color: #fff;
