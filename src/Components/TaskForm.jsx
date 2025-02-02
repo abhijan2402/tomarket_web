@@ -5,7 +5,7 @@ import { AppContext } from "../context/AppContext";
 import { storage } from "../firebase";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 
-function TaskForm({ addTaskToList, isGroupTask }) {
+function TaskForm({ addTaskToList, isGroupTask, loading }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [link, setLink] = useState("");
@@ -27,6 +27,7 @@ function TaskForm({ addTaskToList, isGroupTask }) {
     ) {
       return toast.error("All required fields must be filled");
     }
+
 
     let platformLogo = selectedPlatform;
 
@@ -197,8 +198,17 @@ function TaskForm({ addTaskToList, isGroupTask }) {
         </select>
       </div>
 
-      <button onClick={handleAddTask} style={{ marginTop: "10px" }}>
-        Add Task
+      <button
+        disabled={loading}
+        onClick={handleAddTask}
+        style={{
+          marginTop: "10px",
+          backgroundColor: "#fcc419",
+          color: "black",
+          marginLeft: -3,
+        }}
+      >
+        {loading ? "Adding..." : "Add Task"}
       </button>
     </div>
   );

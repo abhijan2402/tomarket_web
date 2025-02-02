@@ -1,6 +1,12 @@
 import React from "react";
 
-function TaskList({ tasks, removeTask, isGroupTask, handleSubmitGroup }) {
+function TaskList({
+  tasks,
+  removeTask,
+  isGroupTask,
+  handleSubmitGroup,
+  loading,
+}) {
   return (
     <div className="tasklist_container">
       <h6>Group Task</h6>
@@ -21,8 +27,13 @@ function TaskList({ tasks, removeTask, isGroupTask, handleSubmitGroup }) {
 
       {/* Display the group submission button when there are group tasks */}
       {isGroupTask && tasks.length > 0 && (
-        <button onClick={handleSubmitGroup} className="submit-group-btn">
-          Submit Group Tasks
+        <button
+          disabled={loading}
+          onClick={handleSubmitGroup}
+          className="submit-group-btn"
+          style={{ marginLeft: -3, color: "black", backgroundColor: "#fcc419" }}
+        >
+          {loading ? "Submiting..." : "Submit Group Tasks"}
         </button>
       )}
     </div>

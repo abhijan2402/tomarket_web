@@ -1,6 +1,6 @@
 // src/components/PrivateRoute.js
 import React, { useContext } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import Topbar from "./Topbar/Topbar";
 import BottomTabBar from "./BottomTabBar/BottomTabBar";
@@ -9,9 +9,13 @@ import { AppContext } from "../context/AppContext";
 const PrivateRoute = () => {
   const { user } = useAuth();
   const { Logo } = useContext(AppContext);
+  const {pathname} = useLocation()
   return user ? (
     <>
-      <Topbar Logo={Logo} />
+    {
+      pathname !== '/' && <Topbar Logo={Logo} />
+    }
+      
       <Outlet />
       <BottomTabBar />
     </>

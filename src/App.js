@@ -14,7 +14,7 @@ import Dashboard from "./Components/Dashboard";
 import DailyTask from "./Components/DailyTask";
 import CompletedTask from "./Components/CompletedTask";
 import PendingTask from "./Components/PendingTask";
-import Reward from "./Components/Reward";
+import CreateTask from "./Components/create-task";
 import Wallet from "./Components/Wallet";
 import BottomTabBar from "./Components/BottomTabBar/BottomTabBar";
 import Fren from "./Components/Fren";
@@ -60,7 +60,7 @@ function AppContent() {
                 <Route path="daily-task" element={<DailyTask />} />
                 <Route path="completed-task" element={<CompletedTask />} />
                 <Route path="pending-task" element={<PendingTask />} />
-                <Route path="task" element={<Reward />} />
+                <Route path="task" element={<CreateTask />} />
                 <Route path="wallet" element={<Wallet />} />
                 <Route path="frens" element={<Fren />} />
                 <Route path="how-its-work" element={<HowItsWork />} />

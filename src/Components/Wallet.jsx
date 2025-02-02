@@ -80,6 +80,15 @@ function Wallet() {
 
   return (
     <>
+      <div style={{ padding: "20px 10px 0" }}>
+        <h1 style={{ textTransform: "uppercase", color: "white" }}>Wallet</h1>
+
+        <h3 style={{ textTransform: "uppercase", color: "white", letterSpacing: 1 }}>
+          Manage funds{" "}
+          <span style={{ opacity: 0.4 }}> securely and efficiently</span>
+        </h3>
+      </div>
+
       <div className="wallet_header">
         <h3>Points</h3>
         <p>{walletAmount !== null ? `$${walletAmount}` : "0"}</p>

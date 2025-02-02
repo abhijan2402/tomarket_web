@@ -380,7 +380,7 @@ function GroupTask() {
         >
           <div className="modal-dialog modal-lg">
             <div className="modal-content modal-tsk-content">
-              <div className="modal-header">
+              <div className="modal-header" style={{border: 'none'}}>
                 <h5 className="modal-title">Group Tasks</h5>
                 <i
                   className="bi bi-x-square"
@@ -389,7 +389,6 @@ function GroupTask() {
                 ></i>
               </div>
 
-              <div></div>
               <div className="modal-body">
                 <div>
                   {selectedGroup?.thumbnail ? (
