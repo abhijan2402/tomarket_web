@@ -79,7 +79,7 @@ const Fren = () => {
 
           <div className="invite_fren_stats_item">
             <h2>{user?.points || 0}</h2>
-            <p>DOGS Rewards</p>
+            <p>Rewards</p>
           </div>
         </div>
 
@@ -91,27 +91,14 @@ const Fren = () => {
           </div>
 
           <h3>
-            Receive {refferalPoint || 0} DOGS for every referral that makes a
+            Receive {refferalPoint || 0} poins for every referral that makes a
             claim.
           </h3>
         </div>
 
         <div className="hr" />
 
-        <div className="invite_fren_reward">
-          <div>
-            <div className="invite_fren_reward_icon">
-              <i className="bi bi-graph-up-arrow"></i>
-            </div>
-          </div>
-
-          <h3>
-            Receive 100 AIGO Tokens for every invite.{" "}
-            <i className="bi bi-info-circle"></i>
-          </h3>
-        </div>
-
-        <div className="hr" />
+       
 
         <div className="invite_fren_reward">
           <div>
