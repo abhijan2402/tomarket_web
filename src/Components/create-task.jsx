@@ -20,6 +20,7 @@ function CreateTask() {
   const [popupMsgType, setPopupMsgType] = useState("");
   const [description, setDescription] = useState("");
   const [thumbnail, setThumbnail] = useState(null);
+  const [numberOfParticipants, setNumberOfParticipants] = useState(10);
   const [loading, setLoaidng] = useState(false);
   const { setMySingleTasks, setMyGroupTasks } = useApp();
 
@@ -63,6 +64,7 @@ function CreateTask() {
         status: "pending",
         type: "group",
         thumbnail: thumbnailUrl,
+        numberOfParticipants,
         description,
       });
 
@@ -182,6 +184,19 @@ function CreateTask() {
                 placeholder="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div className="task_form_field">
+              <label htmlFor="numberOfParticipants">
+                Number of Participants
+              </label>
+              <input
+                type="number"
+                id="numberOfParticipants"
+                placeholder="10"
+                value={numberOfParticipants}
+                onChange={(e) => setNumberOfParticipants(e.target.value)}
               />
             </div>
 

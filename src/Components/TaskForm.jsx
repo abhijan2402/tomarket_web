@@ -14,6 +14,7 @@ function TaskForm({ addTaskToList, isGroupTask, loading }) {
   const [proof, setProof] = useState("no");
   const [selectedPlatform, setSelectedPlatform] = useState("");
   const [customLogo, setCustomLogo] = useState(null);
+  const [numberOfParticipants, setNumberOfParticipants] = useState(10);
   const { categories } = useContext(AppContext);
 
   const handleAddTask = async () => {
@@ -52,6 +53,7 @@ function TaskForm({ addTaskToList, isGroupTask, loading }) {
       category,
       proof,
       platformLogo,
+      numberOfParticipants
     });
 
     // Reset form fields
@@ -126,7 +128,20 @@ function TaskForm({ addTaskToList, isGroupTask, loading }) {
         />
       </div>
 
+    
+
       {!isGroupTask && (
+        <>
+          <div className="task_form_field">
+        <label htmlFor="numberOfParticipants">Number of Participants</label>
+        <input
+          type="number"
+          id="numberOfParticipants"
+          placeholder="10"
+          value={numberOfParticipants}
+          onChange={(e) => setNumberOfParticipants(e.target.value)}
+        />
+      </div>
         <div className="task_form_field">
           <label htmlFor="category">Category</label>
           <select
@@ -142,6 +157,8 @@ function TaskForm({ addTaskToList, isGroupTask, loading }) {
             ))}
           </select>
         </div>
+        </>
+        
       )}
 
       <div className="task_form_field">

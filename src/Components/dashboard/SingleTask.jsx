@@ -70,7 +70,6 @@ function SingleTask() {
   };
 
   const handleStartTask = async (taskId, link) => {
-    window.open(link, "_blank");
 
     setBtnLoading((prev) => ({ ...prev, [taskId]: true }));
 
@@ -84,6 +83,12 @@ function SingleTask() {
         existingUserTasks = taskDoc.data().userTasks || [];
       }
 
+      if(Number(taskDoc.data().numberOfParticipants) && Number(taskDoc.data().numberOfParticipants) <= existingUserTasks?.length) {
+        return toast.error('No more Participants accepting')
+
+      }
+      window.open(link, "_blank");
+
       const newUserTask = {
         userId: user.uid,
         userName: user.name,
@@ -94,7 +99,7 @@ function SingleTask() {
 
       const updatedUserTasks = [...existingUserTasks, newUserTask];
 
-      await updateDoc(taskDocRef, { userTasks: updatedUserTasks });
+      await updateDoc(taskDocRef, {userTasks: updatedUserTasks });
 
       toast.info("Task is completed and tracked.");
       setTasks((prevTasks) =>
@@ -430,7 +435,7 @@ function SingleTask() {
                   </a>
                 ) : (
                   <button
-                    disabled={btnLoading[task.id]}
+                    disabled={btnLoading[task.id] || Number(task?.numberOfParticipants) <= task?.userTasks?.length}
                     className={`start-redirect-icon`}
                     onClick={() => {
                       handleStartTask(task.id, task.link);

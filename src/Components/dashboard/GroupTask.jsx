@@ -182,8 +182,6 @@ function GroupTask() {
   };
 
   const handleStartTask = async (taskId, index, link) => {
-    window.open(link, "_blank");
-
     setBtnLoading((prev) => ({ ...prev, [index]: true }));
 
     try {
@@ -192,12 +190,24 @@ function GroupTask() {
       const taskDoc = await getDoc(taskDocRef);
 
       let existingUserTasks = [];
+      let existingParticipants = [];
 
       const data = taskDoc.data();
 
       if (taskDoc.exists()) {
         existingUserTasks = data?.tasks[index]?.userTasks || [];
+        existingParticipants = data?.participants || [];
       }
+
+      if (
+        Number(taskDoc.data().numberOfParticipants) &&
+        Number(taskDoc.data().numberOfParticipants) <=
+          existingParticipants?.length &&  !existingParticipants.includes(user.uid)
+      ) {
+        return toast.error("No more Participants accepting");
+      }
+
+      window.open(link, "_blank");
 
       const newUserTask = {
         userId: user.uid,
@@ -213,7 +223,14 @@ function GroupTask() {
         idx === index ? { ...task, userTasks: updatedUserTasks } : task
       );
 
-      await updateDoc(taskDocRef, { tasks: updatedTasks });
+      const updatedParticipants = existingParticipants.includes(user.uid)
+        ? existingParticipants
+        : [...existingParticipants, user.uid];
+
+      await updateDoc(taskDocRef, {
+        tasks: updatedTasks,
+        participants: updatedParticipants,
+      });
 
       setTasks((prevTasks) =>
         prevTasks.map((item) =>
@@ -380,7 +397,7 @@ function GroupTask() {
         >
           <div className="modal-dialog modal-lg">
             <div className="modal-content modal-tsk-content">
-              <div className="modal-header" style={{border: 'none'}}>
+              <div className="modal-header" style={{ border: "none" }}>
                 <h5 className="modal-title">Group Tasks</h5>
                 <i
                   className="bi bi-x-square"
@@ -569,7 +586,7 @@ function GroupTask() {
                             </a>
                           ) : (
                             <button
-                              disabled={btnLoading[index]}
+                              disabled={btnLoading[index] || Number(selectedGroup?.numberOfParticipants) <= selectedGroup?.participants?.length &&  !selectedGroup?.participants.includes(user.uid)}
                               className={`start-redirect-icon`}
                               onClick={() => {
                                 handleStartTask(

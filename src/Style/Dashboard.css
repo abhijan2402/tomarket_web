@@ -307,6 +307,11 @@
   border: none;
 }
 
+.start-redirect-icon:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .tabs-container {
   /* border: 1px solid red; */
   display: flex;

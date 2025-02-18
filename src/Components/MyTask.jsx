@@ -221,7 +221,7 @@ const MyTask = () => {
                 }}
               >
                 <p>Participants </p>{" "}
-                <p>{selectedTask?.userTasks?.length || "0"}</p>
+                <p>{selectedTask?.userTasks?.length || "0"}/{selectedTask?.numberOfParticipants || '∞'}</p>
               </div>
               <div
                 className="modal-body scrollable-container"

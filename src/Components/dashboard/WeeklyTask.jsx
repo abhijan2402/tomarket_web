@@ -74,8 +74,6 @@ function WeeklyTask() {
   };
 
   const handleStartTask = async (taskId, link) => {
-    window.open(link, "_blank");
-
     setBtnLoading((prev) => ({ ...prev, [taskId]: true }));
 
     try {
@@ -87,6 +85,15 @@ function WeeklyTask() {
       if (taskDoc.exists()) {
         existingUserTasks = taskDoc.data().userTasks || [];
       }
+
+      if (
+        Number(taskDoc.data().numberOfParticipants) &&
+        Number(taskDoc.data().numberOfParticipants) <= existingUserTasks?.length
+      ) {
+        return toast.error("No more Participants accepting");
+      }
+
+      window.open(link, "_blank");
 
       const newUserTask = {
         userId: user.uid,
@@ -268,16 +275,16 @@ function WeeklyTask() {
                       ></i>
                     ) : (
                       <div>
-                      <img
-                        style={{
-                          width: 45,
-                          height: 45,
-                          objectFit: "cover",
-                          borderRadius: "50%",
-                        }}
-                        src={item.platformLogo}
-                        alt=""
-                      />
+                        <img
+                          style={{
+                            width: 45,
+                            height: 45,
+                            objectFit: "cover",
+                            borderRadius: "50%",
+                          }}
+                          src={item.platformLogo}
+                          alt=""
+                        />
                       </div>
                     )}
 
@@ -307,14 +314,14 @@ function WeeklyTask() {
                         </button>
                       ) : (
                         <button
-                        className={`start-redirect-icon`}
+                          className={`start-redirect-icon`}
                           disabled={btnLoading[item.id]}
                           onClick={() => handleClaimTask(item)}
                           style={{
                             color: "#fff",
                             textWrap: "nowrap",
                             paddingLeft: 15,
-                                paddingRight: 15
+                            paddingRight: 15,
                           }}
                         >
                           {btnLoading[item.id] ? (
@@ -355,7 +362,7 @@ function WeeklyTask() {
                           color: "#fff",
                           textWrap: "nowrap",
                           paddingLeft: 15,
-                                paddingRight: 15
+                          paddingRight: 15,
                         }}
                       >
                         {btnLoading[item.id] ? (
@@ -376,14 +383,16 @@ function WeeklyTask() {
                         )}
                       </button>
                     ) : userTask?.status === "claimed" ? (
-                      <a href={item.link} target="_blank"
+                      <a
+                        href={item.link}
+                        target="_blank"
                         className={`start-redirect-icon disabled`}
                         style={{
                           cursor: "not-allowed",
                           borderRadius: "10px",
                           padding: "4px 10px",
                           color: "#fff",
-                          backgroundColor:"transparent",
+                          backgroundColor: "transparent",
                         }}
                       >
                         <i
@@ -393,7 +402,11 @@ function WeeklyTask() {
                       </a>
                     ) : (
                       <button
-                        disabled={btnLoading[item.id]}
+                        disabled={
+                          btnLoading[item.id] ||
+                          Number(item?.numberOfParticipants) <=
+                            item?.userTasks?.length
+                        }
                         className={`start-redirect-icon`}
                         onClick={() => {
                           handleStartTask(item.id, item.link);
