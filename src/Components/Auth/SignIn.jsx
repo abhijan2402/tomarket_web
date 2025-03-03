@@ -14,7 +14,7 @@ function SignIn() {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
 
   useEffect(() => {
     if (user) {
@@ -28,9 +28,11 @@ function SignIn() {
     setLoading(true);
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      setLoading(false);
+      const { user } = await signInWithEmailAndPassword(auth, email, password);
+      console.log(user);
+      setUser(user);
       navigate("/");
+      setLoading(false);
     } catch (err) {
       setLoading(false);
       const errorMessage = getFriendlyErrorMessage(err.code);

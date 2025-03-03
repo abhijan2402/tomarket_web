@@ -7,16 +7,18 @@ import BottomTabBar from "./BottomTabBar/BottomTabBar";
 import { AppContext } from "../context/AppContext";
 
 const PrivateRoute = () => {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { Logo } = useContext(AppContext);
-  const {pathname} = useLocation()
+  const { pathname } = useLocation();
+
+  console.log(user)
+  console.log(loading)
+
   return user ? (
-    <>
-    {
-      pathname !== '/' && <Topbar Logo={Logo} />
-    }
-      
-      <Outlet />
+      <>
+        {pathname !== "/" && <Topbar Logo={Logo} />}
+
+        <Outlet />
       <BottomTabBar />
     </>
   ) : (

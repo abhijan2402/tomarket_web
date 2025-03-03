@@ -30,12 +30,12 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } else {
-        setUser(null); // Clear user state when logged out
+        setUser(null);
       }
-      setLoading(false); // Set loading to false once user state is determined
+      setLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const logout = async () => {
