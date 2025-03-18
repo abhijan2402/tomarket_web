@@ -9,11 +9,11 @@ import {
   updateDoc,
   where,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { auth, db } from "../../firebase";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap";
-import { useApp } from "../../context/AppContext";
+import { AppContext, useApp } from "../../context/AppContext";
 
 function SignUp() {
   const [name, setName] = useState("");
@@ -27,6 +27,8 @@ function SignUp() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const { joiningAmount, refferalPoint } = useApp();
+
+  const { Logo } = useContext(AppContext);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -83,6 +85,7 @@ function SignUp() {
     const referredUserData = referredUserDoc.data();
     const updatedPoints = (referredUserData.points || 0) + refferalPoint;
     const updatedReferralCount = (referredUserData.referralCount || 0) + 1;
+    
 
     await updateDoc(referredUserRef, {
       points: updatedPoints,
@@ -193,6 +196,29 @@ function SignUp() {
       ) : (
         <div className="row justify-content-center">
           <div className="col-md-6 login_form_container">
+          <div
+              style={{
+                padding: "0 10px",
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-between",
+                // alignItems: 'center',
+                marginBottom: 30
+              }}
+            >
+              <div>
+                <img
+                  style={{ width: 50, margin: "auto" }}
+                  src={Logo[0]?.value}
+                  alt=""
+                />
+              </div>
+
+              <p className="form_cancle">
+                <i class="bi bi-x-square" onClick={() => navigate("/home")}></i>
+              </p>
+            </div>
+
             <h2 className="text-center">Sign Up</h2>
             <form className="_login_form" onSubmit={handleCreateAccount}>
               <div className="mb-3">

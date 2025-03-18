@@ -1,10 +1,11 @@
 import { signInWithEmailAndPassword } from "firebase/auth";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { auth } from "../../firebase";
 import "../../Style/SignIn.css";
 import { useNavigate } from "react-router-dom";
 import { Spinner } from "react-bootstrap"; // Import Spinner for loader
 import { useAuth } from "../../context/AuthContext"; // Import Auth Context
+import { AppContext } from "../../context/AppContext";
 
 function SignIn() {
   const [email, setEmail] = useState("");
@@ -15,6 +16,7 @@ function SignIn() {
 
   const navigate = useNavigate();
   const { user, setUser } = useAuth();
+  const { Logo } = useContext(AppContext);
 
   useEffect(() => {
     if (user) {
@@ -77,9 +79,29 @@ function SignIn() {
       ) : (
         <div className="row justify-content-center">
           <div className="col-md-6 login_form_container">
-            <p className="form_cancle">
-              <i class="bi bi-x-square" onClick={() => navigate("/home")}></i>
-            </p>
+            <div
+              style={{
+                padding: "0 10px",
+                display: "flex",
+                width: "100%",
+                justifyContent: "space-between",
+                // alignItems: 'center',
+                marginBottom: 30
+              }}
+            >
+              <div>
+                <img
+                  style={{ width: 50, margin: "auto" }}
+                  src={Logo[0]?.value}
+                  alt=""
+                />
+              </div>
+
+              <p className="form_cancle">
+                <i class="bi bi-x-square" onClick={() => navigate("/home")}></i>
+              </p>
+            </div>
+
             <h2 className="text-center">Sign In</h2>
             <form className="_login_form" onSubmit={handleSignIn}>
               <div className="mb-3">

@@ -1,8 +1,10 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../context/AppContext";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Spinner } from "react-bootstrap";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "../firebase";
 
 const Home = () => {
   const { Logo } = useContext(AppContext);
@@ -10,11 +12,47 @@ const Home = () => {
 
   const { user, loading } = useAuth();
 
-  // useEffect(() => {
-  //   if (user) {
-  //     navigate("/");
-  //   }
-  // }, [user, navigate]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalReferrals, setTotalReferrals] = useState(0);
+  const [totalTasks, setTotalTasks] = useState(0);
+
+  const fetchCounts = async () => {
+    try {
+      // Count total users and referrals
+      const usersCollection = collection(db, "users");
+      const usersSnapshot = await getDocs(usersCollection);
+      let userCount = 0;
+      let referralCount = 0;
+
+      usersSnapshot.forEach((doc) => {
+        userCount++;
+        const userData = doc.data();
+        if (userData.referredBy) {
+          referralCount++;
+        }
+      });
+
+      setTotalUsers(userCount);
+      setTotalReferrals(referralCount);
+
+      // Count total tasks
+      const tasksCollection = collection(db, "tasks");
+      const singleTasksCollection = collection(db, "singletasks");
+
+      const tasksSnapshot = await getDocs(tasksCollection);
+      const singleTasksSnapshot = await getDocs(singleTasksCollection);
+
+      setTotalTasks(tasksSnapshot.size + singleTasksSnapshot.size);
+    } catch (error) {
+      console.error("Error fetching counts:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (!user) {
+      fetchCounts();
+    }
+  }, [user]);
 
   if (loading) {
     return (
@@ -35,35 +73,37 @@ const Home = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div style={{display: 'flex', justifyContent: 'space-between', marginTop: 10, alignItems: 'center', borderBottom: '1px solid #fff', paddingBottom: 10}}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginTop: 10,
+          alignItems: "center",
+          paddingBottom: 10,
+        }}
+      >
         <div>
           <img
-            style={{ width: 70, margin: "auto" }}
+            style={{ width: 50, margin: "auto" }}
             src={Logo[0]?.value}
             alt=""
           />
         </div>
 
-        <button
+        <Link
+          to="/login"
           style={{
             backgroundColor: "#416ef0",
             borderRadius: 40,
-            padding: "12px 40px",
+            padding: "9px 25px",
+            color: "white",
+            textDecoration: "none",
           }}
         >
           Sign in
-        </button>
+        </Link>
       </div>
       <div style={{ textAlign: "center" }}>
-        {/* <div
-          style={{ display: "flex", justifyContent: "center", marginTop: 20 }}
-        >
-          <img
-            style={{ width: 100, margin: "auto" }}
-            src={Logo[0]?.value}
-            alt=""
-          />
-        </div> */}
         <h1 style={{ marginTop: 60, color: "#fff", fontSize: "2.375rem" }}>
           Simple Ways to Make Money Online
         </h1>
@@ -83,7 +123,7 @@ const Home = () => {
             marginTop: 40,
             backgroundColor: "#416ef0",
             borderRadius: 40,
-            padding: "15px 40px",
+            padding: "12px 40px",
           }}
           onClick={() => navigate("/login")}
         >
@@ -119,10 +159,10 @@ const Home = () => {
             >
               <div class="MuiCardContent-root css-15q2cw4">
                 <div class="MuiTypography-root MuiTypography-h6 css-yp1y4z">
-                  Total paid out
+                  Total task created
                 </div>
                 <div class="MuiTypography-root MuiTypography-h4 css-1c3irsm">
-                  2 947 049
+                  {totalTasks}
                 </div>
               </div>
             </div>
@@ -140,7 +180,7 @@ const Home = () => {
                   Registered users
                 </div>
                 <div class="MuiTypography-root MuiTypography-h4 css-1c3irsm">
-                  9 459 495
+                  {totalUsers}
                 </div>
               </div>
             </div>
@@ -158,13 +198,13 @@ const Home = () => {
                   style={{ color: "#000" }}
                   class="MuiTypography-root MuiTypography-h6 css-yp1y4z"
                 >
-                  Completed payouts
+                  Total referral
                 </div>
                 <div
                   style={{ color: "#000" }}
                   class="MuiTypography-root MuiTypography-h4 css-1c3irsm"
                 >
-                  2 398 369
+                  {totalReferrals}
                 </div>
               </div>
             </div>

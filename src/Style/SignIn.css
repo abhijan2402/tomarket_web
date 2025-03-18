@@ -9,7 +9,7 @@
 .login_form_container {
   border: 1px solid #fff;
   border-radius: 8px;
-  padding: 40px 10px;
+  padding: 20px 10px 40px;
 }
 
 ._login_container h2 {
@@ -59,8 +59,7 @@
   text-align: end;
   color: #fff;
   font-size: 22px;
-  position: relative;
-  top: -20px;
+ 
 }
 
 @media (max-width: 500px) {
